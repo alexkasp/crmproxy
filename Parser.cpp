@@ -144,6 +144,7 @@ string Parser::parsedata(map<string,string>& data)
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{
+		
 		if(data["UserEvent:"]=="incomecall")
 		{
 			 str = parse_incomecall(data["src"],data["dst"],data["userid"],data["time"],data["Uniqueid:"],data["srctype"]);
@@ -174,6 +175,9 @@ string Parser::parsedata(map<string,string>& data)
 			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["Uniqueid:"],data["callstart"],data["callanswer"],data["status"],data["calltype"]);
 			
 		}
+
+		str += "&maincallid=";
+		str += data["MainCallId"];
 	}
 	else
 		cout<<"wrong event "<<data["Event:"]<<endl;
