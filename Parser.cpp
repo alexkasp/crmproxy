@@ -147,12 +147,12 @@ string Parser::parsedata(map<string,string>& data)
 		
 		if(data["UserEvent:"]=="incomecall")
 		{
-			 str = parse_incomecall(data["src"],data["dst"],data["userid"],data["time"],data["Uniqueid:"],data["srctype"]);
+			 str = parse_incomecall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["srctype"]);
 			
 		}
 		if(data["UserEvent:"]=="outcall")
 		{
-			 str = parse_outcall(data["src"],data["dst"],data["userid"],data["time"],data["Uniqueid:"]);
+			 str = parse_outcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"]);
 			
 		}
 		if(data["UserEvent:"]=="answercall")
@@ -162,17 +162,17 @@ string Parser::parsedata(map<string,string>& data)
 		}
 		if(data["UserEvent:"]=="initcall")
 		{
-			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["Uniqueid:"]);
+			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"]);
 			
 		}
 		if(data["UserEvent:"]=="transfercall")
 		{
-			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["CallUniq"]);
+			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"]);
 			
 		}
 		if(data["UserEvent:"]=="finishcall")
 		{
-			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["Uniqueid:"],data["callstart"],data["callanswer"],data["status"],data["calltype"]);
+			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"]);
 			
 		}
 
