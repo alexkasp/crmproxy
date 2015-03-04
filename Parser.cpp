@@ -31,7 +31,7 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 {
 	
 
-	string request = "http://sipuni.com/native/crmtest.php?userId=";
+	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
 	request+=callid;
@@ -42,7 +42,7 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 }
 string Parser::parse_outcall(string src,string dst,string uid,string timestamp,string callid)
 {
-	string request = "http://sipuni.com/native/crmtest.php?userId=";
+	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
 	request+=callid;
@@ -54,7 +54,7 @@ string Parser::parse_outcall(string src,string dst,string uid,string timestamp,s
 string Parser::parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype)
 {
 
-	string request = "http://sipuni.com/native/crmtest.php?userId=";
+	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
 	request+=callid;
@@ -69,7 +69,7 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	int src_type = (src.length()<10)+1;
 	int dst_type = (dst.length()<10)+1;
 	
-	string request = "http://sipuni.com/native/crmtest.php?userId=";
+	string request = request_str;
 	request+=uid;
 	request+="&event=3&call_id=";
 	request+=callid;
@@ -93,7 +93,8 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype)
 {
 
-	string request = "http://sipuni.com/native/crmtest.php?userId=";
+
+	string request = request_str;
 	request+=uid;
 	request+="&event=2&call_id=";
 	request+=callid;
@@ -127,7 +128,8 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 }
 string Parser::parse_transfercall(string src,string dst,string uid,string timestamp,string callid)
 {
-	string request = "http://sipuni.com/native/crmtest.php?userId=";
+
+	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
 	request+=callid;

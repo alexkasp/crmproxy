@@ -18,6 +18,7 @@ class Parser
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid);
 	string parse_numtype(string num);
 	string format_srcdstnum(string src,string dst);
+	const string request_str = "/native/crmtest.php?userId=";
 public:
 	Parser(void);
 	virtual ~Parser(void);

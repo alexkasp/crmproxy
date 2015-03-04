@@ -1,7 +1,7 @@
 default:
 	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"
 	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
-	g++ main.cpp Parser.cpp EventReader.cpp CRMUrlBuilder.cpp  -o main -lpthread -std=c++0x -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic -lboost_system -lboost_regex -lboost_date_time -Wl,-Bdynamic -lm -lcurl
+	g++ main.cpp Parser.cpp EventReader.cpp CRMUrlBuilder.cpp  -o main -lpthread -std=c++0x -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic -lboost_system -lboost_regex -lboost_thread -lboost_date_time -Wl,-Bdynamic -lm -lcurl -lrt
 	
 test:
 	g++ test.cpp corefunc.cpp sipheader.cpp sipmanager.cpp callbox.cpp -o test -std=c++0x -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic  -lboost_system -lboost_regex -Wl,-Bdynamic -lm
