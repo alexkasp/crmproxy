@@ -6,7 +6,21 @@
 
 using namespace std;
 
-
+class CallRecord
+{
+	string dst;
+	string uid;
+	string callid;
+	string timestamp;
+public:
+	CallRecord(string _dst,string _uid,string  _timestamp,string _callid);
+	~CallRecord();
+	const string& getdst() const;
+	const string& getuid() const;
+	const string& getcallid() const;
+	const string& gettimestamp() const;
+	
+};
 
 class Parser
 {
@@ -18,7 +32,8 @@ class Parser
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid);
 	string parse_numtype(string num);
 	string format_srcdstnum(string src,string dst);
-	const string request_str = "/native/crmtest.php?userId=";
+	const string request_str {"/native/crmtest.php?userId="};
+	multimap<string,unique_ptr<CallRecord>> currentcalls;
 public:
 	Parser(void);
 	virtual ~Parser(void);

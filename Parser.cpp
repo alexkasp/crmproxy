@@ -2,6 +2,37 @@
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 
+const string& CallRecord::getdst() const
+{
+	return dst;
+}
+
+const string& CallRecord::getuid() const
+{
+	return uid;
+}
+
+const string& CallRecord::gettimestamp() const
+{
+	return timestamp;
+}
+
+const string& CallRecord::getcallid() const
+{
+	return callid;
+}
+
+CallRecord::~CallRecord()
+{
+	cout<<"CallRecords delete for "<<dst<<endl;
+}
+
+CallRecord::CallRecord(string _dst,string _uid,string  _timestamp,string _callid):
+	dst(_dst),uid(_uid),timestamp(_timestamp),callid(_callid)
+{
+	cout<<"Create Call"<<dst<<endl;
+}
+
 Parser::Parser(void)
 {
 }
@@ -9,6 +40,7 @@ Parser::Parser(void)
 
 Parser::~Parser(void)
 {
+	
 }
 string Parser::parse_numtype(string num)
 {
@@ -30,7 +62,7 @@ string Parser::format_srcdstnum(string src,string dst)
 string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid)
 {
 	
-
+	currentcalls.insert(pair<string,unique_ptr<CallRecord>>(src,unique_ptr<CallRecord>(new CallRecord(dst,uid,timestamp,callid))));
 	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
@@ -74,17 +106,6 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	request+="&event=3&call_id=";
 	request+=callid;
 	request+=format_srcdstnum(src,dst);
-	/*if((calltype=="out")||(calltype=="local"))
-		request+="&src_type=2&dst_num=";
-	else
-		request+="&src_type=1&dst_num=";
-
-	request+=dst;
-	if(calltype=="out")
-		request+="&dst_type=1&timestamp=";
-	else
-		request+="&dst_type=2&timestamp=";*/
-
 	request+="&timestamp=";
 	request+=timestamp;
 	return request;
@@ -93,25 +114,22 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype)
 {
 
+	pair<multimap<string,unique_ptr<CallRecord>>::iterator,multimap<string,unique_ptr<CallRecord>>::iterator> ret;
+	ret = currentcalls.equal_range(src);
+
+	for(auto x=ret.first; x!=ret.second;++x)
+	{
+		if(((x->second).get())->getdst()==dst)
+		{
+			currentcalls.erase(x);
+			break;
+		}
+	}
 
 	string request = request_str;
 	request+=uid;
 	request+="&event=2&call_id=";
 	request+=callid;
-	/*request+="&src_num=";
-	request+=src;
-	if((calltype=="out")||(calltype=="local"))
-		request+="&src_type=2&dst_num=";
-	else
-		request+="&src_type=1&dst_num=";
-
-	request+=dst;*/
-	
-	/*if(calltype=="out")
-		request+="&dst_type=1&call_start_timestamp=";
-	else
-		request+="&dst_type=2&call_start_timestamp=";
-	*/
 	request+=format_srcdstnum(src,dst);
 	request+="&call_start_timestamp=";
 	request+=callstart;
@@ -123,7 +141,7 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	request+=status;
 	request+="&call_record_link=unknown";
 
-	//cout<<"finish"<<request<<endl;
+	
 	return request;
 }
 string Parser::parse_transfercall(string src,string dst,string uid,string timestamp,string callid)

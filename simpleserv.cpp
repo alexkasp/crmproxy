@@ -2,7 +2,14 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/enable_shared_from_this.hpp>
+
+#ifdef __linux__
 #include <unistd.h>
+#endif // __linux__
+
+
+
+
 #include <iostream>
 
 using namespace boost::asio;
@@ -17,7 +24,7 @@ int main()
 	_sock.connect(ep);
 	
 	_sock.write_some(buffer("Action: login\nUsername: crmproxy\nSecret: mycode\n"));
-	char buf[1024];
+	//char buf[1024];
 	char bufdata[1024];
 	int bytes = 0;
 	//int bytes = read(_sock, buffer(buf));
