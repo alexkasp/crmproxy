@@ -1,7 +1,6 @@
 #include "CRMUrlBuilder.h"
 #include <boost/bind.hpp>
 
-#include <curl/curl.h>
 CRMUrlBuilder::CRMUrlBuilder(Parser parsertostr):parser(parsertostr)
 {
     boost::asio::ip::tcp::resolver resolver(io);
@@ -15,23 +14,6 @@ CRMUrlBuilder::CRMUrlBuilder(Parser parsertostr):parser(parsertostr)
     
     
 };
-
-void CRMUrlBuilder::AcceptRead()
-{
-    tgroup.create_thread(boost::bind(&CRMUrlBuilder::ReadThread,this));
-}
-
-void CRMUrlBuilder::ReadThread()
-{
-    io.run();
-}
-
-void CRMUrlBuilder::ReadFunction(const boost::system::error_code &ec,const size_t bytes_transferred)
-{
-    boost::asio::streambuf buffer;
-//    if(!ec)
-//	boost::asio::read_until(sock,buffer,"\n");
-}
 
 int CRMUrlBuilder::Execute(ParamMap& data)
 {
@@ -67,27 +49,5 @@ int CRMUrlBuilder::SendRequest(std::string url)
 	{
 	    cout<<"CATCH EXCEPTION!!!" << e.what() << '\n';
 	}
-
-/*	
-	CURL *curl;
-	CURLcode res;
- 
-	curl = curl_easy_init();
-	if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-   
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    */
-    /* Perform the request, res will get the return code */ 
-    //res = curl_easy_perform(curl);
-    /* Check for errors */ 
-    //if(res != CURLE_OK)
-      //fprintf(stderr, "curl_easy_perform() failed: %s\n",
-        //      curl_easy_strerror(res));
- 
-    /* always cleanup */ 
-    //curl_easy_cleanup(curl);
-//	return 1;
-  //}
 	return 0;
 }

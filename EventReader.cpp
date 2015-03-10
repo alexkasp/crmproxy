@@ -4,6 +4,7 @@
 #include <vector>
 
 
+
 using namespace std;
 
 void EventReader::SetExecuter(ExecuterInterface* iexecuter)
@@ -23,12 +24,20 @@ EventReader::~EventReader(void)
 
 int EventReader::start(void)
 {
-	ip::tcp::endpoint ep( ip::address::from_string(asthost), astport);
+
+	ip::tcp::endpoint ep(ip::address::from_string(asthost), astport);
 	ip::tcp::socket _sock(service);
-	_sock.connect(ep);
+	try{
+		_sock.connect(ep);
+	}
+	catch(exception &ec)
+	{
+		cout << ec.what() << endl;
+		return 0;
+	}
 	
 	_sock.write_some(buffer("Action: login\nUsername: crmproxy\nSecret: mycode\n"));
-	char buf[1024];
+	
 	char bufdata[4096];
 	int bytes = 0;
 	
@@ -37,7 +46,6 @@ int EventReader::start(void)
 	while(1)
 	{
 		memset(bufdata,0,4096);
-		//if ( _sock.available())
 		{
 			bytes = _sock.read_some(boost::asio::buffer(bufdata));
 			processevent(bufdata);
@@ -100,7 +108,7 @@ int EventReader::parseline(string line,int& state,int& event)
 		default:
 			break;
 	}
-		
+	return 0;
 }
 int EventReader::processevent(const std::string data)
 {

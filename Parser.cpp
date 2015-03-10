@@ -2,6 +2,8 @@
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 
+#undef CALLMANUALCONTROL
+
 const string& CallRecord::getdst() const
 {
 	return dst;
@@ -22,7 +24,7 @@ const string& CallRecord::getcallid() const
 	return callid;
 }
 
-CallRecord::~CallRecord()
+CallRecord::~CallRecord(void)
 {
 	cout<<"CallRecords delete for "<<dst<<endl;
 }
@@ -35,13 +37,22 @@ CallRecord::CallRecord(string _dst,string _uid,string  _timestamp,string _callid
 
 Parser::Parser(void)
 {
+	const string request_str = "/native/crmtest.php?userId=";
 }
+
+
 
 
 Parser::~Parser(void)
 {
 	
 }
+
+void Parser::cleanCalls()
+{
+	
+}
+
 string Parser::parse_numtype(string num)
 {
 	int num_type = (num.length()<10)+1;
@@ -61,8 +72,9 @@ string Parser::format_srcdstnum(string src,string dst)
 }
 string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid)
 {
-	
-	currentcalls.insert(pair<string,unique_ptr<CallRecord>>(src,unique_ptr<CallRecord>(new CallRecord(dst,uid,timestamp,callid))));
+#ifdef CALLMANUALCONTROL
+	auto x = currentcalls.insert(make_pair(src,CallRecord(dst,uid,timestamp,callid)));
+#endif	
 	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
@@ -113,19 +125,23 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype)
 {
-
-	pair<multimap<string,unique_ptr<CallRecord>>::iterator,multimap<string,unique_ptr<CallRecord>>::iterator> ret;
+#ifdef CALLMANUALCONTROL
+	auto x = currentcalls.begin();
+	pair<decltype(x),decltype(x)> ret;
 	ret = currentcalls.equal_range(src);
-
 	for(auto x=ret.first; x!=ret.second;++x)
 	{
-		if(((x->second).get())->getdst()==dst)
+		if((x->first==src)&&((x->second).getdst()==dst))
 		{
 			currentcalls.erase(x);
 			break;
 		}
 	}
-
+#endif	
+	for (auto x = currentcalls.begin(); x != currentcalls.end(); ++x)
+	{
+		cout << "call records " << (*x).first << " -> " << (*x).second.getdst() << endl;
+	}
 	string request = request_str;
 	request+=uid;
 	request+="&event=2&call_id=";
@@ -158,6 +174,11 @@ string Parser::parse_transfercall(string src,string dst,string uid,string timest
 
 }
 
+const CallRecords& Parser::getCallRecords() const
+{
+
+	return currentcalls;
+}
 
 string Parser::parsedata(map<string,string>& data)
 {

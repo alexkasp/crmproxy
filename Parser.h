@@ -1,7 +1,8 @@
 #pragma once
 #include <map>
 #include <string>
-
+#include <memory>
+#include <queue>
 
 
 using namespace std;
@@ -12,6 +13,8 @@ class CallRecord
 	string uid;
 	string callid;
 	string timestamp;
+
+	CallRecord();
 public:
 	CallRecord(string _dst,string _uid,string  _timestamp,string _callid);
 	~CallRecord();
@@ -22,8 +25,12 @@ public:
 	
 };
 
+using CallRecords = multimap < string, CallRecord >;
+
+
 class Parser
 {
+	
 	string parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype);
 	string parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype);
 	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype);
@@ -32,11 +39,14 @@ class Parser
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid);
 	string parse_numtype(string num);
 	string format_srcdstnum(string src,string dst);
-	const string request_str {"/native/crmtest.php?userId="};
-	multimap<string,unique_ptr<CallRecord>> currentcalls;
+	const string request_str;
+	 CallRecords currentcalls;
+	
 public:
 	Parser(void);
 	virtual ~Parser(void);
 	string parsedata(map<string,string>& data);
+	void cleanCalls();
+	const CallRecords& getCallRecords() const;
 };
 
