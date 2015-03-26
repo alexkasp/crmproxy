@@ -32,6 +32,7 @@ public:
 	~EventReader(void);
 	int start(void);
 private:
+	int connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::tcp::endpoint& ep);
 	int SendRequest(std::string url);
 	int parseline(std::string line,int& _state,int& _event);
 	int processevent(const std::string data);

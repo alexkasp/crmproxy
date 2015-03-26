@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include "iexecuter.h"
 
 
 
@@ -22,20 +23,14 @@ EventReader::~EventReader(void)
 }
 
 
+
 int EventReader::start(void)
 {
 
 	ip::tcp::endpoint ep(ip::address::from_string(asthost), astport);
 	ip::tcp::socket _sock(service);
-	try{
-		_sock.connect(ep);
-	}
-	catch(exception &ec)
-	{
-		cout << ec.what() << endl;
-		return 0;
-	}
 	
+	connect(_sock,ep);
 	_sock.write_some(buffer("Action: login\nUsername: crmproxy\nSecret: mycode\n"));
 	
 	char bufdata[4096];
@@ -47,10 +42,21 @@ int EventReader::start(void)
 	{
 		memset(bufdata,0,4096);
 		{
-			bytes = _sock.read_some(boost::asio::buffer(bufdata));
-			processevent(bufdata);
+			boost::system::error_code ec;
+			bytes = _sock.read_some(boost::asio::buffer(bufdata),ec);
+			if(ec)
+			{
+				while(!connect(_sock,ep))
+				{
+					boost::this_thread::sleep(boost::chrono::milliseconds(10000));
+				}
+				continue;
+			}
+			else
+				processevent(bufdata);
 		}
 	}
+		
 	_sock.write_some(buffer("Action: Events\nEventmask: off\n"));
 	_sock.write_some(buffer("Action: logoff\n"));
 	_sock.close();
@@ -152,4 +158,23 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 	eventdata[key]=value;
 	cout << "receive:"<<key<<value<<endl;
 	return 0;
+}
+
+
+int EventReader::connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::tcp::endpoint& ep)
+{
+	try{
+		if(socket.is_open())
+		{
+			socket.close();
+			boost::this_thread::sleep(boost::chrono::milliseconds(10000));
+		}
+		socket.connect(ep);
+	}
+	catch(exception &ec)
+	{
+		cout << ec.what() << endl;
+		return 0;
+	}
+	return 1;
 }

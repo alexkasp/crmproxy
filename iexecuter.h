@@ -6,5 +6,6 @@ class ExecuterInterface
 {	
 	public:
 		virtual int Execute(ParamMap& data) = 0;
+
 };
 #endif
