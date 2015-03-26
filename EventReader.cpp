@@ -48,7 +48,7 @@ int EventReader::start(void)
 			{
 				while(!connect(_sock,ep))
 				{
-					boost::this_thread::sleep(boost::chrono::milliseconds(10000));
+					boost::this_thread::sleep_for(boost::chrono::milliseconds(10000));
 				}
 				continue;
 			}
@@ -167,9 +167,12 @@ int EventReader::connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::
 		if(socket.is_open())
 		{
 			socket.close();
-			boost::this_thread::sleep(boost::chrono::milliseconds(10000));
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(10000));
 		}
+		
 		socket.connect(ep);
+		socket.write_some(buffer("Action: login\nUsername: crmproxy\nSecret: mycode\n"));
+		socket.write_some(buffer("Action: Events\nEventmask: on\n"));
 	}
 	catch(exception &ec)
 	{
