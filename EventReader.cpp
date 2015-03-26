@@ -31,13 +31,10 @@ int EventReader::start(void)
 	ip::tcp::socket _sock(service);
 	
 	connect(_sock,ep);
-	_sock.write_some(buffer("Action: login\nUsername: crmproxy\nSecret: mycode\n"));
 	
 	char bufdata[4096];
 	int bytes = 0;
-	
-	_sock.write_some(buffer("Action: Events\nEventmask: on\n"));
-	
+		
 	while(1)
 	{
 		memset(bufdata,0,4096);
@@ -171,6 +168,7 @@ int EventReader::connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::
 		}
 		
 		socket.connect(ep);
+
 		socket.write_some(buffer("Action: login\nUsername: crmproxy\nSecret: mycode\n"));
 		socket.write_some(buffer("Action: Events\nEventmask: on\n"));
 	}
