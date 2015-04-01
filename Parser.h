@@ -4,7 +4,7 @@
 #include <memory>
 #include <queue>
 
-
+#include "IParser.h"
 using namespace std;
 
 class CallRecord
@@ -28,7 +28,7 @@ public:
 using CallRecords = multimap < string, CallRecord >;
 
 
-class Parser
+class Parser: public IParser
 {
 	
 	string parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype);
@@ -45,7 +45,7 @@ class Parser
 public:
 	Parser(void);
 	virtual ~Parser(void);
-	string parsedata(map<string,string>& data);
+	string parsedata(ParamMap& data);
 	void cleanCalls();
 	const CallRecords& getCallRecords() const;
 };

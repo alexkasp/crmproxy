@@ -4,6 +4,6 @@
 #include <string>
 #include <map>
 
-typedef std::map<std::string,std::string> ParamMap;
+using ParamMap = std::map < std::string, std::string > ;
 
 #endif

@@ -181,7 +181,7 @@ const CallRecords& Parser::getCallRecords() const
 	return currentcalls;
 }
 
-string Parser::parsedata(map<string,string>& data)
+string Parser::parsedata(ParserData& data)
 {
 	string str = "";
 	if(data["Event:"]=="UserEvent")

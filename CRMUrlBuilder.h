@@ -5,13 +5,14 @@
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <vector>
 
 
 class CRMUrlBuilder: public ExecuterInterface
 {
 	
 		boost::asio::io_service io;
-		Parser parser;
+		std::vector<IParser*> parser;
 		boost::thread_group tgroup;
 		boost::asio::ip::tcp::endpoint ep;
 		
@@ -21,6 +22,7 @@ class CRMUrlBuilder: public ExecuterInterface
 
 		
 	public:
-		CRMUrlBuilder(Parser parsertostr);
+		CRMUrlBuilder();
+		void AddParser(IParser* parsertostr);
 		virtual int Execute(ParamMap& data);
 };

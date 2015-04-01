@@ -8,9 +8,14 @@ using namespace std;
 int main()
 {
 	EventReader reader("127.0.0.1",5038);
-	reader.SetExecuter(new CRMUrlBuilder(Parser()));
+	
+	CRMUrlBuilder sender;
+	Parser simpleParser;
+	sender.AddParser(&simpleParser);
+	reader.SetExecuter(&CRMUrlBuilder());
+
 	reader.start();
 
- 
+
 	return 0;
 }

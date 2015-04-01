@@ -1,7 +1,7 @@
 #include "CRMUrlBuilder.h"
 #include <boost/bind.hpp>
 
-CRMUrlBuilder::CRMUrlBuilder(Parser parsertostr):parser(parsertostr)
+CRMUrlBuilder::CRMUrlBuilder()
 {
     boost::asio::ip::tcp::resolver resolver(io);
     boost::asio::ip::tcp::resolver::query query("sipuni.com","80");
@@ -15,13 +15,23 @@ CRMUrlBuilder::CRMUrlBuilder(Parser parsertostr):parser(parsertostr)
     
 };
 
+void CRMUrlBuilder::AddParser(IParser* parsertostr)
+{
+	parser.push_back(parsertostr);
+}
+
 int CRMUrlBuilder::Execute(ParamMap& data)
 {
-	string request = parser.parsedata(data);
-	if(request.size()>0)
-		return SendRequest(request);
-	else
-		return 0;
+	auto x = parser.begin();
+	for (auto currentParser = x; currentParser != parser.end(); ++currentParser)
+	{ 
+		string request = (*currentParser)->parsedata(data);
+		if (request.size()>0)
+			return SendRequest(request);
+		else
+			return 0;
+	}
+	
 }
 
 int CRMUrlBuilder::SendRequest(std::string url)
