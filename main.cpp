@@ -12,7 +12,7 @@ int main()
 	CRMUrlBuilder sender;
 	Parser simpleParser;
 	sender.AddParser(&simpleParser);
-	reader.SetExecuter(&CRMUrlBuilder());
+	reader.SetExecuter(&sender);
 
 	reader.start();
 
