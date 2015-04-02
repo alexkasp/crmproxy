@@ -35,8 +35,8 @@ CallRecord::CallRecord(string _dst,string _uid,string  _timestamp,string _callid
 	cout<<"Create Call"<<dst<<endl;
 }
 
-Parser::Parser(void):
-request_str("/native/crmtest.php?userId=")
+Parser::Parser(const std::string& str):
+request_str(str)
 {
 	//request_str = "/native/crmtest.php?userId=";
 }

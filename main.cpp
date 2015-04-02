@@ -10,8 +10,10 @@ int main()
 	EventReader reader("127.0.0.1",5038);
 	
 	CRMUrlBuilder sender;
-	Parser simpleParser;
+	Parser simpleParser("/native/crmtest.php?userId=");
+	Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=");
 	sender.AddParser(&simpleParser);
+	sender.AddParser(&newParser);
 	reader.SetExecuter(&CRMUrlBuilder());
 
 	reader.start();

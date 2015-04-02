@@ -43,7 +43,7 @@ class Parser: public IParser
 	 CallRecords currentcalls;
 	
 public:
-	Parser(void);
+	Parser(const string& str);
 	virtual ~Parser(void);
 	string parsedata(ParamMap& data);
 	void cleanCalls();
