@@ -96,12 +96,24 @@ string Parser::parse_outcall(string src,string dst,string uid,string timestamp,s
 	request+=timestamp;
 	return request;
 }
+string Parser::parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid)
+{
+	string request = request_str;
+	request += uid;
+	request += "&event=4&call_id=";
+	request += callid;
+	request += format_srcdstnum(src, dst);
+	request += "&timestamp=";
+	request += timestamp;
+	return request;
+}
+
 string Parser::parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype)
 {
 
 	string request = request_str;
 	request+=uid;
-	request+="&event=1&call_id=";
+	request+="&event=5&call_id=";
 	request+=callid;
 	request+=format_srcdstnum(src,dst);
 	request+="&timestamp=";
@@ -126,23 +138,7 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype)
 {
-#ifdef CALLMANUALCONTROL
-	auto x = currentcalls.begin();
-	pair<decltype(x),decltype(x)> ret;
-	ret = currentcalls.equal_range(src);
-	for(auto x=ret.first; x!=ret.second;++x)
-	{
-		if((x->first==src)&&((x->second).getdst()==dst))
-		{
-			currentcalls.erase(x);
-			break;
-		}
-	}
-#endif	
-	for (auto x = currentcalls.begin(); x != currentcalls.end(); ++x)
-	{
-		cout << "call records " << (*x).first << " -> " << (*x).second.getdst() << endl;
-	}
+
 	string request = request_str;
 	request+=uid;
 	request+="&event=2&call_id=";
@@ -216,6 +212,11 @@ string Parser::parsedata(ParserData& data)
 		{
 			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"]);
 			
+		}
+		if (data["UserEvent:"] == "finish_transfer")
+		{
+			str = parse_finishtransfer(data["src"], data["dst"], data["userid"], data["time"], data["callid"]);
+
 		}
 
 		str += "&TreeId=";
