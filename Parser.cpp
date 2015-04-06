@@ -73,9 +73,7 @@ string Parser::format_srcdstnum(string src,string dst)
 }
 string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid)
 {
-#ifdef CALLMANUALCONTROL
-	auto x = currentcalls.insert(make_pair(src,CallRecord(dst,uid,timestamp,callid)));
-#endif	
+
 	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
@@ -221,6 +219,8 @@ string Parser::parsedata(ParserData& data)
 
 		str += "&TreeId=";
 		str += data["TreeId"];
+		str += "&Channel=";
+		str += data["ChannelName"];
 	}
 	else
 		cout<<"wrong event "<<data["Event:"]<<endl;
