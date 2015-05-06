@@ -32,16 +32,22 @@ int EventReader::start(void)
 	
 	connect(_sock,ep);
 	
-	char bufdata[4096];
+	boost::asio::streambuf buf;
 	int bytes = 0;
 		
 	while(1)
 	{
-		memset(bufdata,0,4096);
 		{
 			boost::system::error_code ec;
-			bytes = _sock.read_some(boost::asio::buffer(bufdata),ec);
-			if(ec)
+			bytes = boost::asio::read_until(_sock,buf,"\r\n\r\n",ec);
+			if (!ec)
+			{
+			    string str(boost::asio::buffers_begin(buf.data()), boost::asio::buffers_begin(buf.data()) + buf.size());
+			    buf.consume(bytes);
+			    processevent(str);
+			    
+			}
+			else
 			{
 				while(!connect(_sock,ep))
 				{
@@ -49,8 +55,6 @@ int EventReader::start(void)
 				}
 				continue;
 			}
-			else
-				processevent(bufdata);
 		}
 	}
 		
@@ -144,11 +148,12 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 			auto x = lines.begin();
 			key = *x++;
 			value = *x;
-			value.pop_back();
+			if(!value.empty())
+			    value.pop_back();
 		}
 		catch (exception& e)
 		  {
-			cout<<"CATCH EXCEPTION!!!" << e.what() << '\n';
+			cout<<"ADDPARAM  EXCEPTION!!!" << e.what() << '\n';
 		  }
 	}
 	
