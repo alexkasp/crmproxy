@@ -136,10 +136,12 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype)
 {
-
+	string event2store;
 	string request = request_str;
+	
 	request+=uid;
-	request+="&event=2&call_id=";
+	
+	request+="&call_id=";
 	request+=callid;
 	request+=format_srcdstnum(src,dst);
 	request+="&call_start_timestamp=";
@@ -152,6 +154,12 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	request+=status;
 	request+="&call_record_link=unknown";
 
+	event2store=request;
+	event2store+="&event=2";
+
+	event2storage[callid]=event2store;
+
+	request+="&event=4";
 	
 	return request;
 }
@@ -167,6 +175,18 @@ string Parser::parse_transfercall(string src,string dst,string uid,string timest
 	request+=timestamp;
 	return request;
 
+}
+
+string Parser::parse_cdrevent(string callid)
+{
+	auto it = event2storage.find(callid);
+	if(it!=event2storage.end())
+	{
+		string event2request = (*it).second;
+		event2storage.erase(it);
+	}
+	return "";
+	
 }
 
 const CallRecords& Parser::getCallRecords() const
@@ -217,13 +237,18 @@ string Parser::parsedata(ParserData& data)
 
 		}
 
-		str += "&TreeId=";
+		
+	}
+	else if(data["Event:"] == "Cdr")
+	{
+		str = parse_cdrevent(data["UniqueID:"]);
+	}
+	
+	str += "&TreeId=";
 		str += data["TreeId"];
 		str += "&Channel=";
 		str += data["ChannelName"];
-	}
-	else
-		cout<<"wrong event "<<data["Event:"]<<endl;
+
 	
 	cout<<"Parse"<<endl<<str<<endl<<endl;
 	return str;
