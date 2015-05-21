@@ -26,7 +26,7 @@ int CRMUrlBuilder::Execute(ParamMap& data)
 	for (auto currentParser = x; currentParser != parser.end(); ++currentParser)
 	{ 
 		string request = (*currentParser)->parsedata(data);
-		if (!request.empty)
+		if (!request.empty())
 			return SendRequest(request);
 		else
 			return 0;

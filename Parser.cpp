@@ -184,6 +184,7 @@ string Parser::parse_cdrevent(string callid)
 	{
 		string event2request = (*it).second;
 		event2storage.erase(it);
+		return event2request;
 	}
 	return "";
 	
