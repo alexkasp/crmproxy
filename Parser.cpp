@@ -244,7 +244,9 @@ string Parser::parsedata(ParserData& data)
 	{
 		str = parse_cdrevent(data["UniqueID:"]);
 	}
-	
+	else
+	    return str;
+	    
 	str += "&TreeId=";
 		str += data["TreeId"];
 		str += "&Channel=";
