@@ -1,0 +1,98 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		7D6473681B3ACACF00BCABCB /* UnitTestProxy */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UnitTestProxy; sourceTree = "<group>"; };
+		7D6473691B3ACACF00BCABCB /* CRMUrlBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CRMUrlBuilder.h; sourceTree = "<group>"; };
+		7D64736A1B3ACACF00BCABCB /* datatypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = datatypes.h; sourceTree = "<group>"; };
+		7D64736B1B3ACACF00BCABCB /* EventReader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EventReader.h; sourceTree = "<group>"; };
+		7D64736C1B3ACACF00BCABCB /* iexecuter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iexecuter.h; sourceTree = "<group>"; };
+		7D64736D1B3ACACF00BCABCB /* IParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IParser.h; sourceTree = "<group>"; };
+		7D64736E1B3ACACF00BCABCB /* Parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
+		7D64736F1B3ACACF00BCABCB /* CRMUrlBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CRMUrlBuilder.cpp; sourceTree = "<group>"; };
+		7D6473701B3ACACF00BCABCB /* EventReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EventReader.cpp; sourceTree = "<group>"; };
+		7D6473711B3ACACF00BCABCB /* iexecuter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = iexecuter.cpp; sourceTree = "<group>"; };
+		7D6473721B3ACACF00BCABCB /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		7D6473731B3ACACF00BCABCB /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		7D6473741B3ACACF00BCABCB /* simpleserv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = simpleserv.cpp; sourceTree = "<group>"; };
+		7D6473751B3ACACF00BCABCB /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		7D6473611B3ACA4B00BCABCB = {
+			isa = PBXGroup;
+			children = (
+				7D6473681B3ACACF00BCABCB /* UnitTestProxy */,
+				7D6473691B3ACACF00BCABCB /* CRMUrlBuilder.h */,
+				7D64736A1B3ACACF00BCABCB /* datatypes.h */,
+				7D64736B1B3ACACF00BCABCB /* EventReader.h */,
+				7D64736C1B3ACACF00BCABCB /* iexecuter.h */,
+				7D64736D1B3ACACF00BCABCB /* IParser.h */,
+				7D64736E1B3ACACF00BCABCB /* Parser.h */,
+				7D64736F1B3ACACF00BCABCB /* CRMUrlBuilder.cpp */,
+				7D6473701B3ACACF00BCABCB /* EventReader.cpp */,
+				7D6473711B3ACACF00BCABCB /* iexecuter.cpp */,
+				7D6473721B3ACACF00BCABCB /* main.cpp */,
+				7D6473731B3ACACF00BCABCB /* Parser.cpp */,
+				7D6473741B3ACACF00BCABCB /* simpleserv.cpp */,
+				7D6473751B3ACACF00BCABCB /* Makefile */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		7D6473621B3ACA4B00BCABCB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0630;
+			};
+			buildConfigurationList = 7D6473651B3ACA4B00BCABCB /* Build configuration list for PBXProject "crmproxy" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 7D6473611B3ACA4B00BCABCB;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		7D6473661B3ACA4B00BCABCB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		7D6473671B3ACA4B00BCABCB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7D6473651B3ACA4B00BCABCB /* Build configuration list for PBXProject "crmproxy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D6473661B3ACA4B00BCABCB /* Debug */,
+				7D6473671B3ACA4B00BCABCB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7D6473621B3ACA4B00BCABCB /* Project object */;
+}

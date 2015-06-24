@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>1C220AAE-70BD-4D0A-9B94-274250CFD614</string>
+	<key>IDESourceControlProjectName</key>
+	<string>crmproxy</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>DD4235F690060E0EB0C5B84145C9F16DD38FC51D</key>
+		<string>https://github.com/alexkasp/crmproxy.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>crmproxy.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>DD4235F690060E0EB0C5B84145C9F16DD38FC51D</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/alexkasp/crmproxy.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>DD4235F690060E0EB0C5B84145C9F16DD38FC51D</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>DD4235F690060E0EB0C5B84145C9F16DD38FC51D</string>
+			<key>IDESourceControlWCCName</key>
+			<string>crmproxy</string>
+		</dict>
+	</array>
+</dict>
+</plist>
