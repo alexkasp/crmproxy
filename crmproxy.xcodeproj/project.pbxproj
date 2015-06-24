@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7D5CF43F1B3AFB580092EE84 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D5CF43E1B3AFB580092EE84 /* main.cpp */; };
+		7D5CF4451B3B06190092EE84 /* DButils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D5CF4441B3B06190092EE84 /* DButils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,8 @@
 		7D5CF4361B3AFB0C0092EE84 /* RegisterParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RegisterParser.cpp; sourceTree = "<group>"; };
 		7D5CF43B1B3AFB570092EE84 /* crmproxy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = crmproxy; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D5CF43E1B3AFB580092EE84 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = crmproxy/main.cpp; sourceTree = "<group>"; };
+		7D5CF4431B3B06190092EE84 /* DButils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DButils.h; sourceTree = "<group>"; };
+		7D5CF4441B3B06190092EE84 /* DButils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DButils.cpp; sourceTree = "<group>"; };
 		7D6473681B3ACACF00BCABCB /* UnitTestProxy */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UnitTestProxy; sourceTree = "<group>"; };
 		7D6473691B3ACACF00BCABCB /* CRMUrlBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CRMUrlBuilder.h; sourceTree = "<group>"; };
 		7D64736A1B3ACACF00BCABCB /* datatypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = datatypes.h; sourceTree = "<group>"; };
@@ -73,6 +76,8 @@
 		7D6473611B3ACA4B00BCABCB = {
 			isa = PBXGroup;
 			children = (
+				7D5CF4431B3B06190092EE84 /* DButils.h */,
+				7D5CF4441B3B06190092EE84 /* DButils.cpp */,
 				7D5CF4331B3AFB0C0092EE84 /* RegisterMonitor.h */,
 				7D5CF4341B3AFB0C0092EE84 /* RegisterParser.h */,
 				7D5CF4351B3AFB0C0092EE84 /* RegisterMonitor.cpp */,
@@ -152,6 +157,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D5CF43F1B3AFB580092EE84 /* main.cpp in Sources */,
+				7D5CF4451B3B06190092EE84 /* DButils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
