@@ -1,15 +1,22 @@
 #pragma once
 
-#ifndef __linux__
-#include <boost\asio.hpp>
-#include <boost\thread.hpp>
-#include <boost\algorithm\string\split.hpp>
-#include <boost\algorithm\string.hpp>
-#else
+
+
+#ifdef __linux__
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
+#elif __APPLE__
+#include <boost/asio.hpp>
+#include <boost/thread.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
+#else
+#include <boost\asio.hpp>
+#include <boost\thread.hpp>
+#include <boost\algorithm\string\split.hpp>
+#include <boost\algorithm\string.hpp>
 #endif
 
 #include <vector>
