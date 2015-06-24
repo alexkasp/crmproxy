@@ -1,3 +1,5 @@
+#ifndef IPARSER_INTERFACE
+#define IPARSER_INTERFACE 1
 #include <string>
 #include <map>
 
@@ -9,6 +11,13 @@ using ParserData = map < string, string > ;
 
 class IParser
 {
-	public:
-		virtual string parsedata(ParamMap& data) = 0;
+	IParser(){};
+    protected:
+	const string request_str;                                
+    public:
+	IParser(const std::string& str):
+	request_str(str){};
+	
+	virtual string parsedata(ParamMap& data) = 0;
 };
+#endif

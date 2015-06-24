@@ -12,11 +12,15 @@
 
 #include <iostream>
 
+
+#define VERSION "1.1 with agent called"
+
 using namespace boost::asio;
 
 int main()
 {
 	
+	cout<<"VERSION "<<VERSION<<endl;
 
 	io_service service;
 	ip::tcp::endpoint ep( ip::address::from_string("127.0.0.1"), 5038);

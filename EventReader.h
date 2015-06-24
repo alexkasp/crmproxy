@@ -12,6 +12,8 @@
 #include <boost/algorithm/string.hpp>
 #endif
 
+#include <vector>
+
 #include <string>
 #include "datatypes.h"
 #include "iexecuter.h"
@@ -25,7 +27,7 @@ class EventReader
 	int astport;
 	io_service service;
 	ParamMap data;
-	ExecuterInterface* Executer;
+	std::vector<ExecuterInterface*> Executer;
 
 public:
 	EventReader(std::string host,int port);
@@ -37,7 +39,7 @@ private:
 	int parseline(std::string line,int& _state,int& _event);
 	int processevent(const std::string data);
 public:
-	void SetExecuter(ExecuterInterface* iexecuter);
+	void AddExecuter(ExecuterInterface* iexecuter);
 	int AddParam(std::string data, ParamMap& eventdata);
 };
 

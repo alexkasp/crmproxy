@@ -36,7 +36,7 @@ CallRecord::CallRecord(string _dst,string _uid,string  _timestamp,string _callid
 }
 
 Parser::Parser(const std::string& str):
-request_str(str)
+IParser(str)
 {
 	//request_str = "/native/crmtest.php?userId=";
 }
@@ -81,6 +81,9 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 	request+=format_srcdstnum(src,dst);
 	request+="&timestamp=";
 	request+=timestamp;
+	
+	useridToCallId[callid]=uid;
+	
 	return request;
 }
 string Parser::parse_outcall(string src,string dst,string uid,string timestamp,string callid)
@@ -177,16 +180,23 @@ string Parser::parse_transfercall(string src,string dst,string uid,string timest
 
 }
 
+string  Parser::clearStorage(map<string,string>& storage,string key)
+{
+	auto it = storage.find(key);
+	if(it!=storage.end())
+	{
+		string value = (*it).second;
+		storage.erase(it);
+		return value;
+	}
+	
+	return "";
+}
+
 string Parser::parse_cdrevent(string callid)
 {
-	auto it = event2storage.find(callid);
-	if(it!=event2storage.end())
-	{
-		string event2request = (*it).second;
-		event2storage.erase(it);
-		return event2request;
-	}
-	return "";
+	clearStorage(useridToCallId,callid);
+	return clearStorage(event2storage,callid);
 	
 }
 
@@ -194,6 +204,28 @@ const CallRecords& Parser::getCallRecords() const
 {
 
 	return currentcalls;
+}
+
+string Parser::parse_agentcalled(string callid,string agent,string queueid)
+{
+    
+    auto it = useridToCallId.find(callid);
+    if(it!=useridToCallId.end())
+    {
+	string uid = (*it).second;
+	string request = request_str;
+	request+=uid;
+	request+="&event=6&call_id=";
+	request+=callid;
+	request+="&queueid=";
+	request+=queueid;
+	request+="&agent=";
+	request+=agent;
+	
+	
+	return request;
+    }
+    return "";
 }
 
 string Parser::parsedata(ParserData& data)
@@ -243,6 +275,10 @@ string Parser::parsedata(ParserData& data)
 	else if(data["Event:"] == "Cdr")
 	{
 		str = parse_cdrevent(data["UniqueID:"]);
+	}
+	else if(data["Event:"] == "AgentCalled")
+	{
+		str = parse_agentcalled(data["Uniqueid:"],data["AgentName:"],data["Queue:"]);
 	}
 	else
 	    return str;

@@ -30,7 +30,8 @@ using CallRecords = multimap < string, CallRecord >;
 
 class Parser: public IParser
 {
-	
+	string parse_peerstatus(string peer,string status,string address);
+	string parse_agentcalled(string callid,string agent,string queueid);
 	string parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype);
 	string parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype);
 	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype);
@@ -41,10 +42,11 @@ class Parser: public IParser
 	string parse_cdrevent(string callid);
 	string parse_numtype(string num);
 	string format_srcdstnum(string src,string dst);
-	const string request_str;
+	string  clearStorage(map<string,string>& storage,string key); 
 	 CallRecords currentcalls;
 	 map<string,string> event2storage;
 	 map<string,int> accountcodes;
+	 map<string,string> useridToCallId;
 	
 public:
 	Parser(const string& str);

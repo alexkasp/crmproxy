@@ -8,18 +8,21 @@
 
 using namespace std;
 
-void EventReader::SetExecuter(ExecuterInterface* iexecuter)
+void EventReader::AddExecuter(ExecuterInterface* iexecuter)
 {
-	Executer = iexecuter;
+	Executer.push_back(iexecuter);
 }
 EventReader::EventReader(std::string host,int port):asthost(host),astport(port)
 {
-	Executer = nullptr;
+	//Executer = nullptr;
 }
 
 
 EventReader::~EventReader(void)
 {
+    for(auto i=Executer.begin();i!=Executer.end();++i)
+	delete (*i);
+
 }
 
 
@@ -32,6 +35,7 @@ int EventReader::start(void)
 	
 	connect(_sock,ep);
 	
+	char databuf[1024];
 	boost::asio::streambuf buf;
 	int bytes = 0;
 		
@@ -43,6 +47,10 @@ int EventReader::start(void)
 			if (!ec)
 			{
 			    string str(boost::asio::buffers_begin(buf.data()), boost::asio::buffers_begin(buf.data()) + buf.size());
+			    
+			//    cout<<"["<<str<<"]"<<endl;
+			    
+			    //string str(databuf);
 			    buf.consume(bytes);
 			    processevent(str);
 			    
@@ -77,6 +85,7 @@ int EventReader::parseline(string line,int& state,int& event)
 	}
 	
 	cout<<"parseline:"<<line<<endl;
+	cout<<"go switch"<<endl;
 	switch(state)
 	{
 		case(1):
@@ -92,12 +101,12 @@ int EventReader::parseline(string line,int& state,int& event)
 		}
 		case(3):
 		{
-			cout<<"start send"<<endl;
+			/*cout<<"start send"<<endl;
 			for(auto x=data.begin();x!=data.end();++x)
 			{
 				cout<<"key->"<<(*x).first<<endl;
 				cout<<"value->"<<(*x).second<<endl<<endl;
-			}
+			}*/
 			/*string request = parsestr.parsedata(data);
 			if(request.size()>0)
 			{
@@ -105,9 +114,9 @@ int EventReader::parseline(string line,int& state,int& event)
 				this->SendRequest(request);
 				cout<<request<<endl;
 			}*/
-			if(Executer!=nullptr)
-				Executer->Execute(data);
-			if(data.empty())
+			for(auto i=Executer.begin();i!=Executer.end();++i)
+			    (*i)->Execute(data);
+			if(!data.empty())
 				data.clear();
 			state = 0;
 			break;
@@ -119,16 +128,20 @@ int EventReader::parseline(string line,int& state,int& event)
 }
 int EventReader::processevent(const std::string data)
 {
-		cout<<"process data"<<endl<<data<<endl;
+		try{
 		int state = 0;//try find event
 		int currentevent = 0;
 		std::vector<std::string> lines;
 		boost::algorithm::split(lines, data, boost::is_any_of("\n"));
-		for(auto x = lines.begin();x!=lines.end();++x)
-		{
+		    for(auto x = lines.begin();x!=lines.end();++x)
+		    {
 			parseline(*x,state,currentevent);
+		    }
 		}
-		cout<<"end process data"<<endl;
+		catch(exception& e)
+		{
+		    cout<<"process parseline error "<<e.what()<<endl;
+		}
 	return 0;
 }
 
@@ -139,7 +152,7 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 	std::string value;
 	std::istringstream in(data);
 	in >> key >> value;
-	if(value=="")
+	if((value=="")&&( string::npos != data.find(':')))
 	{
 		try
 		{
@@ -155,6 +168,10 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 		  {
 			cout<<"ADDPARAM  EXCEPTION!!!" << e.what() << '\n';
 		  }
+	}else if(string::npos == data.find(':'))
+	{
+	    cout<<"CATCH! "<<data<<endl;
+	    
 	}
 	
 	eventdata[key]=value;
