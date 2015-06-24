@@ -48,9 +48,7 @@ int EventReader::start(void)
 			{
 			    string str(boost::asio::buffers_begin(buf.data()), boost::asio::buffers_begin(buf.data()) + buf.size());
 			    
-			//    cout<<"["<<str<<"]"<<endl;
-			    
-			    //string str(databuf);
+			
 			    buf.consume(bytes);
 			    processevent(str);
 			    
