@@ -11,6 +11,7 @@
 #include <CRMUrlBuilder.h>
 #include <Parser.h>
 #include <RegisterMonitor.h>
+#include <RecallParser.h>
 
 using namespace std;
 
@@ -20,17 +21,23 @@ int main()
     
     EventReader reader("127.0.0.1",5038);
     
-    CRMUrlBuilder sender;
+    CRMUrlBuilder sender("sipuni.com","80");
     Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=");
+    sender.AddParser(&newParser);
+    
     
     RegisterParser rparser("not need");
     RegisterMonitor monitor(&rparser,"/var/lib/asterisk/agi-bin/system_variables.php");
     
-    sender.AddParser(&newParser);
+    CRMUrlBuilder recallManager("127.0.0.1","80");
+    RecallParser recall("http://sip.sipuni.com/IaEQvJmntW/callbackcrm.php?");
+    recallManager.AddParser(&recall);
+    
+    
     
     
     reader.AddExecuter(&sender);
-    
+    reader.AddExecuter(&recallManager);
     reader.AddExecuter(&monitor);
     
     reader.start();

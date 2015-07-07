@@ -15,14 +15,14 @@ class CRMUrlBuilder: public ExecuterInterface
 		std::vector<IParser*> parser;
 		boost::thread_group tgroup;
 		boost::asio::ip::tcp::endpoint ep;
-		
-		const string server="sipuni.com";
-		
+    
+        string server;
+    
 		int SendRequest(std::string url);
-
+    
 		
 	public:
-		CRMUrlBuilder();
+		CRMUrlBuilder(string server,string port);
 		void AddParser(IParser* parsertostr);
 		virtual int Execute(ParamMap& data);
 };

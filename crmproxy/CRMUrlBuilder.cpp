@@ -1,10 +1,11 @@
 #include <CRMUrlBuilder.h>
 #include <boost/bind.hpp>
 
-CRMUrlBuilder::CRMUrlBuilder()
+CRMUrlBuilder::CRMUrlBuilder(string webserver,string port)
 {
+    server = webserver;
     boost::asio::ip::tcp::resolver resolver(io);
-    boost::asio::ip::tcp::resolver::query query("sipuni.com","80");
+    boost::asio::ip::tcp::resolver::query query(server,port);
     
     boost::asio::ip::tcp::resolver::iterator iter = resolver.resolve( query);
     ep = *iter;
@@ -28,8 +29,6 @@ int CRMUrlBuilder::Execute(ParamMap& data)
 		string request = (*currentParser)->parsedata(data);
 		if (!request.empty())
 			SendRequest(request);
-		else
-			return 0;
 	}
     return 0;
 }

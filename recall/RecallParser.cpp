@@ -24,11 +24,15 @@ string RecallParser::parsedata(ParamMap& data)
     return request;
 }
 
-string RecallParser::parse_recallrequest(string from,string to)
+/*
+ prepare for URL
+ http://sip.sipuni.com/IaEQvJmntW/callback.php?num=TO&callfrom=FROM
+ */
+string RecallParser::parse_recallrequest(string from,string to,string CallId)
 {
     string request = request_str;
-    request+="from="+from;
-    request+="&to="+to;
+    request+="callfrom="+from;
+    request+="&num="+to;
     
     return request;
 }
