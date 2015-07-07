@@ -29,6 +29,7 @@
 		7D6473741B3ACACF00BCABCB /* simpleserv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = simpleserv.cpp; sourceTree = "<group>"; };
 		7D6473751B3ACACF00BCABCB /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		7DFFE2491B4BD63E0035071B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		7DFFE24B1B4BD67A0035071B /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +61,7 @@
 		7D6473611B3ACA4B00BCABCB = {
 			isa = PBXGroup;
 			children = (
+				7DFFE24B1B4BD67A0035071B /* include */,
 				7D6473681B3ACACF00BCABCB /* UnitTestProxy */,
 				7D6473711B3ACACF00BCABCB /* iexecuter.cpp */,
 				7DFFE2491B4BD63E0035071B /* main.cpp */,
