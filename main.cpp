@@ -11,7 +11,7 @@
 #include <CRMUrlBuilder.h>
 #include <Parser.h>
 #include <RegisterMonitor.h>
-#include <RecallParser.h>
+#include <RecallManager.h>
 
 using namespace std;
 
@@ -29,8 +29,8 @@ int main()
     RegisterParser rparser("not need");
     RegisterMonitor monitor(&rparser,"/var/lib/asterisk/agi-bin/system_variables.php");
     
-    CRMUrlBuilder recallManager("127.0.0.1","80");
-    RecallParser recall("http://sip.sipuni.com/IaEQvJmntW/callbackcrm.php?");
+    RecallManager recallManager();
+    RecallParser recall("/IaEQvJmntW/callbackcrm.php?");
     recallManager.AddParser(&recall);
     
     

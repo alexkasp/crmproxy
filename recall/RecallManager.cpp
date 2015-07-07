@@ -12,6 +12,6 @@ int RecallManager::Execute(ParamMap& data)
     
     if(parser->parsedata(data,from,to))
     {
-        //call
+        ast.call(from,to);
     }
 }

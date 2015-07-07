@@ -1,13 +1,17 @@
 #include <RecallParser.h>
+#include <iostream>
 
 int RecallParser::parsedata(ParamMap& data,string& from,string& to)
 {
-    if(data["Event:"] == "Recall")
+    if(data["Event:"] == "UserEvent")
     {
-        from = data["operator:"];
-        to = data["recallnum:"];
+	if(data["UserEvent:"] == "Recall")
+	{
+    	    from = data["operator:"];
+    	    to = data["recallnum:"];
         
-        return 1;
+    	    return 1;
+	}
     }
     else
         return 0;
@@ -16,11 +20,15 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to)
 string RecallParser::parsedata(ParamMap& data)
 {
     string request = "";
-    if(data["Event:"] == "Recall")
+    if(data["Event:"] == "UserEvent")
     {
-        request = parse_recallrequest(data["operator:"],data["recallnum"]);
+	if(data["UserEvent:"] == "Recall")
+	{
+    	    request = parse_recallrequest(data["operator"],data["recallnum"]);
+	}
     }
     
+    std::cout<<"prepare URL "<<request<<endl;
     return request;
 }
 
