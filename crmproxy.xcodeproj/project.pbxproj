@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7D5CF43F1B3AFB580092EE84 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D5CF43E1B3AFB580092EE84 /* main.cpp */; };
-		7D5CF4451B3B06190092EE84 /* DButils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D5CF4441B3B06190092EE84 /* DButils.cpp */; };
+		7DFFE24A1B4BD63E0035071B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7DFFE2491B4BD63E0035071B /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,27 +23,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		7D5CF4331B3AFB0C0092EE84 /* RegisterMonitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RegisterMonitor.h; sourceTree = "<group>"; };
-		7D5CF4341B3AFB0C0092EE84 /* RegisterParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RegisterParser.h; sourceTree = "<group>"; };
-		7D5CF4351B3AFB0C0092EE84 /* RegisterMonitor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RegisterMonitor.cpp; sourceTree = "<group>"; };
-		7D5CF4361B3AFB0C0092EE84 /* RegisterParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RegisterParser.cpp; sourceTree = "<group>"; };
 		7D5CF43B1B3AFB570092EE84 /* crmproxy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = crmproxy; sourceTree = BUILT_PRODUCTS_DIR; };
-		7D5CF43E1B3AFB580092EE84 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = crmproxy/main.cpp; sourceTree = "<group>"; };
-		7D5CF4431B3B06190092EE84 /* DButils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DButils.h; sourceTree = "<group>"; };
-		7D5CF4441B3B06190092EE84 /* DButils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DButils.cpp; sourceTree = "<group>"; };
 		7D6473681B3ACACF00BCABCB /* UnitTestProxy */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UnitTestProxy; sourceTree = "<group>"; };
-		7D6473691B3ACACF00BCABCB /* CRMUrlBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CRMUrlBuilder.h; sourceTree = "<group>"; };
-		7D64736A1B3ACACF00BCABCB /* datatypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = datatypes.h; sourceTree = "<group>"; };
-		7D64736B1B3ACACF00BCABCB /* EventReader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EventReader.h; sourceTree = "<group>"; };
-		7D64736C1B3ACACF00BCABCB /* iexecuter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = iexecuter.h; sourceTree = "<group>"; };
-		7D64736D1B3ACACF00BCABCB /* IParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IParser.h; sourceTree = "<group>"; };
-		7D64736E1B3ACACF00BCABCB /* Parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
-		7D64736F1B3ACACF00BCABCB /* CRMUrlBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CRMUrlBuilder.cpp; sourceTree = "<group>"; };
-		7D6473701B3ACACF00BCABCB /* EventReader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EventReader.cpp; sourceTree = "<group>"; };
 		7D6473711B3ACACF00BCABCB /* iexecuter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = iexecuter.cpp; sourceTree = "<group>"; };
-		7D6473731B3ACACF00BCABCB /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
 		7D6473741B3ACACF00BCABCB /* simpleserv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = simpleserv.cpp; sourceTree = "<group>"; };
 		7D6473751B3ACACF00BCABCB /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		7DFFE2491B4BD63E0035071B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,24 +60,9 @@
 		7D6473611B3ACA4B00BCABCB = {
 			isa = PBXGroup;
 			children = (
-				7D5CF4431B3B06190092EE84 /* DButils.h */,
-				7D5CF4441B3B06190092EE84 /* DButils.cpp */,
-				7D5CF4331B3AFB0C0092EE84 /* RegisterMonitor.h */,
-				7D5CF4341B3AFB0C0092EE84 /* RegisterParser.h */,
-				7D5CF4351B3AFB0C0092EE84 /* RegisterMonitor.cpp */,
-				7D5CF4361B3AFB0C0092EE84 /* RegisterParser.cpp */,
 				7D6473681B3ACACF00BCABCB /* UnitTestProxy */,
-				7D6473691B3ACACF00BCABCB /* CRMUrlBuilder.h */,
-				7D64736A1B3ACACF00BCABCB /* datatypes.h */,
-				7D64736B1B3ACACF00BCABCB /* EventReader.h */,
-				7D64736C1B3ACACF00BCABCB /* iexecuter.h */,
-				7D64736D1B3ACACF00BCABCB /* IParser.h */,
-				7D64736E1B3ACACF00BCABCB /* Parser.h */,
-				7D64736F1B3ACACF00BCABCB /* CRMUrlBuilder.cpp */,
-				7D6473701B3ACACF00BCABCB /* EventReader.cpp */,
 				7D6473711B3ACACF00BCABCB /* iexecuter.cpp */,
-				7D5CF43E1B3AFB580092EE84 /* main.cpp */,
-				7D6473731B3ACACF00BCABCB /* Parser.cpp */,
+				7DFFE2491B4BD63E0035071B /* main.cpp */,
 				7D6473741B3ACACF00BCABCB /* simpleserv.cpp */,
 				7D6473751B3ACACF00BCABCB /* Makefile */,
 				7D5CF43D1B3AFB580092EE84 /* crmproxy */,
@@ -156,8 +125,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7D5CF43F1B3AFB580092EE84 /* main.cpp in Sources */,
-				7D5CF4451B3B06190092EE84 /* DButils.cpp in Sources */,
+				7DFFE24A1B4BD63E0035071B /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +239,7 @@
 				7D5CF4421B3AFB580092EE84 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		7D6473651B3ACA4B00BCABCB /* Build configuration list for PBXProject "crmproxy" */ = {
 			isa = XCConfigurationList;
