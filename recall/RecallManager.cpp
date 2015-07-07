@@ -17,11 +17,11 @@ int RecallManager::makeAction(ParamMap& data,IParser* iparser)
     {
 	std::cout<<"START CALLING"<<std::endl;
 	
-        boost::thread(boost::bind(&RecallManager::callWithPause,this));
+        boost::thread(boost::bind(&RecallManager::callWithPause,this,from,to));
     }
 }
 
-void RecallManager::callWithPause()
+void RecallManager::callWithPause(string from,string to)
 {
     boost::this_thread::sleep(boost::posix_time::seconds(WaitForSeconds));
     ast.call(from,to);
