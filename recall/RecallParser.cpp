@@ -28,7 +28,7 @@ string RecallParser::parsedata(ParamMap& data)
  prepare for URL
  http://sip.sipuni.com/IaEQvJmntW/callback.php?num=TO&callfrom=FROM
  */
-string RecallParser::parse_recallrequest(string from,string to,string CallId)
+string RecallParser::parse_recallrequest(string from,string to)
 {
     string request = request_str;
     request+="callfrom="+from;

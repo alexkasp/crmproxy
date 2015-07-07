@@ -1,11 +1,13 @@
 	PROXYHEADERS = ./crmproxy
+	RECALLHEADERS = ./recall
 	BUILDHEADER = -I ./include -I /usr/include/mysql++ -I /usr/include/mysql
 default:
 	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"
 	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
 	
 	${MAKE} -C ${PROXYHEADERS}
-	g++ ${PROXYHEADERS}/*.o ${BUILDHEADER}  main.cpp -o main -std=c++0x -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
+	${MAKE} -C ${RECALLHEADERS}
+	g++ ${PROXYHEADERS}/*.o ${RECALLHEADERS}/*.o ${BUILDHEADER}  main.cpp -o main -std=c++0x -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
 	-Wl,-Bstatic -lboost_system -lboost_regex  -lboost_thread -lboost_date_time -Wl,-Bdynamic -lm -lcurl -lrt -lmysqlpp -lmysqlclient
 test:
 	g++ test.cpp corefunc.cpp sipheader.cpp sipmanager.cpp callbox.cpp -o test  -I ../include -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic  -lboost_system -lboost_regex -Wl,-Bdynamic -lm
