@@ -16,20 +16,16 @@ CRMUrlBuilder::CRMUrlBuilder(string webserver,string port)
     
 };
 
-void CRMUrlBuilder::AddParser(IParser* parsertostr)
-{
-	parser.push_back(parsertostr);
-}
 
-int CRMUrlBuilder::Execute(ParamMap& data)
+
+int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
 {
-	auto x = parser.begin();
-	for (auto currentParser = x; currentParser != parser.end(); ++currentParser)
-	{ 
-		string request = (*currentParser)->parsedata(data);
+		string request = currentParser->parsedata(data);
 		if (!request.empty())
+        {
 			SendRequest(request);
-	}
+            return 1;
+        }
     return 0;
 }
 

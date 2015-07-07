@@ -13,6 +13,7 @@ class RegisterMonitor: public ExecuterInterface
 	DButils DBWorker;
 	
 	map<string,string> UidToIdStorage;
+    virtual int makeAction(ParamMap& data,IParser* currentParser);
     public:
 	RegisterMonitor(RegisterParser *_parser,string settings_filename):parser(_parser)
 	{
@@ -23,5 +24,5 @@ class RegisterMonitor: public ExecuterInterface
 	    }
 	};
 	
-	virtual int Execute(ParamMap& data);
+	
 };

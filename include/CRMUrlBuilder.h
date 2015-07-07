@@ -1,5 +1,5 @@
 #include "iexecuter.h"
-#include "IParser.h"
+
 
 #include <string>
 
@@ -12,17 +12,18 @@ class CRMUrlBuilder: public ExecuterInterface
 {
 	
 		boost::asio::io_service io;
-		std::vector<IParser*> parser;
+		
 		boost::thread_group tgroup;
 		boost::asio::ip::tcp::endpoint ep;
     
         string server;
     
 		int SendRequest(std::string url);
+        virtual int makeAction(ParamMap& data,IParser* currentParser);
     
 		
 	public:
 		CRMUrlBuilder(string server,string port);
-		void AddParser(IParser* parsertostr);
-		virtual int Execute(ParamMap& data);
+		
+    
 };

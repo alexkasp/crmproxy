@@ -4,10 +4,10 @@
 
 class RecallManager: public ExecuterInterface
 {
-    RecallParser* parser;
-    AsteriskManager ast;
-    
+        RecallParser* parser;
+        AsteriskManager ast;
+        virtual int makeAction(ParamMap& data,IParser* currentParser);
     public:
-    RecallManager(RecallParser* setparser);
-    virtual int Execute(ParamMap& data);
+        RecallManager();
+    
 };

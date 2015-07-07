@@ -29,7 +29,7 @@ int main()
     RegisterParser rparser("not need");
     RegisterMonitor monitor(&rparser,"/var/lib/asterisk/agi-bin/system_variables.php");
     
-    RecallManager recallManager();
+    RecallManager recallManager;
     RecallParser recall("/IaEQvJmntW/callbackcrm.php?");
     recallManager.AddParser(&recall);
     

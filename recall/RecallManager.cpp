@@ -5,7 +5,7 @@ RecallManager::RecallManager(RecallParser* setparser)
     parser = setparser;
 }
 
-int RecallManager::Execute(ParamMap& data)
+int RecallManager::makeAction(ParamMap& data,IParser* parser)
 {
     string from;
     string to;
