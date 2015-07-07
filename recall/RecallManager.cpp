@@ -1,4 +1,6 @@
 #include <RecallManager.h>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
 
 RecallManager::RecallManager()
 {
@@ -15,7 +17,7 @@ int RecallManager::makeAction(ParamMap& data,IParser* iparser)
     {
 	std::cout<<"START CALLING"<<std::endl;
 	
-        boost::thread
+        boost::thread(boost::bind(&RecallManager::callWithPause,this));
     }
 }
 
