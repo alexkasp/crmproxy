@@ -8,7 +8,7 @@ int RegisterMonitor::Execute(ParamMap& data)
     
     if(parser->parsedata(data,number,status,address))
     {
-	cout<<"START REGISTER EVENT"<<endl;
+	
 	
 	auto it = UidToIdStorage.find(number.substr(0,6));
 	if(it!=UidToIdStorage.end())

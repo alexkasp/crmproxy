@@ -46,13 +46,16 @@ int DButils::getAuthParams(string filename)
 
 DButils::DButils()
 {
+#ifdef __LINUX__
     cout<<"try to create connection object"<<endl;
     conn = shared_ptr<mysqlpp::Connection>(new mysqlpp::Connection(false));
     cout<<"it is OK"<<endl;
+#endif
 }
 
 int DButils::getUidList(map<string,string>& uidToUserId)
 {
+#ifdef __LINUX__
     mysqlpp::Query query = conn->query("select id,uid from UserConfig");
         
      if (mysqlpp::StoreQueryResult res = query.store()) 
@@ -63,11 +66,13 @@ int DButils::getUidList(map<string,string>& uidToUserId)
         }
          return 1;
      }
+#endif
      return 0;
 }
 
 void DButils::PutRegisterEvent(string id,string number,string status)
 {
+#ifdef __LINUX__
      mysqlpp::Query query = conn->query("insert into RegisterEvents(eventtime,number,status,uid) values(Now(),'%0','%1',%2)");
      query.parse();
      mysqlpp::SQLQueryParms parms;
@@ -85,9 +90,10 @@ void DButils::PutRegisterEvent(string id,string number,string status)
     }
     else
 	cout <<"PUTREGISTER EVENT"<<endl;
-    
+#endif
 }
 
+#ifdef __LINUX__
 void DButils::addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult::const_iterator it)
 {
     mysqlpp::Row row = *it;
@@ -96,8 +102,11 @@ void DButils::addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult:
     storage[uid]=id;
 }
 
+#endif
+
 int DButils::getUid(map<string,string>& uidToUserId,string uid,string& id)
 {
+#ifdef __LINUX__
     mysqlpp::Query query = conn->query("select id,uid from UserConfig where uid="+uid);
         
      if (mysqlpp::StoreQueryResult res = query.store()) 
@@ -112,11 +121,13 @@ int DButils::getUid(map<string,string>& uidToUserId,string uid,string& id)
         }
          return 1;
      }
+#endif
      return 0;
 }
 
 int DButils::connect()
 {
+#ifdef __LINUX__
      if (conn->connect(db.c_str(),host.c_str(),login.c_str(),pass.c_str()))
      {
         return 1;
@@ -125,6 +136,9 @@ int DButils::connect()
         cerr << "DB connection failed: " << conn->error() << endl;
                 return 0;
      }
+    
+#endif
+    return 0;
 }
 
 int DButils::parse(string msg,string delimiter,string& param,string& value)

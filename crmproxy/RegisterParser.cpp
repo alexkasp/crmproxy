@@ -27,17 +27,17 @@ string RegisterParser::parsedata(ParamMap& data)
     }
     else
         return str;
-    
+    return "";
 }
 
 int RegisterParser::parsedata(ParamMap& data,string& number,string& status,string& address)
 {
     if(data["Event:"] == "PeerStatus")
     {
-	number = data["Peer:"].substr(4);
-	status = data["PeerStatus:"];
-	address = data["Address:"];
-	return 1;
+        number = data["Peer:"].substr(4);
+        status = data["PeerStatus:"];
+        address = data["Address:"];
+        return 1;
     }
     return 0;
 }
