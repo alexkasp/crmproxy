@@ -81,7 +81,7 @@ int AsteriskManager::call(std::string from,std::string to)
     
 	_sock->write_some(buffer(command,command.size()));
 	
-	deinit();
+	
 	}
 	catch (std::exception& e)
 		  {

@@ -7,8 +7,8 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to)
     {
 	if(data["UserEvent:"] == "Recall")
 	{
-    	    from = data["operator:"];
-    	    to = data["recallnum:"];
+    	    from = data["operator"];
+    	    to = data["recallnum"];
         
     	    return 1;
 	}

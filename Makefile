@@ -7,7 +7,7 @@ default:
 	
 	${MAKE} -C ${PROXYHEADERS}
 	${MAKE} -C ${RECALLHEADERS}
-	g++ ${PROXYHEADERS}/*.o ${RECALLHEADERS}/*.o ${BUILDHEADER}  main.cpp -o main -std=c++0x -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
+	g++ ${PROXYHEADERS}/*.o ${RECALLHEADERS}/*.o ${BUILDHEADER}  main.cpp -o main iexecuter.cpp  -std=c++0x -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
 	-Wl,-Bstatic -lboost_system -lboost_regex  -lboost_thread -lboost_date_time -Wl,-Bdynamic -lm -lcurl -lrt -lmysqlpp -lmysqlclient
 test:
 	g++ test.cpp corefunc.cpp sipheader.cpp sipmanager.cpp callbox.cpp -o test  -I ../include -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic  -lboost_system -lboost_regex -Wl,-Bdynamic -lm
