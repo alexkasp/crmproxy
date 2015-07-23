@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 using namespace boost::asio;
 
@@ -19,6 +20,7 @@ class AsteriskManager
 		boost::shared_ptr<ip::tcp::socket> _sock;
 		int init();
 		int deinit();
+		int softinit();
 	public:
 		AsteriskManager();
 		~AsteriskManager();
