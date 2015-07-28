@@ -30,6 +30,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7D1740F41B61214700D24DC1 /* Monitor */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Monitor; sourceTree = "<group>"; };
 		7D5CF43B1B3AFB570092EE84 /* crmproxy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = crmproxy; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D6473711B3ACACF00BCABCB /* iexecuter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = iexecuter.cpp; sourceTree = "<group>"; };
 		7D6473741B3ACACF00BCABCB /* simpleserv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = simpleserv.cpp; sourceTree = "<group>"; };
@@ -82,6 +83,7 @@
 		7D6473611B3ACA4B00BCABCB = {
 			isa = PBXGroup;
 			children = (
+				7D1740F41B61214700D24DC1 /* Monitor */,
 				7DFFE25B1B4BD8200035071B /* recall */,
 				7DFFE24B1B4BD67A0035071B /* include */,
 				7D6473711B3ACACF00BCABCB /* iexecuter.cpp */,

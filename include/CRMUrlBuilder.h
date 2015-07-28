@@ -18,10 +18,12 @@ class CRMUrlBuilder: public ExecuterInterface
     
         string server;
     
-		int SendRequest(std::string url);
-        virtual int makeAction(ParamMap& data,IParser* currentParser);
-    
 		
+    
+    
+    protected:
+        virtual int makeAction(ParamMap& data,IParser* currentParser);
+        int SendRequest(std::string url);
 	public:
 		CRMUrlBuilder(string server,string port);
 		
