@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>1C220AAE-70BD-4D0A-9B94-274250CFD614</string>
 	<key>IDESourceControlProjectName</key>
-	<string>crmproxy</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>DD4235F690060E0EB0C5B84145C9F16DD38FC51D</key>
 		<string>https://github.com/alexkasp/crmproxy.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>crmproxy.xcodeproj</string>
+	<string>crmproxy.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>DD4235F690060E0EB0C5B84145C9F16DD38FC51D</key>

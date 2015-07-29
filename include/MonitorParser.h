@@ -5,6 +5,7 @@ using namespace std;
 
 class MonitorParser :public IParser
 {
+    DButils* DBManager;
     string parse_cdrevent(string uniqueID);
 public:
     MonitorParser(string requestStr);

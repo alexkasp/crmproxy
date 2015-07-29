@@ -42,22 +42,22 @@ int MonitorManager::SendRequestAndWaitAnswer(std::string url)
     boost::asio::write(sock,request,ec);
     if(ec)
     {
-	std::cout<<"ERROR MSG "<<ec.value()<<std::endl;
+        std::cout<<"ERROR MSG "<<ec.value()<<std::endl;
     }
     
     std::string AnswerData;
     boost::asio::read_until(sock,response,"\r\n\r\n",ec);
     if(!ec)
     {
-	std::istream response_stream(&response);
-	while(std::getline(response_stream,AnswerData))
-	{
-	    if(AnswerData=="\r")
-	    {
-		std::getline(response_stream,AnswerData);
-		break;
-	    }
-	}
+        std::istream response_stream(&response);
+        while(std::getline(response_stream,AnswerData))
+        {
+            if(AnswerData=="\r")
+            {
+                std::getline(response_stream,AnswerData);
+                break;
+            }
+        }
     }
 
     std::stringstream ss;
@@ -67,7 +67,6 @@ int MonitorManager::SendRequestAndWaitAnswer(std::string url)
     
     
     bool status = pt.get<bool>("success");
-    //std::string comment = pt.get<std::string>("message");
     std::cout<<"STATUS="<<status<<endl;
     
     sock.close();

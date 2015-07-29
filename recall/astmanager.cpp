@@ -3,23 +3,23 @@
 int AsteriskManager::init()
 {
     try{
-	ep.reset(new ip::tcp::endpoint( ip::address::from_string(asthost), astport));
-	 _sock.reset(new ip::tcp::socket(service));
-	_sock->connect(*ep);
-	 boost::asio::streambuf response;
-	boost::asio::read_until(*_sock, response, "\r\n");
-	boost::asio::read_until(*_sock, response, "\r\n");
+        ep.reset(new ip::tcp::endpoint( ip::address::from_string(asthost), astport));
+         _sock.reset(new ip::tcp::socket(service));
+        _sock->connect(*ep);
+         boost::asio::streambuf response;
+        boost::asio::read_until(*_sock, response, "\r\n");
+        boost::asio::read_until(*_sock, response, "\r\n");
 
-	std::string command = "Action: login\r\nUsername: myasterisk\r\nSecret: mycode\r\nActionID: 1\r\n\r\n";
-	_sock->write_some(buffer(command,command.size()));
-	
-	boost::asio::read_until(*_sock, response, "\r\n");
-	return 1;	
+        std::string command = "Action: login\r\nUsername: myasterisk\r\nSecret: mycode\r\nActionID: 1\r\n\r\n";
+        _sock->write_some(buffer(command,command.size()));
+        
+        boost::asio::read_until(*_sock, response, "\r\n");
+        return 1;	
     }
     catch(std::exception &e)
     {
-	std::cout<<"CATCH EXCEPTION!!! AsteriskManager::init()" << e.what() << '\n';
-	return 0;
+        std::cout<<"CATCH EXCEPTION!!! AsteriskManager::init()" << e.what() << '\n';
+        return 0;
     }
 }
 
@@ -28,16 +28,16 @@ int AsteriskManager::softinit()
 {
     try
     {
-	boost::asio::streambuf response;
-	std::string command = "Action: login\r\nUsername: myasterisk\r\nSecret: mycode\r\nActionID: 1\r\n\r\n";
-	_sock->write_some(buffer(command,command.size()));
-	boost::asio::read_until(*_sock, response, "\r\n");
-	return 1;
+        boost::asio::streambuf response;
+        std::string command = "Action: login\r\nUsername: myasterisk\r\nSecret: mycode\r\nActionID: 1\r\n\r\n";
+        _sock->write_some(buffer(command,command.size()));
+        boost::asio::read_until(*_sock, response, "\r\n");
+        return 1;
     }
     catch(std::exception &e)
     {
-	std::cout<<"CATCH EXCEPTION!!! AsteriskManager::init()" << e.what() << '\n';
-	return 0;
+        std::cout<<"CATCH EXCEPTION!!! AsteriskManager::init()" << e.what() << '\n';
+        return 0;
     }
 }
 

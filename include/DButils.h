@@ -53,7 +53,8 @@ class DButils
     int parseParam(string msg,string& param,string& value);
 public:
     DButils();
-    
+    int callRecordStatus(string uniqueid);
+
     void PutRegisterEvent(string id,string number,string status);
     int getAuthParams(string filename);
     int connect();

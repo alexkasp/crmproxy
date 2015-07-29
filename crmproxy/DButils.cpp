@@ -70,6 +70,8 @@ int DButils::getUidList(map<string,string>& uidToUserId)
      return 0;
 }
 
+
+
 void DButils::PutRegisterEvent(string id,string number,string status)
 {
 #ifdef __LINUX__
@@ -141,15 +143,34 @@ int DButils::connect()
     return 0;
 }
 
+int DButils::callRecordStatus(string uniqueid)
+{
+#ifdef __LINUX__
+    mysqlpp::Query query = conn->query("select isblock from records where callid="+uniqueid);
+    if(mysqlpp::StoreQueryResult res = query.store())
+    {
+        for(auto it=res.begin();it!=res.end();++it)
+        {
+             mysqlpp::Row row = *it;
+             return !row[0].data();
+        }
+        
+    }
+
+    
+#endif
+    return 0;
+}
+
 int DButils::parse(string msg,string delimiter,string& param,string& value)
 {
     size_t pos = 0;
     if((pos = msg.find(delimiter))!= std::string::npos)
     {
-	param = msg.substr(0, pos);
-	msg.erase(0, pos + delimiter.length());
-	value=msg;
-	return 1;	
+        param = msg.substr(0, pos);
+        msg.erase(0, pos + delimiter.length());
+        value=msg;
+        return 1;	
 		
     }
     
@@ -160,12 +181,12 @@ int DButils::parseParam(string msg,string& param,string& value)
 {
     if(parse(msg,delimiter,param,value))
     {
-	string tmpparam;
-	if((parse(param,vardelimiter, tmpparam,param))&&(value.length()>3))
-	{
-	    value = value.substr(VALUEPREFIXLENGTH,value.length()-VALUEPOSTFIXLENGTH);
-	    return 1;
-	}
+        string tmpparam;
+        if((parse(param,vardelimiter, tmpparam,param))&&(value.length()>3))
+        {
+            value = value.substr(VALUEPREFIXLENGTH,value.length()-VALUEPOSTFIXLENGTH);
+            return 1;
+        }
     }
     
     return 0;

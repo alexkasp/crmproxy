@@ -15,9 +15,11 @@ string MonitorParser::parsedata(ParamMap& data)
 
 string MonitorParser::parse_cdrevent(string uniqueID)
 {
+
     string request = request_str;
     request+=uniqueID;
     return request;
+   
 }
 
 //string for testing
@@ -25,5 +27,5 @@ string MonitorParser::parse_cdrevent(string uniqueID)
 
 MonitorParser::MonitorParser(string request):IParser(request)
 {
-
+    DBManager = DB;
 }
