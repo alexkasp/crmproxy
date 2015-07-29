@@ -1,5 +1,7 @@
 #include <MonitorManager.h>
 #include <boost/bind.hpp>
+#include <sstream>
+#include <boost/foreach.hpp>
 
 MonitorManager::MonitorManager(string server,string port):CRMUrlBuilder(server,port)
 {
@@ -7,20 +9,22 @@ MonitorManager::MonitorManager(string server,string port):CRMUrlBuilder(server,p
     sock.connect(ep);
 }
 
-int makeAction(ParamMap& data,IParser* currentParser)
+int MonitorManager::makeAction(ParamMap& data,IParser* currentParser)
 {
     string request = currentParser->parsedata(data);
     if (!request.empty())
     {
-        tgroup.create_thread(boost::bind(&MonitorManager::SendRequest,this,request));
+        tgroup.create_thread(boost::bind(&MonitorManager::SendRequestAndWaitAnswer,this,request));
+        
+        //SendRequestAndWaitAnswer(request);
         return 1;
     }
     return 0;
 }
 
-int MonitorManager::SendRequest(std::string url)
+int MonitorManager::SendRequestAndWaitAnswer(std::string url)
 {
-    boost::asio::streambuf request,responce;
+    boost::asio::streambuf request,response;
     
     std::ostream request_stream(&request);
     
@@ -33,17 +37,38 @@ int MonitorManager::SendRequest(std::string url)
     boost::asio::ip::tcp::socket sock(io);
     sock.connect(ep);
     boost::system::error_code ec;
-    boost::asio::write(sock,request);
     
-    boost::asio::read(sock,responce);
     
-    string AnswerData = "";
+    boost::asio::write(sock,request,ec);
+    if(ec)
+    {
+	std::cout<<"ERROR MSG "<<ec.value()<<std::endl;
+    }
     
-    std::istream responce_stream(&responce);
+    std::string AnswerData;
+    boost::asio::read_until(sock,response,"\r\n\r\n",ec);
+    if(!ec)
+    {
+	std::istream response_stream(&response);
+	while(std::getline(response_stream,AnswerData))
+	{
+	    if(AnswerData=="\r")
+	    {
+		std::getline(response_stream,AnswerData);
+		break;
+	    }
+	}
+    }
+
+    std::stringstream ss;
+    ss << AnswerData;
+        
+    boost::property_tree::read_json(ss, pt);
     
-    responce_stream >> AnswerData;
-    std::cout<<"MONITOR MANAGER "<<AnswerData<<std::endl;
+    
+    bool status = pt.get<bool>("success");
+    //std::string comment = pt.get<std::string>("message");
+    std::cout<<"STATUS="<<status<<endl;
     
     sock.close();
-
 }

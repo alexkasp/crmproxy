@@ -82,8 +82,8 @@ int EventReader::parseline(string line,int& state,int& event)
 		cout<<"prepare to send"<<endl;
 	}
 	
-	cout<<"parseline:"<<line<<endl;
-	cout<<"go switch"<<endl;
+	//cout<<"parseline:"<<line<<endl;
+	//cout<<"go switch"<<endl;
 	switch(state)
 	{
 		case(1):
@@ -173,7 +173,7 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 	}
 	
 	eventdata[key]=value;
-	cout << "receive:"<<key<<value<<endl;
+	//cout << "receive:"<<key<<value<<endl;
 	return 0;
 }
 

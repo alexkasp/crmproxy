@@ -1,3 +1,5 @@
+#ifndef CRMURL_BUILDER_CLASS
+#define CRMURL_BUILDER_CLASS 1
 #include "iexecuter.h"
 
 
@@ -11,21 +13,24 @@
 class CRMUrlBuilder: public ExecuterInterface
 {
 	
-		boost::asio::io_service io;
 		
+		
+	
+    
+		int SendRequest(std::string url);
+    
+    
+    protected:
 		boost::thread_group tgroup;
 		boost::asio::ip::tcp::endpoint ep;
     
         string server;
-    
-		
-    
-    
-    protected:
+	boost::asio::io_service io;
         virtual int makeAction(ParamMap& data,IParser* currentParser);
-        int SendRequest(std::string url);
+        
 	public:
 		CRMUrlBuilder(string server,string port);
 		
     
 };
+#endif

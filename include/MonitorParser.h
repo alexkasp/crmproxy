@@ -9,4 +9,4 @@ class MonitorParser :public IParser
 public:
     MonitorParser(string requestStr);
     string parsedata(ParamMap& data);
-}
+};

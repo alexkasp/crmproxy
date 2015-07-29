@@ -1,16 +1,14 @@
 #include <MonitorParser.h>
+#include <iostream>
 
-string MonitorParser::parsedata(PraamMap& data)
+string MonitorParser::parsedata(ParamMap& data)
 {
     string str = "";
-    if(data["Event:"]=="UserEvent")
+    if(data["Event:"] == "Cdr")
     {
-        
-        if(data["Event:"] == "Cdr")
-        {
-            str = parse_cdrevent(data["UniqueID:"]);
-        }
+        str = parse_cdrevent(data["UniqueID:"]);
     }
+    
     
     return str;
 }
