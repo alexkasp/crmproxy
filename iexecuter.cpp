@@ -10,7 +10,7 @@ int ExecuterInterface::Execute(ParamMap& data)
     auto x = parser.begin();
     for (auto currentParser = x; currentParser != parser.end(); ++currentParser)
     {
-        return makeAction(data,*currentParser);
+         makeAction(data,*currentParser);
     }
     return 0;
 }

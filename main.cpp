@@ -14,7 +14,7 @@
 #include <RecallManager.h>
 #include <MonitorParser.h>
 #include <MonitorManager.h>
-
+#include <MonitorParserCRM.h>
 
 using namespace std;
 
@@ -36,16 +36,18 @@ int main()
     RecallParser recall("/IaEQvJmntW/callbackcrm.php?");
     recallManager.AddParser(&recall);
     
-    MonitorParser monitorServiceParser("/api/testing/test?callid=");
+    MonitorParser monitorServiceParser("/api/testing/record?callId=");
+    MonitorParserCRM monitorServiceParserCRM("/api/testing/test?callid=");
     MonitorManager monitorServiceManager("sipuni.com","80");
     monitorServiceManager.AddParser(&monitorServiceParser);
+    //monitorServiceManager.AddParser(&monitorServiceParserCRM);
     
     
     
     
-    //reader.AddExecuter(&sender);
-    //reader.AddExecuter(&recallManager);
-    //reader.AddExecuter(&monitor);
+    reader.AddExecuter(&sender);
+    reader.AddExecuter(&recallManager);
+    reader.AddExecuter(&monitor);
     reader.AddExecuter(&monitorServiceManager);
     
     reader.start();

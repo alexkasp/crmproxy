@@ -9,21 +9,9 @@ MonitorManager::MonitorManager(string server,string port):CRMUrlBuilder(server,p
     sock.connect(ep);
 }
 
-int MonitorManager::makeAction(ParamMap& data,IParser* currentParser)
+int MonitorManager::SendRequest(std::string url)
 {
-    string request = currentParser->parsedata(data);
-    if (!request.empty())
-    {
-        tgroup.create_thread(boost::bind(&MonitorManager::SendRequestAndWaitAnswer,this,request));
-        
-        //SendRequestAndWaitAnswer(request);
-        return 1;
-    }
-    return 0;
-}
 
-int MonitorManager::SendRequestAndWaitAnswer(std::string url)
-{
     boost::asio::streambuf request,response;
     
     std::ostream request_stream(&request);
@@ -31,7 +19,7 @@ int MonitorManager::SendRequestAndWaitAnswer(std::string url)
     request_stream << "GET " << url << " HTTP/1.0\r\n";
     request_stream << "Host: " << server << "\r\n";
     request_stream << "Accept: */*\r\n";
-    request_stream << "Connection: close\r\n\r\n";
+    request_stream << "Connection: Keep-Alive\r\n\r\n";
     
     
     boost::asio::ip::tcp::socket sock(io);
@@ -47,27 +35,39 @@ int MonitorManager::SendRequestAndWaitAnswer(std::string url)
     
     std::string AnswerData;
     boost::asio::read_until(sock,response,"\r\n\r\n",ec);
+    std::istream response_stream(&response);
+
     if(!ec)
     {
-        std::istream response_stream(&response);
+
         while(std::getline(response_stream,AnswerData))
         {
+    	    std::cout<<AnswerData<<std::endl;
             if(AnswerData=="\r")
             {
-                std::getline(response_stream,AnswerData);
+        	boost::asio::read_until(sock,response,"\n",ec);
                 break;
             }
         }
     }
-
+    
+    std::getline(response_stream,AnswerData);
+    
     std::stringstream ss;
     ss << AnswerData;
-        
-    boost::property_tree::read_json(ss, pt);
+    std::cout<<"JSON DATA "<<AnswerData<<std::endl;    
     
+    
+    
+    try{
+	boost::property_tree::read_json(ss, pt);
+    }
+    catch(exception& e)
+    {
+	std::cout<<e.what()<<std::endl;
+    }
     
     bool status = pt.get<bool>("success");
-    std::cout<<"STATUS="<<status<<endl;
     
     sock.close();
 }

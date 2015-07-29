@@ -2,8 +2,8 @@
 
 class MonitorParserCRM: public MonitorParser
 {
-    
+	virtual string parse_cdrevent(string uniqueID,string accountCode);
     public:
-    MonitorParserCRM(string requeststr):parent(requeststr)
-    {}
+	MonitorParserCRM(string requeststr):MonitorParser(requeststr)
+	{}
 };

@@ -4,14 +4,14 @@
 
 class MonitorManager: public CRMUrlBuilder
 {
-    int	SendRequestAndWaitAnswer(std::string url);
+    virtual int	SendRequest(std::string url);
     boost::thread_group tgroup;
     
     boost::property_tree::ptree pt;
     
 protected:
     
-     virtual int makeAction(ParamMap& data,IParser* currentParser);
+    // virtual int makeAction(ParamMap& data,IParser* currentParser);
 public:
     MonitorManager(string server,string port);
 };

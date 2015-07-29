@@ -1,5 +1,6 @@
 #include <CRMUrlBuilder.h>
 #include <boost/bind.hpp>
+#include <iostream>
 
 CRMUrlBuilder::CRMUrlBuilder(string webserver,string port)
 {
@@ -20,10 +21,11 @@ CRMUrlBuilder::CRMUrlBuilder(string webserver,string port)
 
 int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
 {
-		string request = currentParser->parsedata(data);
-		if (!request.empty())
+	string request = currentParser->parsedata(data);
+	if (!request.empty())
         {
-			SendRequest(request);
+	    SendRequest(request);
+            //tgroup.create_thread(boost::bind(&CRMUrlBuilder::SendRequest,this,request));
             return 1;
         }
     return 0;
@@ -33,7 +35,7 @@ int CRMUrlBuilder::SendRequest(std::string url)
 {
 	
 	try{
-	
+	    
 	    boost::asio::streambuf request;
 	    
 	    std::ostream request_stream(&request);

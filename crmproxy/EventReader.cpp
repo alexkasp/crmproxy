@@ -79,7 +79,6 @@ int EventReader::parseline(string line,int& state,int& event)
 	else if((line.size()<2)&&(state==2))
 	{
 		state = 3;
-		cout<<"prepare to send"<<endl;
 	}
 	
 	//cout<<"parseline:"<<line<<endl;

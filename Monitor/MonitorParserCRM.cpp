@@ -1,13 +1,15 @@
 #include <MonitorParserCRM.h>
+#include <iostream>
+
 
 
 using namespace std;
 
-string MonitorParser::parse_cdrevent(string uniqueID)
+string MonitorParserCRM::parse_cdrevent(string uniqueID,string accountCode)
 {
-    cout<<"MONITOR PARSER CRM"<<endl;
     string request = request_str;
     request+=uniqueID;
+    
     return request;
     
 }

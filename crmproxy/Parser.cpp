@@ -289,6 +289,6 @@ string Parser::parsedata(ParserData& data)
 		str += data["ChannelName"];
 
 	
-	cout<<"Parse"<<endl<<str<<endl<<endl;
+	debugParseString(str);
 	return str;
 }

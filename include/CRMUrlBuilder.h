@@ -17,7 +17,7 @@ class CRMUrlBuilder: public ExecuterInterface
 		
 	
     
-		int SendRequest(std::string url);
+	virtual	int SendRequest(std::string url);
     
     
     protected:
