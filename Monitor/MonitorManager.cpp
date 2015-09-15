@@ -2,30 +2,71 @@
 #include <boost/bind.hpp>
 #include <sstream>
 #include <boost/foreach.hpp>
+#include <fstream>
+
+using namespace std;
 
 MonitorManager::MonitorManager(string server,string port):CRMUrlBuilder(server,port)
 {
     boost::asio::ip::tcp::socket sock(io);
     sock.connect(ep);
+    tgroup.create_thread(boost::bind(&MonitorManager::SendRequestCicle,this));
 }
 
-int MonitorManager::SendRequest(std::string url)
+void MonitorManager::SendRequestCicle()
 {
+    while(1)
+    {
+	string msg;
+	boost::this_thread::sleep( boost::posix_time::milliseconds(10000));
+	if(!SendRequestWithDelay(msg))
+	{
+	    fstream f(zabbix_file);
+	     if (f.good()) 
+	     {
+	         f.close();
+	     }
+	     else
+	     {
+	        f.open(zabbix_file,fstream::out);
+	        f<<msg<<"\n";
+	        f.close();
+	     } 
+	}
+    }
+}
 
-    boost::asio::streambuf request,response;
-    
-    std::ostream request_stream(&request);
-    
-    request_stream << "GET " << url << " HTTP/1.0\r\n";
-    request_stream << "Host: " << server << "\r\n";
-    request_stream << "Accept: */*\r\n";
-    request_stream << "Connection: Keep-Alive\r\n\r\n";
-    
+int MonitorManager::SendRequestWithDelay(string& msg)
+{
+    bool returnStatus = true;
     
     boost::asio::ip::tcp::socket sock(io);
     sock.connect(ep);
     boost::system::error_code ec;
     
+    struct timeval now;
+    gettimeofday(&now,NULL);
+    
+    for(auto x = requestList.begin();x!=requestList.end();)
+    {
+    
+    RequestWithTime* requestData = &(*x);
+    
+    //std::cout<<"now.tv_sec="<<now.tv_sec<<"-"<<requestData->timeReq<<"="<<now.tv_sec-requestData->timeReq<<endl;
+    
+    if((now.tv_sec-requestData->timeReq)>600)
+    {
+    boost::asio::streambuf request,response;
+    
+    std::ostream request_stream(&request);
+    
+    request_stream << "GET " << requestData->request << " HTTP/1.0\r\n";
+    request_stream << "Host: " << server << "\r\n";
+    request_stream << "Accept: */*\r\n";
+    request_stream << "Connection: Keep-Alive\r\n\r\n";
+    
+    
+    x = requestList.erase(x);
     
     boost::asio::write(sock,request,ec);
     if(ec)
@@ -67,7 +108,30 @@ int MonitorManager::SendRequest(std::string url)
 	std::cout<<e.what()<<std::endl;
     }
     
-    bool status = pt.get<bool>("success");
-    
+	bool status = pt.get<bool>("success");
+	if(!status)
+	{
+	    msg = pt.get<string>("message");
+	}
+	returnStatus&=status;
+    }
+    else
+	break;
+    }
     sock.close();
+    
+    return returnStatus;
+}
+
+int MonitorManager::SendRequest(std::string url)
+{
+
+    struct timeval now;
+    gettimeofday(&now,NULL);
+
+    RequestWithTime newRequest;
+    newRequest.timeReq = now.tv_sec;
+    newRequest.request = url;
+    
+    requestList.push_back(newRequest);
 }

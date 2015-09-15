@@ -10,5 +10,5 @@ class RegisterParser: public IParser
     public:
 	string parsedata(ParamMap& data);
 	int parsedata(ParamMap& data,string& number,string& status,string& address);
-	RegisterParser(string str);
+	RegisterParser(string str,LoggerModule& lm);
 };

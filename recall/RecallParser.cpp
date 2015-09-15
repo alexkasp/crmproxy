@@ -1,20 +1,21 @@
 #include <RecallParser.h>
 #include <iostream>
 
-int RecallParser::parsedata(ParamMap& data,string& from,string& to)
+int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& announce)
 {
     if(data["Event:"] == "UserEvent")
     {
+	
 	if(data["UserEvent:"] == "Recall")
 	{
     	    from = data["operator"];
     	    to = data["recallnum"];
-        
+    	    announce = data["announce"];
+    	    std::cout<<"Start recall "<<from<<" ->"<<to<<" with "<<announce<<endl;
     	    return 1;
 	}
     }
-    else
-        return 0;
+    return 0;
 }
 
 string RecallParser::parsedata(ParamMap& data)
@@ -45,7 +46,7 @@ string RecallParser::parse_recallrequest(string from,string to)
     return request;
 }
 
-RecallParser::RecallParser(string requestStr):IParser(requestStr)
+RecallParser::RecallParser(string requestStr,LoggerModule& lm):IParser(requestStr,lm)
 {
 
 }

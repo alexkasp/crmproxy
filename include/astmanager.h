@@ -28,6 +28,7 @@ class AsteriskManager
 		int call(std::string from,std::string to,std::string outline,std::string schema);
 		int callsimple(std::string from,std::string to,std::string outline,std::string schema);
 		int call(std::string from,std::string to);
+		int callWithAnnounce(std::string from,std::string to,std::string announce);
 		int call(std::string from,std::string to,std::string schema);
 };
 #endif

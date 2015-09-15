@@ -1,4 +1,5 @@
 #include "iexecuter.h"
+#include <iostream>
 
 void ExecuterInterface::AddParser(IParser* parsertostr)
 {

@@ -81,8 +81,6 @@ int EventReader::parseline(string line,int& state,int& event)
 		state = 3;
 	}
 	
-	//cout<<"parseline:"<<line<<endl;
-	//cout<<"go switch"<<endl;
 	switch(state)
 	{
 		case(1):
@@ -98,19 +96,6 @@ int EventReader::parseline(string line,int& state,int& event)
 		}
 		case(3):
 		{
-			/*cout<<"start send"<<endl;
-			for(auto x=data.begin();x!=data.end();++x)
-			{
-				cout<<"key->"<<(*x).first<<endl;
-				cout<<"value->"<<(*x).second<<endl<<endl;
-			}*/
-			/*string request = parsestr.parsedata(data);
-			if(request.size()>0)
-			{
-				cout<<"try to send"<<endl<<request<<endl;
-				this->SendRequest(request);
-				cout<<request<<endl;
-			}*/
 			for(auto i=Executer.begin();i!=Executer.end();++i)
 			    (*i)->Execute(data);
 			if(!data.empty())

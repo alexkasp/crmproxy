@@ -7,7 +7,7 @@ class RecallParser :public IParser
 {
     string parse_recallrequest(string from,string to);
 public:
-    RecallParser(string requestStr);
+    RecallParser(string requestStr,LoggerModule& lm);
     string parsedata(ParamMap& data);
-    int parsedata(ParamMap& data,string& from, string& tonum);
+    int parsedata(ParamMap& data,string& from, string& tonum,string& announce);
 };

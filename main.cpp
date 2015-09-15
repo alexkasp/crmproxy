@@ -15,39 +15,41 @@
 #include <MonitorParser.h>
 #include <MonitorManager.h>
 #include <MonitorParserCRM.h>
+#include <LoggerModule.h>
 
 using namespace std;
 
 int main()
 {
     
+    LoggerModule lm;
     
     EventReader reader("127.0.0.1",5038);
     
     CRMUrlBuilder sender("sipuni.com","80");
-    Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=");
+    Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
     sender.AddParser(&newParser);
     
-    
-    RegisterParser rparser("not need");
-    RegisterMonitor monitor(&rparser,"/var/lib/asterisk/agi-bin/system_variables.php");
+    RegisterParser rparser("not need",lm);
+    RegisterMonitor rmonitor("/var/lib/asterisk/agi-bin/system_variables.php");
+    rmonitor.AddParser(&rparser);
     
     RecallManager recallManager;
-    RecallParser recall("/IaEQvJmntW/callbackcrm.php?");
+    RecallParser recall("/IaEQvJmntW/callbackcrm.php?",lm);
     recallManager.AddParser(&recall);
     
-    MonitorParser monitorServiceParser("/api/testing/record?callId=");
-    MonitorParserCRM monitorServiceParserCRM("/api/testing/test?callid=");
+    MonitorParser monitorServiceParser("/api/testing/record?callId=",lm);
+    MonitorParserCRM monitorServiceParserCRM("/api/testing/crm?callId=","/var/lib/asterisk/agi-bin/system_variables.php",lm);
     MonitorManager monitorServiceManager("sipuni.com","80");
     monitorServiceManager.AddParser(&monitorServiceParser);
-    //monitorServiceManager.AddParser(&monitorServiceParserCRM);
+    monitorServiceManager.AddParser(&monitorServiceParserCRM);
     
     
     
     
     reader.AddExecuter(&sender);
     reader.AddExecuter(&recallManager);
-    reader.AddExecuter(&monitor);
+    reader.AddExecuter(&rmonitor);
     reader.AddExecuter(&monitorServiceManager);
     
     reader.start();

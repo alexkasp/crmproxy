@@ -1,6 +1,6 @@
 #include <RegisterParser.h>
 
-RegisterParser::RegisterParser(string str):IParser(str)
+RegisterParser::RegisterParser(string str,LoggerModule& lm):IParser(str,lm)
 {
 
 }

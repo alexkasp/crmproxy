@@ -1,6 +1,7 @@
 	PROXYHEADERS = ./crmproxy
 	RECALLHEADERS = ./recall
 	MONITORHEADERS = ./Monitor
+	LOGGER = ./logger
 	BUILDHEADERS = -I ./include -I /usr/include/mysql++ -I /usr/include/mysql
 default:
 	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"
@@ -9,8 +10,9 @@ default:
 	echo ${MAKE} -C ${PROXYHEADERS}
 	echo ${MAKE} -C ${RECALLHEADERS}
 	echo ${MAKE} -C ${MONITORHEADERS}
-	g++ ${PROXYHEADERS}/*.o ${RECALLHEADERS}/*.o ${BUILDHEADERS} ${MONITORHEADERS}/*.o  main.cpp -o main iexecuter.cpp  -std=c++11 -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
-	-Wl,-Bstatic -lboost_system -lboost_regex  -lboost_thread -lboost_date_time -Wl,-Bdynamic -lm -lcurl -lrt -lmysqlpp -lmysqlclient
+	echo ${MAKE} -C ${LOGGER}
+	g++ ${PROXYHEADERS}/*.o ${LOGGER}/*.o ${RECALLHEADERS}/*.o ${BUILDHEADERS} ${MONITORHEADERS}/*.o  main.cpp -o main iexecuter.cpp  -std=c++11 -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
+	-Wl,-Bstatic -lboost_system -lboost_regex  -lboost_thread -lboost_date_time -lboost_log -lboost_log_setup -lboost_filesystem -Wl,-Bdynamic -lpthread -lm -lcurl -lrt -lmysqlpp -lmysqlclient
 test:
 	g++ test.cpp corefunc.cpp sipheader.cpp sipmanager.cpp callbox.cpp -o test  -I ../include -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic  -lboost_system -lboost_regex -Wl,-Bdynamic -lm
 	
@@ -36,5 +38,6 @@ all:
 	${MAKE} -C ${PROXYHEADERS}
 	${MAKE} -C ${RECALLHEADERS}
 	${MAKE} -C ${MONITORHEADERS}
+	${MAKE} -C ${LOGGER}
 clean:
-	rm -f ${PROXYHEADERS}/*.o ${RECALLHEADERS}/*.o ${MONITORHEADERS}/*.o ./main
+	rm -f ${PROXYHEADERS}/*.o ${RECALLHEADERS}/*.o ${MONITORHEADERS}/*.o ${LOGGER}/*.o  ./main

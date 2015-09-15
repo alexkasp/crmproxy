@@ -13,9 +13,11 @@ class RegisterMonitor: public ExecuterInterface
 	DButils DBWorker;
 	
 	map<string,string> UidToIdStorage;
-    virtual int makeAction(ParamMap& data,IParser* currentParser);
+    protected:
+    
+	virtual int makeAction(ParamMap& data,IParser* currentParser);
     public:
-	RegisterMonitor(RegisterParser *_parser,string settings_filename):parser(_parser)
+	RegisterMonitor(string settings_filename)
 	{
 	    if(DBWorker.getAuthParams(settings_filename))
 	    {

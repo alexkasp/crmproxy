@@ -35,8 +35,8 @@ CallRecord::CallRecord(string _dst,string _uid,string  _timestamp,string _callid
 	cout<<"Create Call"<<dst<<endl;
 }
 
-Parser::Parser(const std::string& str):
-IParser(str)
+Parser::Parser(const std::string str,LoggerModule& lm):
+IParser(str,lm)
 {
 	//request_str = "/native/crmtest.php?userId=";
 }
@@ -137,13 +137,13 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	return request;
 }
 
-string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype)
+string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, string callbackId)
 {
 	string event2store;
+	
 	string request = request_str;
 	
 	request+=uid;
-	
 	request+="&call_id=";
 	request+=callid;
 	request+=format_srcdstnum(src,dst);
@@ -159,11 +159,15 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 
 	event2store=request;
 	event2store+="&event=2";
-
+	
+	event2store+="&callbackId=";
+	event2store+=callbackId;
+	
 	event2storage[callid]=event2store;
 
-	request+="&event=4";
 	
+	
+	request+="&event=4";
 	return request;
 }
 string Parser::parse_transfercall(string src,string dst,string uid,string timestamp,string callid)
@@ -195,7 +199,12 @@ string  Parser::clearStorage(map<string,string>& storage,string key)
 
 string Parser::parse_cdrevent(string callid)
 {
-	clearStorage(useridToCallId,callid);
+	//clearStorage(useridToCallId,callid);
+	callid = mergedCalls.getMergedCall(callid);
+	
+	mergedCalls.eraseMergedCall(callid);
+	clearStorage(callbackIdList,callid);
+	
 	return clearStorage(event2storage,callid);
 	
 }
@@ -228,6 +237,16 @@ string Parser::parse_agentcalled(string callid,string agent,string queueid)
     return "";
 }
 
+void Parser::parse_mergecall(string newcallid,string callid)
+{
+    mergedCalls.addMergedCall(newcallid,callid);
+}
+
+void Parser::parse_setcallbackId(string callid,string callbackId)
+{
+    callbackIdList[callid] = callbackId;
+}
+
 string Parser::parsedata(ParserData& data)
 {
 	string str = "";
@@ -251,6 +270,9 @@ string Parser::parsedata(ParserData& data)
 		}
 		if(data["UserEvent:"]=="initcall")
 		{
+			if(!(data["callbackId"]).empty())
+			    callbackIdList[data["callid"]] = data["callbackId"];
+			    
 			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"]);
 			
 		}
@@ -261,7 +283,7 @@ string Parser::parsedata(ParserData& data)
 		}
 		if(data["UserEvent:"]=="finishcall")
 		{
-			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"]);
+			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"]);
 			
 		}
 		if (data["UserEvent:"] == "finish_transfer")
@@ -269,7 +291,21 @@ string Parser::parsedata(ParserData& data)
 			str = parse_finishtransfer(data["src"], data["dst"], data["userid"], data["time"], data["callid"]);
 
 		}
-
+		if(data["UserEvent:"] == "mergecall")
+		{
+		    parse_mergecall(data["newcallid"],data["callid"]);
+		}
+		
+		if((data["callbackId"]).empty())
+		{
+		    auto x = callbackIdList.find(data["callid"]);
+		    if(x!=callbackIdList.end())
+		    {
+			data["callbackId"] = (*x).second;
+		    }
+		}
+		str+= "&callbackId=";
+		str+= data["callbackId"];
 		
 	}
 	else if(data["Event:"] == "Cdr")

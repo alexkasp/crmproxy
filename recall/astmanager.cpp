@@ -97,11 +97,12 @@ int AsteriskManager::callsimple(std::string from,std::string to,std::string outl
 		  }
 }
 
+
 int AsteriskManager::call(std::string from,std::string to)
 {
 	try
 	{
-	    softinit();
+	    //softinit();
 	    std::string command = "Action: Originate\r\nChannel: Local/"+from+"@vatsrecall\r\nExten: "+to+"\r\nContext: vatsout\r\nPriority: 1\r\nCallerID: "+from+"\r\nVariable: CALLERID(dnid)="+to+"\r\nActionID: 2\r\n\r\n";
     
 	    boost::system::error_code ec;
@@ -122,6 +123,42 @@ int AsteriskManager::call(std::string from,std::string to)
 		
 		    _sock->write_some(buffer(command,command.size()),ec);
 	    }
+	    
+	    //deinit();
+	}
+	catch (std::exception& e)
+		  {
+			std::cout<<"CATCH EXCEPTION!!! AsteriskManager::call(std::string from,std::string to)" << e.what() << '\n';
+		  }
+}
+
+int AsteriskManager::callWithAnnounce(std::string from,std::string to,std::string announce)
+{
+	try
+	{
+	    softinit();
+	    std::string command = "Action: Originate\r\nChannel: Local/"+from+"@vatsrecall\r\nExten: announce:"+announce+":"+to+"\r\nContext: vatsoutrecall\r\nPriority: 1\r\nCallerID: "+from+"\r\nVariable: CALLERID(dnid)="+to+"\r\nRecallAnnounce="+announce+"\r\nActionID: 2\r\n\r\n";
+    	    std::cout<<command<<"\n";
+	    boost::system::error_code ec;
+	    
+	    boost::asio::streambuf response;
+	    _sock->write_some(buffer(command,command.size()),ec);
+	    
+	    if(!ec)
+	    {
+		boost::asio::read_until(*_sock, response, "\r\n");
+	    }
+	    else
+	    {
+		while(!init())
+		{
+		    boost::this_thread::sleep_for(boost::chrono::milliseconds(10000));
+		}
+		
+		    _sock->write_some(buffer(command,command.size()),ec);
+	    }
+	    
+	    deinit();
 	}
 	catch (std::exception& e)
 		  {
