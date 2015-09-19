@@ -31,6 +31,7 @@ string MonitorParserCRM::parsedata(ParamMap& data)
 
 int MonitorParserCRM::initCrmUsers(map<string,int>& users)
 {
+    users.clear();
     return DBWorker.getCrmUsers(users);
 }
 
@@ -46,9 +47,11 @@ MonitorParserCRM::MonitorParserCRM(string requeststr,string workerStr,LoggerModu
 
 void MonitorParserCRM::refreshCrmUsersList()
 {
-    boost::this_thread::sleep( boost::posix_time::milliseconds(1800000));
-    initCrmUsers(crmUsers);
-    
+    while(1)
+    {
+	boost::this_thread::sleep( boost::posix_time::milliseconds(18000));
+	initCrmUsers(crmUsers);
+    }
 }
 /*
 void MonitorParserCRM::parse_mergecall(string newcallid,string callid)

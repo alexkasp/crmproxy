@@ -6,6 +6,9 @@
 #include <LoggerModule.h>
 #include "datatypes.h"
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/thread.hpp> 
+
 using namespace std;
 
 using ParserData = map < string, string > ;
@@ -22,6 +25,7 @@ class IParser
 	    {
 		lm.makeLog(info,"["+module+"]:"+str);                                
 		//cout<<"DebugINFO "<<str<<endl;
+		//boost::this_thread::sleep( boost::posix_time::milliseconds(60000));
 	    }
 	}
     public:

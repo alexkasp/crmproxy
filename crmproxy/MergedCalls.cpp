@@ -2,7 +2,7 @@
 
 void MergedCalls::addMergedCall(string newcallid,string callid)
 {
-    callList[newcallid]=callid;
+    callList[callid]=newcallid;
 }
 
 string MergedCalls::getMergedCall(string callid)

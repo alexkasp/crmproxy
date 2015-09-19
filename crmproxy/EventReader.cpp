@@ -12,9 +12,10 @@ void EventReader::AddExecuter(ExecuterInterface* iexecuter)
 {
 	Executer.push_back(iexecuter);
 }
-EventReader::EventReader(std::string host,int port):asthost(host),astport(port)
+EventReader::EventReader(std::string host,int port,LoggerModule& _lm):asthost(host),astport(port),lm(_lm),_sock(service),ep(ip::address::from_string(asthost), astport)
 {
-	//Executer = nullptr;
+	//ip::tcp::endpoint ep(ip::address::from_string(asthost), astport);
+	//ip::tcp::socket _sock(service);
 }
 
 
@@ -27,41 +28,73 @@ EventReader::~EventReader(void)
 
 
 
+
+void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf,const boost::system::error_code& ec,std::size_t size)
+{
+    try{
+	
+	if (!ec)
+	{
+	    readRequest();
+	    boost::asio::streambuf& buf = *databuf;
+	    
+	    string str(boost::asio::buffers_begin(buf.data()), boost::asio::buffers_begin(buf.data()) + buf.size());
+
+	    buf.consume(size);
+	    
+	    
+	    lm.makeLog(info,"[Event AMI]:\n"+str);
+	    
+	    ParamMap data;
+	    tgroup.create_thread(boost::bind(&EventReader::processevent,this,str,data));
+	    //processevent(str,data);
+	}
+	else
+	{
+	    
+	    std::cout<<ec.category().name() << ':' << ec.value();
+	    
+	    string errmsg = ec.category().name() + ec.value();
+	    lm.makeLog(boost::log::trivial::severity_level::error,"NetWork ERROR: "+errmsg);
+	}
+    }
+    catch(exception &ec)
+    {
+	string errmsg = "Error in read_handle ";
+	lm.makeLog(boost::log::trivial::severity_level::error,errmsg+ec.what());
+    }
+    
+    
+}
+
+void EventReader::readRequest()
+{
+    boost::shared_ptr<boost::asio::streambuf> buf = boost::shared_ptr<boost::asio::streambuf>(new boost::asio::streambuf());
+    boost::asio::async_read_until(_sock,*buf,"\r\n\r\n",boost::bind(&EventReader::read_handler,this,buf,_1,_2));
+}
+
 int EventReader::start(void)
 {
 
-	ip::tcp::endpoint ep(ip::address::from_string(asthost), astport);
-	ip::tcp::socket _sock(service);
+	
 	
 	connect(_sock,ep);
 	
-	char databuf[1024];
-	boost::asio::streambuf buf;
-	int bytes = 0;
-		
+	
 	while(1)
 	{
-		{
-			boost::system::error_code ec;
-			bytes = boost::asio::read_until(_sock,buf,"\r\n\r\n",ec);
-			if (!ec)
-			{
-			    string str(boost::asio::buffers_begin(buf.data()), boost::asio::buffers_begin(buf.data()) + buf.size());
-			    
+		readRequest();
+		service.run();
+		lm.makeLog(boost::log::trivial::severity_level::error,"Disconnect from ATS");
+		tgroup.join_all();
+		lm.makeLog(info,"Start reconnect");
 			
-			    buf.consume(bytes);
-			    processevent(str);
-			    
-			}
-			else
-			{
-				while(!connect(_sock,ep))
-				{
-					boost::this_thread::sleep_for(boost::chrono::milliseconds(10000));
-				}
-				continue;
-			}
+		while(!connect(_sock,ep))
+		{
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(10000));
 		}
+		lm.makeLog(info,"Reconnect SUCCESS");
+		service.reset();
 	}
 		
 	_sock.write_some(buffer("Action: Events\nEventmask: off\n"));
@@ -70,7 +103,7 @@ int EventReader::start(void)
 	return 0;
 }
 
-int EventReader::parseline(string line,int& state,int& event)
+int EventReader::parseline(string line,int& state,int& event,ParamMap& structdata)
 {
 	if(line.find("Event:")==0)
 	{
@@ -85,21 +118,19 @@ int EventReader::parseline(string line,int& state,int& event)
 	{
 		case(1):
 		{
-			AddParam(line,data);
+			AddParam(line,structdata);
 			state = 2;
 			break;
 		}
 		case(2):
 		{
-			AddParam(line,data);
+			AddParam(line,structdata);
 			break;	
 		}
 		case(3):
 		{
 			for(auto i=Executer.begin();i!=Executer.end();++i)
-			    (*i)->Execute(data);
-			if(!data.empty())
-				data.clear();
+			    (*i)->Execute(structdata);
 			state = 0;
 			break;
 		}
@@ -108,7 +139,7 @@ int EventReader::parseline(string line,int& state,int& event)
 	}
 	return 0;
 }
-int EventReader::processevent(const std::string data)
+int EventReader::processevent(const std::string data,ParamMap& structdata)
 {
 		try{
 		int state = 0;//try find event
@@ -117,12 +148,13 @@ int EventReader::processevent(const std::string data)
 		boost::algorithm::split(lines, data, boost::is_any_of("\n"));
 		    for(auto x = lines.begin();x!=lines.end();++x)
 		    {
-			parseline(*x,state,currentevent);
+			parseline(*x,state,currentevent,structdata);
 		    }
 		}
 		catch(exception& e)
 		{
-		    cout<<"process parseline error "<<e.what()<<endl;
+		    string errmsg = "process line error";
+		    lm.makeLog(boost::log::trivial::severity_level::error,errmsg+e.what());
 		}
 	return 0;
 }
@@ -148,11 +180,12 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 		}
 		catch (exception& e)
 		  {
-			cout<<"ADDPARAM  EXCEPTION!!!" << e.what() << '\n';
+			string errmsg = "ADDPARAM  EXCEPTION!!!";
+			lm.makeLog(boost::log::trivial::severity_level::error,errmsg+e.what());
 		  }
 	}else if(string::npos == data.find(':'))
 	{
-	    cout<<"CATCH! "<<data<<endl;
+	    lm.makeLog(warning,"CATCH! "+data);
 	    
 	}
 	
@@ -160,7 +193,6 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 	//cout << "receive:"<<key<<value<<endl;
 	return 0;
 }
-
 
 int EventReader::connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::tcp::endpoint& ep)
 {
@@ -172,7 +204,6 @@ int EventReader::connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::
 		}
 		
 		socket.connect(ep);
-
 		socket.write_some(buffer("Action: login\nUsername: crmproxy\nSecret: mycode\n"));
 		socket.write_some(buffer("Action: Events\nEventmask: on\n"));
 	}

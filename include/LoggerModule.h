@@ -1,3 +1,5 @@
+#ifndef LOGGER_MODULE
+#define LOGGER_MODULE
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -28,3 +30,4 @@ class LoggerModule
 	void makeLog(boost::log::v2s_mt_posix::trivial::severity_level lvl,std::string message);
 	LoggerModule();
 };
+#endif

@@ -24,6 +24,7 @@
 #include <string>
 #include "datatypes.h"
 #include "iexecuter.h"
+#include <LoggerModule.h>
 
 using namespace boost::asio;
 
@@ -33,18 +34,25 @@ class EventReader
 	std::string asthost;
 	int astport;
 	io_service service;
-	ParamMap data;
 	std::vector<ExecuterInterface*> Executer;
+	LoggerModule& lm;
 
 public:
-	EventReader(std::string host,int port);
+	EventReader(std::string host,int port,LoggerModule& lm);
 	~EventReader(void);
 	int start(void);
 private:
+	ip::tcp::endpoint ep;
+	ip::tcp::socket _sock;
+	boost::thread_group tgroup;
+	
+	void writeHandler(const boost::system::error_code& error, std::size_t bytes_transferred);
+	void readRequest();
+	void read_handler(boost::shared_ptr<boost::asio::streambuf> databuf,const boost::system::error_code& ec,std::size_t size);
 	int connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::tcp::endpoint& ep);
 	int SendRequest(std::string url);
-	int parseline(std::string line,int& _state,int& _event);
-	int processevent(const std::string data);
+	int parseline(std::string line,int& _state,int& _event,ParamMap& structdata);
+	int processevent(const std::string data,ParamMap& structdata);
 public:
 	void AddExecuter(ExecuterInterface* iexecuter);
 	int AddParam(std::string data, ParamMap& eventdata);

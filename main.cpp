@@ -24,7 +24,7 @@ int main()
     
     LoggerModule lm;
     
-    EventReader reader("127.0.0.1",5038);
+    EventReader reader("127.0.0.1",5038,lm);
     
     CRMUrlBuilder sender("sipuni.com","80");
     Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);

@@ -1,3 +1,5 @@
+#ifndef MERGED_CALLS
+#define MERGED_CALLS
 #include <map>
 #include <string>
 
@@ -11,3 +13,4 @@ class MergedCalls
     string getMergedCall(string callid);
     void eraseMergedCall(string callid);
 };
+#endif
