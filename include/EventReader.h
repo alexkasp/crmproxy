@@ -25,11 +25,15 @@
 #include "datatypes.h"
 #include "iexecuter.h"
 
+
+#include <LoggerModule.h>
+
 using namespace boost::asio;
 
 
 class EventReader
 {
+	LoggerModule lm;
 	std::string asthost;
 	int astport;
 	io_service service;
@@ -37,7 +41,7 @@ class EventReader
 	std::vector<ExecuterInterface*> Executer;
 
 public:
-	EventReader(std::string host,int port);
+	EventReader(std::string host,int port,LoggerModule& lm);
 	~EventReader(void);
 	int start(void);
 private:

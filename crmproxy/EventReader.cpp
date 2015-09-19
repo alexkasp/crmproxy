@@ -12,7 +12,7 @@ void EventReader::AddExecuter(ExecuterInterface* iexecuter)
 {
 	Executer.push_back(iexecuter);
 }
-EventReader::EventReader(std::string host,int port):asthost(host),astport(port)
+EventReader::EventReader(std::string host,int port,LoggerModule& _lm):asthost(host),astport(port),lm(_lm)
 {
 	//Executer = nullptr;
 }
@@ -48,7 +48,7 @@ int EventReader::start(void)
 			{
 			    string str(boost::asio::buffers_begin(buf.data()), boost::asio::buffers_begin(buf.data()) + buf.size());
 			    
-			
+				lm.makeLog(info,"[AGI EVENT]"+str);
 			    buf.consume(bytes);
 			    processevent(str);
 			    
