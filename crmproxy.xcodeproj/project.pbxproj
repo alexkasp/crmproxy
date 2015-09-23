@@ -47,6 +47,9 @@
 		7D6473711B3ACACF00BCABCB /* iexecuter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = iexecuter.cpp; sourceTree = "<group>"; };
 		7D6473741B3ACACF00BCABCB /* simpleserv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = simpleserv.cpp; sourceTree = "<group>"; };
 		7D6473751B3ACACF00BCABCB /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		7DAB37761BB2D90400A156A5 /* icmserver */ = {isa = PBXFileReference; lastKnownFileType = folder; path = icmserver; sourceTree = "<group>"; };
+		7DAB37771BB2D91000A156A5 /* ICMServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ICMServer.h; path = include/ICMServer.h; sourceTree = "<group>"; };
+		7DAB37781BB2D91C00A156A5 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
 		7DFFE2491B4BD63E0035071B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		7DFFE24B1B4BD67A0035071B /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
 		7DFFE24C1B4BD7370035071B /* CRMUrlBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CRMUrlBuilder.cpp; sourceTree = "<group>"; };
@@ -111,6 +114,9 @@
 		7D6473611B3ACA4B00BCABCB = {
 			isa = PBXGroup;
 			children = (
+				7DAB37781BB2D91C00A156A5 /* include */,
+				7DAB37771BB2D91000A156A5 /* ICMServer.h */,
+				7DAB37761BB2D90400A156A5 /* icmserver */,
 				7D1740F41B61214700D24DC1 /* Monitor */,
 				7DFFE25B1B4BD8200035071B /* recall */,
 				7DFFE24B1B4BD67A0035071B /* include */,
@@ -413,6 +419,7 @@
 				7D1CDBB41B68D6DA005105E7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		7D5CF4401B3AFB580092EE84 /* Build configuration list for PBXNativeTarget "crmproxy" */ = {
 			isa = XCConfigurationList;
