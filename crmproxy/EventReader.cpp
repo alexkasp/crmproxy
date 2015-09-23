@@ -46,7 +46,9 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 	    lm.makeLog(info,"[Event AMI]:\n"+str);
 	    
 	    ParamMap data;
-	    tgroup.create_thread(boost::bind(&EventReader::processevent,this,str,data));
+	    boost::thread t(boost::bind(&EventReader::processevent,this,str,data));
+	    tgroup.add_thread(&t);
+	    t.detach();
 	    //processevent(str,data);
 	}
 	else
