@@ -11,7 +11,7 @@
 using namespace boost::asio;
 using namespace std;
 
-class ICMServer: public IParser
+class ICMServer
 {
     io_service service;
     ip::udp::socket socket;
@@ -27,7 +27,6 @@ public:
     int init(int port);
     void startProcessing();
     ICMServer(LoggerModule& _lm);
-    virtual string parsedata(ParamMap& data);
     int putCDREvent(string url);
 };
 

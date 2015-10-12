@@ -35,7 +35,7 @@ class Parser: public IParser
 	string parse_agentcalled(string callid,string agent,string queueid);
 	string parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype);
 	string parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype);
-	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype,string callbackId);
+	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype,string callbackId,string usecrm);
 	string parse_transfercall(string src,string dst,string uid,string timestamp,string callid);
 	string parse_initcall(string src,string dst,string uid,string timestamp,string callid);
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid);

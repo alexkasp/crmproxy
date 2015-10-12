@@ -1,7 +1,7 @@
 #include <ICMServer.h>
-#include <boost/spirit/include/classic_core.hpp>
+#include <boost/algorithm/string.hpp>
 
-ICMServer::ICMServer(LoggerModule& _lm):socket(service),lm(_lm),IParser("EMPTY",_lm)
+ICMServer::ICMServer(LoggerModule& _lm):socket(service),lm(_lm)
 {
     
 }
@@ -84,32 +84,35 @@ void ICMServer::storeCDRData(std::map<std::string,std::string>& data)
 int ICMServer::putCDREvent(string url)
 {
     try {
-        std::map<std::string,std::string> data;
+        std::map<std::string,std::string> CDRData;
         
         std::string delimiter = "=";
         
         std::vector<std::string> lines;
-        boost::algorithm::split(lines, data, boost::is_any_of("?"));
+        boost::algorithm::split(lines, url, boost::is_any_of("?"));
+        
         if(lines.size()==2)
         {
             std::vector<std::string> params;
-            boost::algorithm::split(lines, data, boost::is_any_of("&"));
+            
+            boost::algorithm::split(params, lines.at(1), boost::is_any_of("&"));
             for(auto x = params.begin();x!=params.end();++x)
             {
                 std::string data = *x;
                 size_t pos = 0;
                 if((pos = data.find(delimiter))!= std::string::npos)
                 {
-                    param = data.substr(0, pos);
+                    std::string param = data.substr(0, pos);
                     data.erase(0, pos + delimiter.length());
-                    value=data;
-                    data[param] = value;
+                    std::string value=data;
+                    CDRData[param] = value;
                     
                 }
                 
             }
-            if (!data.empty()) {
-                storeCDRData(data);
+            if (!CDRData.empty()) {
+        	if(CDRData["event"]=="2")
+            	    storeCDRData(CDRData);
             }
             
         }
@@ -117,5 +120,6 @@ int ICMServer::putCDREvent(string url)
     } catch (exception& e) {
         string errmsg = "ICM parse URL error "+url;
         lm.makeLog(boost::log::trivial::severity_level::error,errmsg+e.what());
+	std::cout<<errmsg<<" "<<e.what()<<"\n";
     }
 }

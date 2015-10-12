@@ -49,7 +49,7 @@ void MonitorParserCRM::refreshCrmUsersList()
 {
     while(1)
     {
-	boost::this_thread::sleep( boost::posix_time::milliseconds(18000));
+	boost::this_thread::sleep( boost::posix_time::milliseconds(1800000));
 	initCrmUsers(crmUsers);
     }
 }

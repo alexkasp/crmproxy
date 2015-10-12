@@ -137,7 +137,7 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	return request;
 }
 
-string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, string callbackId)
+string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, string callbackId, string usecrm)
 {
 	string event2store;
 	
@@ -160,15 +160,21 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	event2store=request;
 	event2store+="&event=2";
 	
+	request+="&event=4";
+	
 	event2store+="&callbackId=";
 	event2store+=callbackId;
 	
-	event2storage[callid]=event2store;
-
-	
-	
-	request+="&event=4";
-	return request;
+	if(usecrm=="1")
+	{
+	    event2storage[callid]=event2store;
+	    return request;
+	}
+	else
+	{
+	    event2storage[callid]="nocrm"+event2store;
+	}
+	return "";
 }
 string Parser::parse_transfercall(string src,string dst,string uid,string timestamp,string callid)
 {
@@ -283,7 +289,7 @@ string Parser::parsedata(ParserData& data)
 		}
 		if(data["UserEvent:"]=="finishcall")
 		{
-			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"]);
+			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"],data["usecrm"]);
 			
 		}
 		if (data["UserEvent:"] == "finish_transfer")
@@ -301,12 +307,15 @@ string Parser::parsedata(ParserData& data)
 		    auto x = callbackIdList.find(data["callid"]);
 		    if(x!=callbackIdList.end())
 		    {
-                data["callbackId"] = (*x).second;
+            		data["callbackId"] = (*x).second;
 		    }
 		}
-		str+= "&callbackId=";
-		str+= data["callbackId"];
 		
+		if(!str.empty())
+		{
+		    str+= "&callbackId=";
+		    str+= data["callbackId"];
+		}
 	}
 	else if(data["Event:"] == "Cdr")
 	{
@@ -318,13 +327,15 @@ string Parser::parsedata(ParserData& data)
 	}
 	else
 	    return str;
-	    
-	str += "&TreeId=";
+	
+	if(!str.empty())
+	{    
+		str += "&TreeId=";
 		str += data["TreeId"];
 		str += "&Channel=";
 		str += data["ChannelName"];
 
-	
+	}
 	debugParseString(str);
 	return str;
 }

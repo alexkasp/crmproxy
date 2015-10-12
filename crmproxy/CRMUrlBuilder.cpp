@@ -2,7 +2,7 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
-CRMUrlBuilder::CRMUrlBuilder(string webserver,string port)
+CRMUrlBuilder::CRMUrlBuilder(string webserver,string port,ICMServer* _icm):icm(_icm)
 {
     server = webserver;
     boost::asio::ip::tcp::resolver resolver(io);
@@ -21,10 +21,18 @@ CRMUrlBuilder::CRMUrlBuilder(string webserver,string port)
 
 int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
 {
+    string httpsign = "nocrm";
+    
 	string request = currentParser->parsedata(data);
 	if (!request.empty())
         {
-	    SendRequest(request);
+    	    if(request.compare(0,httpsign.length(),httpsign)!=0)
+    	    {
+    		std::cout<<"SEND REQUEST\n"<<request<<"\n";
+		SendRequest(request);
+	    }
+	    if(icm!=NULL)
+		icm->putCDREvent(request);
             //tgroup.create_thread(boost::bind(&CRMUrlBuilder::SendRequest,this,request));
             return 1;
         }

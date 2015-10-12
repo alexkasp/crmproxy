@@ -8,6 +8,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <vector>
+#include <ICMServer.h>
 
 
 class CRMUrlBuilder: public ExecuterInterface
@@ -21,6 +22,7 @@ class CRMUrlBuilder: public ExecuterInterface
     
     
     protected:
+		ICMServer* icm;
 		boost::thread_group tgroup;
 		boost::asio::ip::tcp::endpoint ep;
     
@@ -29,7 +31,7 @@ class CRMUrlBuilder: public ExecuterInterface
         virtual int makeAction(ParamMap& data,IParser* currentParser);
         
 	public:
-		CRMUrlBuilder(string server,string port);
+		CRMUrlBuilder(string server,string port,ICMServer* _icm = NULL);
 		
     
 };

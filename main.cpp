@@ -16,6 +16,8 @@
 #include <MonitorManager.h>
 #include <MonitorParserCRM.h>
 #include <LoggerModule.h>
+#include <ICMServer.h>
+
 
 using namespace std;
 
@@ -23,10 +25,16 @@ int main()
 {
     
     LoggerModule lm;
+    ICMServer icm(lm);
+    
+    if(!icm.init(7722))
+	std::cout<<"ERROR START ICM SERVER!!!!!\n";
+    else
+	std::cout<<"ICM SERVER OK\n";
     
     EventReader reader("127.0.0.1",5038,lm);
     
-    CRMUrlBuilder sender("sipuni.com","80");
+    CRMUrlBuilder sender("sipuni.com","80",&icm);
     Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
     sender.AddParser(&newParser);
     
