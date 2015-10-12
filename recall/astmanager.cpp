@@ -102,7 +102,7 @@ int AsteriskManager::call(std::string from,std::string to)
 {
 	try
 	{
-	    //softinit();
+	    softinit();
 	    std::string command = "Action: Originate\r\nChannel: Local/"+from+"@vatsrecall\r\nExten: "+to+"\r\nContext: vatsout\r\nPriority: 1\r\nCallerID: "+from+"\r\nVariable: CALLERID(dnid)="+to+"\r\nActionID: 2\r\n\r\n";
     
 	    boost::system::error_code ec;
