@@ -7,6 +7,7 @@
 #include <LoggerModule.h>
 #include <Parser.h>
 #include <map>
+#include <ICMStorage.h>
 
 using namespace boost::asio;
 using namespace std;
@@ -17,7 +18,7 @@ class ICMServer
     ip::udp::socket socket;
     LoggerModule& lm;
     
-    
+    ICMStorage storage(1000000);
     void storeCDRData(std::map<std::string,std::string>& data);
     void getRequest();
     void prepareAccept();

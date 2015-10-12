@@ -67,18 +67,36 @@ void ICMServer::processICM(const boost::system::error_code& error,std::size_t by
     delete[] databuf;
 }
 
-void ICMServer::solveRequest(string number,boost::shared_ptr<ip::udp::endpoint> sender)
+void ICMServer::solveRequest(string strData,boost::shared_ptr<ip::udp::endpoint> sender)
 {
+    string delimiter = ":";
+    size_t pos = 0;
+    string aNumber;
+    string userId;
     string icmMSG = "not found\r\n";
+
+    if((pos = strData.find(delimiter))!= std::string::npos)
+    {
+        userId = strData.substr(0, pos);
+        strData.erase(0, pos + delimiter.length());
+        aNumber=strData;
+        
+        CDRData cdr;
+        if(storage.getCDRData(userId,aNumber,cdr))
+            icmMSG = cdr.operatorNum;
+        
+    }
+
+    
     socket.send_to(boost::asio::buffer(icmMSG),*sender);
 }
 
 void ICMServer::storeCDRData(std::map<std::string,std::string>& data)
 {
-    for(auto x=data.begin();x!=data.end();++x)
-    {
-        std::cout<<(x->first)<<" -- "<<(x->second)<<"\n";
-    }
+    int status = 0;
+    if((status = storage.putCDRData(data))<1)
+        std::cout<<"ERROR PUT CDR "<<status<<"\n";
+        
 }
 
 int ICMServer::putCDREvent(string url)
