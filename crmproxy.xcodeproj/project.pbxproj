@@ -43,6 +43,8 @@
 		7D1740F41B61214700D24DC1 /* Monitor */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Monitor; sourceTree = "<group>"; };
 		7D1CDBAE1B68D6DA005105E7 /* Monitor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Monitor; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D1CDBB01B68D6DA005105E7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		7D230E821BCBA47D006C5568 /* boost_1_58_0 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = boost_1_58_0; path = ../boost_1_58_0; sourceTree = "<group>"; };
+		7D230E831BCBA4DC006C5568 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; path = include; sourceTree = "<group>"; };
 		7D5CF43B1B3AFB570092EE84 /* crmproxy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = crmproxy; sourceTree = BUILT_PRODUCTS_DIR; };
 		7D6473711B3ACACF00BCABCB /* iexecuter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = iexecuter.cpp; sourceTree = "<group>"; };
 		7D6473741B3ACACF00BCABCB /* simpleserv.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = simpleserv.cpp; sourceTree = "<group>"; };
@@ -88,6 +90,15 @@
 			path = Monitor;
 			sourceTree = "<group>";
 		};
+		7D230E811BCBA45A006C5568 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				7D230E831BCBA4DC006C5568 /* include */,
+				7D230E821BCBA47D006C5568 /* boost_1_58_0 */,
+			);
+			name = Library;
+			sourceTree = "<group>";
+		};
 		7D5CF43C1B3AFB570092EE84 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -114,6 +125,7 @@
 		7D6473611B3ACA4B00BCABCB = {
 			isa = PBXGroup;
 			children = (
+				7D230E811BCBA45A006C5568 /* Library */,
 				7DAB37781BB2D91C00A156A5 /* include */,
 				7DAB37771BB2D91000A156A5 /* ICMServer.h */,
 				7DAB37761BB2D90400A156A5 /* icmserver */,

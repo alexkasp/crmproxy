@@ -1,45 +1,9 @@
 #include <ICMServer.h>
+#include <boost/spirit/include/classic_core.hpp>
 
 ICMServer::ICMServer(LoggerModule& _lm):socket(service),lm(_lm),IParser("EMPTY",_lm)
 {
     
-}
-
-void ICMServer::parse_finishcall(string src,string dst,string callid)
-{
-
-}
-
-void ICMServer::parse_mergecall(string newcallid,string callid)
-{
-
-}
-
-
-void ICMServer::parse_cdrevent(string callid)
-{
-
-}
-
-string ICMServer::parsedata(ParamMap& data)
-{
-
-    if(data["Event:"]=="UserEvent")
-    {
-	if(data["UserEvent:"]=="finishcall")
-	{
-	    parse_finishcall(data["src"],data["dst"],data["callid"]);
-	}
-	if(data["UserEvent:"] == "mergecall")
-	{
-	    parse_mergecall(data["newcallid"],data["callid"]);
-	}
-    }
-    else if(data["Event:"] == "Cdr")
-    {
-    	parse_cdrevent(data["UniqueID:"]);
-    }
-    return "";
 }
 
 int ICMServer::init(int port)
@@ -73,8 +37,8 @@ void ICMServer::prepareAccept()
     
     while(1)
     {
-	getRequest();
-	service.run();
+        getRequest();
+        service.run();
     }
 }
 
@@ -107,4 +71,51 @@ void ICMServer::solveRequest(string number,boost::shared_ptr<ip::udp::endpoint> 
 {
     string icmMSG = "not found\r\n";
     socket.send_to(boost::asio::buffer(icmMSG),*sender);
+}
+
+void ICMServer::storeCDRData(std::map<std::string,std::string>& data)
+{
+    for(auto x=data.begin();x!=data.end();++x)
+    {
+        std::cout<<(x->first)<<" -- "<<(x->second)<<"\n";
+    }
+}
+
+int ICMServer::putCDREvent(string url)
+{
+    try {
+        std::map<std::string,std::string> data;
+        
+        std::string delimiter = "=";
+        
+        std::vector<std::string> lines;
+        boost::algorithm::split(lines, data, boost::is_any_of("?"));
+        if(lines.size()==2)
+        {
+            std::vector<std::string> params;
+            boost::algorithm::split(lines, data, boost::is_any_of("&"));
+            for(auto x = params.begin();x!=params.end();++x)
+            {
+                std::string data = *x;
+                size_t pos = 0;
+                if((pos = data.find(delimiter))!= std::string::npos)
+                {
+                    param = data.substr(0, pos);
+                    data.erase(0, pos + delimiter.length());
+                    value=data;
+                    data[param] = value;
+                    
+                }
+                
+            }
+            if (!data.empty()) {
+                storeCDRData(data);
+            }
+            
+        }
+        
+    } catch (exception& e) {
+        string errmsg = "ICM parse URL error "+url;
+        lm.makeLog(boost::log::trivial::severity_level::error,errmsg+e.what());
+    }
 }
