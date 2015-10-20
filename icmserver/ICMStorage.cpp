@@ -32,12 +32,17 @@ int ICMStorage::putCDRData(string calldate,string userId,string aNum,string oper
     if(!userId.empty())
     {
         auto clientMap = aNumToCDRData.find(userId);
-        if(clientMap!=aNumToCDRData.end())
+        if((clientMap!=aNumToCDRData.end())&&(((clientMap->second).size()<limit)))
         {
     	    std::cout<<"NOT FIRST CALL\n";
+            
+            
         }
         else
         {
+            if((clientMap->second).size()>limit)
+                aNumToCDRData.erase(clientMap);
+            
     	    map<string,CDRData> tmpMap;
     	    auto insertResult = aNumToCDRData.insert(make_pair(userId,tmpMap));
     	    
