@@ -17,13 +17,9 @@ class RegisterMonitor: public ExecuterInterface
     
 	virtual int makeAction(ParamMap& data,IParser* currentParser);
     public:
-	RegisterMonitor(string settings_filename)
+	RegisterMonitor(DButils& db):DBWorker(db)
 	{
-	    if(DBWorker.getAuthParams(settings_filename))
-	    {
-		DBWorker.connect();
 		DBWorker.getUidList(UidToIdStorage);
-	    }
 	};
 	
 	

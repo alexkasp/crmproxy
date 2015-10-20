@@ -9,7 +9,7 @@ using namespace std;
 class MonitorParserCRM: public MonitorParser
 {
 	MergedCalls mergedCalls;
-	DButils DBWorker;
+	DButils& DBWorker;
 	map<string,int> crmUsers;
 	int initCrmUsers(map<string,int>& users);
 	void refreshCrmUsersList();
@@ -17,5 +17,5 @@ class MonitorParserCRM: public MonitorParser
 	virtual string parse_cdrevent(string uniqueID,string accountCode);
     public:
 	string parsedata(ParamMap& data);
-	MonitorParserCRM(string requeststr,string workerStr,LoggerModule& lm);
+	MonitorParserCRM(string requeststr,DButils& db,LoggerModule& lm);
 };

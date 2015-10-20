@@ -17,7 +17,7 @@
 #include <MonitorParserCRM.h>
 #include <LoggerModule.h>
 #include <ICMServer.h>
-
+#include <DButils.h>
 
 using namespace std;
 
@@ -25,13 +25,24 @@ int main()
 {
     
     LoggerModule lm;
-    ICMServer icm(lm);
+    DButils DBWorker;
     
+    if(DBWorker.getAuthParams("/var/lib/asterisk/agi-bin/system_variables.php"))
+    {
+        DBWorker.connect();
+    }
+    else
+	std::cout<<"ERROR CREATE DButils object\n";
+    
+    
+    ICMServer icm(lm,DBWorker);
     if(!icm.init(7722))
 	std::cout<<"ERROR START ICM SERVER!!!!!\n";
     else
+    {
+	icm.startProcessing();
 	std::cout<<"ICM SERVER OK\n";
-    
+    }
     EventReader reader("127.0.0.1",5038,lm);
     
     CRMUrlBuilder sender("sipuni.com","80",&icm);
@@ -39,7 +50,7 @@ int main()
     sender.AddParser(&newParser);
     
     RegisterParser rparser("not need",lm);
-    RegisterMonitor rmonitor("/var/lib/asterisk/agi-bin/system_variables.php");
+    RegisterMonitor rmonitor(DBWorker);
     rmonitor.AddParser(&rparser);
     
     RecallManager recallManager;
@@ -47,7 +58,7 @@ int main()
     recallManager.AddParser(&recall);
     
     MonitorParser monitorServiceParser("/api/testing/record?callId=",lm);
-    MonitorParserCRM monitorServiceParserCRM("/api/testing/crm?callId=","/var/lib/asterisk/agi-bin/system_variables.php",lm);
+    MonitorParserCRM monitorServiceParserCRM("/api/testing/crm?callId=",DBWorker,lm);
     MonitorManager monitorServiceManager("sipuni.com","80");
     monitorServiceManager.AddParser(&monitorServiceParser);
     monitorServiceManager.AddParser(&monitorServiceParserCRM);

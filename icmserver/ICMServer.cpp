@@ -1,7 +1,7 @@
 #include <ICMServer.h>
 #include <boost/algorithm/string.hpp>
 
-ICMServer::ICMServer(LoggerModule& _lm):socket(service),lm(_lm)
+ICMServer::ICMServer(LoggerModule& _lm,DButils& _db):socket(service),lm(_lm),db(_db),storage(1000)
 {
     
 }
@@ -81,13 +81,19 @@ void ICMServer::solveRequest(string strData,boost::shared_ptr<ip::udp::endpoint>
         strData.erase(0, pos + delimiter.length());
         aNumber=strData;
         
-        CDRData cdr;
+        CDRData cdr("Empty","Empty");
         if(storage.getCDRData(userId,aNumber,cdr))
             icmMSG = cdr.operatorNum;
+        else if(db.getCallData(userId,aNumber,icmMSG)>0)
+        {
+    	    int status = 0;
+    	    if((status = storage.putCDRData("unknown",userId,aNumber,icmMSG))<1)
+    		std::cout<<"ERROR PUT CDR "<<status<<"\n";
+        }    
         
     }
 
-    
+    std::cout<<"solveRequest "<<icmMSG<<"\n";
     socket.send_to(boost::asio::buffer(icmMSG),*sender);
 }
 
@@ -130,7 +136,18 @@ int ICMServer::putCDREvent(string url)
             }
             if (!CDRData.empty()) {
         	if(CDRData["event"]=="2")
-            	    storeCDRData(CDRData);
+        	{
+        	    string clientNum,operatorNum;
+        	    if(CDRData["calltype"]=="out")
+        	    {
+        		clientNum = CDRData["dst_num"];
+        		operatorNum = CDRData["src_num"];
+        		CDRData["dst_num"] = operatorNum;
+        		CDRData["src_num"] = clientNum;
+        	    }
+        	    if((!operatorNum.empty())&&(!clientNum.empty()))
+            		storeCDRData(CDRData);
+        	}
             }
             
         }

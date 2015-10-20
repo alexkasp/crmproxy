@@ -35,12 +35,8 @@ int MonitorParserCRM::initCrmUsers(map<string,int>& users)
     return DBWorker.getCrmUsers(users);
 }
 
-MonitorParserCRM::MonitorParserCRM(string requeststr,string workerStr,LoggerModule& lm):MonitorParser(requeststr,lm)
+MonitorParserCRM::MonitorParserCRM(string requeststr,DButils& db,LoggerModule& lm):MonitorParser(requeststr,lm),DBWorker(db)
 {
-    if(DBWorker.getAuthParams(workerStr))
-    {
-	DBWorker.connect();
-    }
     initCrmUsers(crmUsers);
     boost::thread t(boost::bind(&MonitorParserCRM::refreshCrmUsersList,this));
 }

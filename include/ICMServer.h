@@ -8,6 +8,7 @@
 #include <Parser.h>
 #include <map>
 #include <ICMStorage.h>
+#include <DButils.h>
 
 using namespace boost::asio;
 using namespace std;
@@ -17,8 +18,9 @@ class ICMServer
     io_service service;
     ip::udp::socket socket;
     LoggerModule& lm;
+    DButils& db;
     
-    ICMStorage storage(1000000);
+    ICMStorage storage;
     void storeCDRData(std::map<std::string,std::string>& data);
     void getRequest();
     void prepareAccept();
@@ -27,7 +29,7 @@ class ICMServer
 public:
     int init(int port);
     void startProcessing();
-    ICMServer(LoggerModule& _lm);
+    ICMServer(LoggerModule& _lm,DButils& db);
     int putCDREvent(string url);
 };
 

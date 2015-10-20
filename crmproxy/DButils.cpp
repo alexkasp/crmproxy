@@ -66,6 +66,74 @@ int DButils::getUidList(map<string,string>& uidToUserId)
      return 0;
 }
 
+int DButils::getCallData(string userId,string clientNum,string& operatorNum)
+{
+    map<string,map<string,string>> callsWithDate;
+    
+    stringstream queryStr;
+    string clientNumSub;
+    if(clientNum.length()>9)
+	clientNumSub = clientNum.substr(2,clientNum.length());
+    
+    queryStr << "select froma,uniqueid, IF(froma = '"<<clientNum<<"','in','out' ) from cdr where accountcode='"<<userId<<"' and (dst like '%"<<clientNumSub<<"' or froma = '"<<clientNum<<"') and calldate > DATE_SUB(CURDATE(), INTERVAL 3 month) and accountcode="<<userId<<"  order by calldate DESC limit 100;";
+    
+    string queryStringPrepared = queryStr.str();
+    
+    std::cout<<"getCallData "<<queryStringPrepared<<"\n";
+    
+    mysqlpp::Query query = conn->query(queryStringPrepared);
+        
+     if (mysqlpp::StoreQueryResult res = query.store()) 
+     {
+        for(auto it=res.begin();it!=res.end();++it)
+        {
+    	    mysqlpp::Row row = *it;
+    	    if(row[2].data() == "out")
+    	    {
+    		operatorNum = row[0].data();
+    		return 1;
+    	    }
+    	    else
+    	    {
+    		if(getIncomeCallData(row[1].data(),operatorNum) > 0)
+    		{
+    		    return 1;
+    		}
+    	    }
+        }
+         return -1;
+     }
+     return 0;
+
+}
+
+int DButils::getIncomeCallData(string uniqueid,string& operatorNum)
+{
+
+    stringstream ss;
+    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 order by time DESC";
+    
+    std::cout<<" getIncomeCallData "<<(ss.str())<<"\n";
+    mysqlpp::Query query = conn->query(ss.str());
+        
+     if (mysqlpp::StoreQueryResult res = query.store()) 
+     {
+        for(auto it=res.begin();it!=res.end();++it)
+        {
+    	    mysqlpp::Row row = *it;
+    	    if(!(row[0]).empty())
+    	    {
+    		operatorNum = row[0].data();
+    		return 1;
+    	    }
+        }
+         return -1;
+     }
+     return 0;
+
+
+}
+
 int DButils::getCrmUsers(map<string,int>& users)
 {
     std::cout<<"getCrmUsers"<<std::endl;

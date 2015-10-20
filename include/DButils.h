@@ -21,9 +21,12 @@ class DButils
 	int parse(string msg,string delimiter,string& param,string& value);
 	void addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult::const_iterator it);
 	int parseParam(string msg,string& param,string& value);
+	int getIncomeCallData(string uniqueid,string& operatorNum);
+    
     public:
 	DButils();
 	
+	int getCallData(string userId,string clientNum,string& operatorNum);
 	int getCrmUsers(map<string,int>& users);
 	void PutRegisterEvent(string id,string number,string status,string address);
 	int getAuthParams(string filename);

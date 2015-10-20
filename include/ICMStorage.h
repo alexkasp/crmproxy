@@ -28,7 +28,7 @@ class ICMStorage
     map<string,map<string,CDRData>> aNumToCDRData;
 public:
     int getCDRData(string userId,string aNum,CDRData& data);
-    void putCDRData(string calldate,string userId,string aNum,string operatorNum);
+    int putCDRData(string calldate,string userId,string aNum,string operatorNum);
     int putCDRData(map<string,string> rawData);
     
     ICMStorage(int limit);

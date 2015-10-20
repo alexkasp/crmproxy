@@ -156,7 +156,9 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	request+="&status=";
 	request+=status;
 	request+="&call_record_link=unknown";
-
+	request+="&calltype=";
+	request+=calltype;
+	
 	event2store=request;
 	event2store+="&event=2";
 	
