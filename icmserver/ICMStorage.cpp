@@ -40,10 +40,14 @@ int ICMStorage::putCDRData(string calldate,string userId,string aNum,string oper
         }
         else
         {
-            if((clientMap->second).size()>limit)
+            if((clientMap!=aNumToCDRData.end())&&((clientMap->second).size()>limit))
+            {
+        	std::cout<<"ERASE MAP because limit\n";
                 aNumToCDRData.erase(clientMap);
-            
+            }
     	    map<string,CDRData> tmpMap;
+    	    
+    	    std::cout<<"try insert callMap\n";
     	    auto insertResult = aNumToCDRData.insert(make_pair(userId,tmpMap));
     	    
     	    clientMap = insertResult.first;
