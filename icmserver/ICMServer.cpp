@@ -1,7 +1,7 @@
 #include <ICMServer.h>
 #include <boost/algorithm/string.hpp>
 
-ICMServer::ICMServer(LoggerModule& _lm,DButils& _db):socket(service),lm(_lm),db(_db),storage(1)
+ICMServer::ICMServer(LoggerModule& _lm,DButils& _db):socket(service),lm(_lm),db(_db),storage(100000)
 {
     
 }
