@@ -33,7 +33,6 @@ int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
 	    }
 	    if(icm!=NULL)
 		icm->putCDREvent(request);
-            //tgroup.create_thread(boost::bind(&CRMUrlBuilder::SendRequest,this,request));
             return 1;
         }
     return 0;
