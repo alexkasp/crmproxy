@@ -1,8 +1,9 @@
 #include <CRMUrlBuilder.h>
 #include <boost/bind.hpp>
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 
-CRMUrlBuilder::CRMUrlBuilder(string webserver,string port,ICMServer* _icm):icm(_icm)
+CRMUrlBuilder::CRMUrlBuilder(string webserver,string port,ICMServer* _icm,CDRManager* _cdr):icm(_icm),cdr(_cdr)
 {
     server = webserver;
     boost::asio::ip::tcp::resolver resolver(io);
@@ -17,6 +18,46 @@ CRMUrlBuilder::CRMUrlBuilder(string webserver,string port,ICMServer* _icm):icm(_
     
 };
 
+int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
+{
+    try {
+        
+        
+        std::string delimiter = "=";
+        
+        std::vector<std::string> lines;
+        boost::algorithm::split(lines, url, boost::is_any_of("?"));
+        
+        if(lines.size()==2)
+        {
+            std::vector<std::string> params;
+            
+            boost::algorithm::split(params, lines.at(1), boost::is_any_of("&"));
+            for(auto x = params.begin();x!=params.end();++x)
+            {
+                std::string data = *x;
+                size_t pos = 0;
+                if((pos = data.find(delimiter))!= std::string::npos)
+                {
+                    std::string param = data.substr(0, pos);
+                    data.erase(0, pos + delimiter.length());
+                    std::string value=data;
+                    CDRData[param] = value;
+                    
+                }
+                
+            }
+            
+            return 1;
+        }
+    } catch (exception& e) {
+        string errmsg = "ICM parse URL error "+url;
+        //lm.makeLog(boost::log::trivial::severity_level::error,errmsg+e.what());
+	std::cout<<errmsg<<" "<<e.what()<<"\n";
+    }
+    
+    return 0;
+}
 
 
 int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
@@ -28,12 +69,18 @@ int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
         {
     	    if(request.compare(0,httpsign.length(),httpsign)!=0)
     	    {
-    		std::cout<<"SEND REQUEST\n"<<request<<"\n";
 		SendRequest(request);
 	    }
-	    if(icm!=NULL)
-		icm->putCDREvent(request);
-            //tgroup.create_thread(boost::bind(&CRMUrlBuilder::SendRequest,this,request));
+	    
+	    map<string,string> data;
+	    
+	    if(processURL(request,data))
+	    {
+		if(icm!=NULL)
+		    icm->putCDREvent(data);
+        	if(cdr!=NULL)
+        	    cdr->processCDR(data);
+            }
             return 1;
         }
     return 0;

@@ -24,4 +24,4 @@ serv:
 	g++ simpleserv.cpp -o serv -std=c++0x -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic -lboost_thread -lboost_system -lboost_regex -Wl,-Bdynamic -lm -lpthread -lrt
 
 clean:
-	rm -f ./test ./main ./thread ./logs ./serv
+	rm -f ./*.o

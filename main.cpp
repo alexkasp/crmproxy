@@ -18,6 +18,7 @@
 #include <LoggerModule.h>
 #include <ICMServer.h>
 #include <DButils.h>
+#include <CDRManager.h>
 
 using namespace std;
 
@@ -43,9 +44,12 @@ int main()
 	icm.startProcessing();
 	std::cout<<"ICM SERVER OK\n";
     }
+    
+    CDRManager cdr(lm,DBWorker);
+    
     EventReader reader("127.0.0.1",5038,lm);
     
-    CRMUrlBuilder sender("sipuni.com","80",&icm);
+    CRMUrlBuilder sender("sipuni.com","80",&icm,&cdr);
     Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
     sender.AddParser(&newParser);
     

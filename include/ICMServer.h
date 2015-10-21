@@ -30,7 +30,7 @@ public:
     int init(int port);
     void startProcessing();
     ICMServer(LoggerModule& _lm,DButils& db);
-    int putCDREvent(string url);
+    int putCDREvent(map<string,string>& data);
 };
 
 #endif

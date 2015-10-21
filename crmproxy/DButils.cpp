@@ -66,6 +66,33 @@ int DButils::getUidList(map<string,string>& uidToUserId)
      return 0;
 }
 
+void DButils::putCDR(map<string,string>& data)
+{
+    std::cout<<"make query\n";
+    mysqlpp::Query query = conn->query();
+    
+    string treeId = data["TreeId"];
+    if(treeId.empty())
+	treeId="0";
+    
+    
+    query<<"insert into callstat(calldate,src,dst,duration,billsec,disposition,uniqueid,numrecords,numnodes,answertime,treeId,from2,to2,userId,directProcess) values(Now(),"<<
+    "'"<<data["src_num"]<<"','"<<data["dst_num"]<<"',"<<0<<","<<0<<",'"<<data["status"]<<"','"<<data["call_id"]<<"',0"<<",6"<<",0,"<<treeId<<",'"<<data["src_num"]<<"','"<<data["dst_num"]<<"',"<<data["userId"]<<",1)";
+    
+    std::cout<<query.str()<<"\n";
+    
+    query.execute();
+     if (mysqlpp::StoreQueryResult res = query.store()) 
+         {
+              std::cout<<"success query\n";
+                  }
+                  
+                      else 
+                          {
+                                  std::cout << "Failed to get item list: " << query.error() << endl;
+                                              }
+}
+
 int DButils::getCallData(string userId,string clientNum,string& operatorNum)
 {
     map<string,map<string,string>> callsWithDate;

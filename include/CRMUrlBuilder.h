@@ -9,7 +9,7 @@
 #include <boost/thread.hpp>
 #include <vector>
 #include <ICMServer.h>
-
+#include <CDRManager.h>
 
 class CRMUrlBuilder: public ExecuterInterface
 {
@@ -19,9 +19,10 @@ class CRMUrlBuilder: public ExecuterInterface
 	
     
 	virtual	int SendRequest(std::string url);
-    
+	int processURL(string url,map<string,string>& CDRData);
     
     protected:
+		CDRManager* cdr;
 		ICMServer* icm;
 		boost::thread_group tgroup;
 		boost::asio::ip::tcp::endpoint ep;
@@ -31,7 +32,7 @@ class CRMUrlBuilder: public ExecuterInterface
         virtual int makeAction(ParamMap& data,IParser* currentParser);
         
 	public:
-		CRMUrlBuilder(string server,string port,ICMServer* _icm = NULL);
+		CRMUrlBuilder(string server,string port,ICMServer* _icm = NULL,CDRManager* _cdr = NULL);
 		
     
 };

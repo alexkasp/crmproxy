@@ -1,5 +1,4 @@
 #include <ICMServer.h>
-#include <boost/algorithm/string.hpp>
 
 ICMServer::ICMServer(LoggerModule& _lm,DButils& _db):socket(service),lm(_lm),db(_db),storage(100000)
 {
@@ -105,36 +104,9 @@ void ICMServer::storeCDRData(std::map<std::string,std::string>& data)
         
 }
 
-int ICMServer::putCDREvent(string url)
+int ICMServer::putCDREvent(map<string,string>& CDRData)
 {
-    try {
-        std::map<std::string,std::string> CDRData;
-        
-        std::string delimiter = "=";
-        
-        std::vector<std::string> lines;
-        boost::algorithm::split(lines, url, boost::is_any_of("?"));
-        
-        if(lines.size()==2)
-        {
-            std::vector<std::string> params;
-            
-            boost::algorithm::split(params, lines.at(1), boost::is_any_of("&"));
-            for(auto x = params.begin();x!=params.end();++x)
-            {
-                std::string data = *x;
-                size_t pos = 0;
-                if((pos = data.find(delimiter))!= std::string::npos)
-                {
-                    std::string param = data.substr(0, pos);
-                    data.erase(0, pos + delimiter.length());
-                    std::string value=data;
-                    CDRData[param] = value;
-                    
-                }
-                
-            }
-            if (!CDRData.empty()) {
+    if (!CDRData.empty()) {
         	if(CDRData["event"]=="2")
         	{
         	    string clientNum,operatorNum;
@@ -148,13 +120,10 @@ int ICMServer::putCDREvent(string url)
         	    if((!operatorNum.empty())&&(!clientNum.empty()))
             		storeCDRData(CDRData);
         	}
-            }
-            
+        	else
+        	    return 0;
+            return 1;
         }
-        
-    } catch (exception& e) {
-        string errmsg = "ICM parse URL error "+url;
-        lm.makeLog(boost::log::trivial::severity_level::error,errmsg+e.what());
-	std::cout<<errmsg<<" "<<e.what()<<"\n";
-    }
+        return 0;
 }
+
