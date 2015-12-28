@@ -1,10 +1,35 @@
 #include "astmanager.h"
 
+void keepAliveActivate(boost::asio::ip::tcp::socket* tcpsocket)
+{
+	// the timeout value
+    unsigned int timeout_milli = 10000;
+
+    // platform-specific switch
+#if defined _WIN32 || defined WIN32 || defined OS_WIN64 || defined _WIN64 || defined WIN64 || defined WINNT
+  // use windows-specific time
+  int32_t timeout = timeout_milli;
+  setsockopt(tcpsocket->native(), SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+  setsockopt(tcpsocket->native(), SOL_SOCKET, SO_SNDTIMEO, (const char*)&timeout, sizeof(timeout));
+#else
+  // assume everything else is posix
+  struct timeval tv;
+  tv.tv_sec  = timeout_milli / 1000;
+  tv.tv_usec = timeout_milli % 1000;
+  setsockopt(tcpsocket->native(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+  setsockopt(tcpsocket->native(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+#endif
+}
+
+
 int AsteriskManager::init()
 {
     try{
         ep.reset(new ip::tcp::endpoint( ip::address::from_string(asthost), astport));
          _sock.reset(new ip::tcp::socket(service));
+         
+         keepAliveActivate(_sock.get());
+         
         _sock->connect(*ep);
          boost::asio::streambuf response;
         boost::asio::read_until(*_sock, response, "\r\n");
@@ -39,6 +64,8 @@ int AsteriskManager::softinit()
         std::cout<<"CATCH EXCEPTION!!! AsteriskManager::init()" << e.what() << '\n';
         return 0;
     }
+    
+    return 1;
 }
 
 int AsteriskManager::deinit()

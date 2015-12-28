@@ -52,7 +52,7 @@ private:
 	int connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::tcp::endpoint& ep);
 	int SendRequest(std::string url);
 	int parseline(std::string line,int& _state,int& _event,ParamMap& structdata);
-	int processevent(const std::string data,ParamMap& structdata);
+	int processevent(const std::string data);
 public:
 	void AddExecuter(ExecuterInterface* iexecuter);
 	int AddParam(std::string data, ParamMap& eventdata);

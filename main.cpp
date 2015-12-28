@@ -24,7 +24,9 @@ using namespace std;
 
 int main()
 {
-    
+    //string webservaddr = "212.193.100.104";
+    string webservaddr = "crm.sipuni.com";
+    cout<<"CDR by NET version 3.1(cdr) (add parsetask)\n";
     LoggerModule lm;
     DButils DBWorker;
     
@@ -45,11 +47,13 @@ int main()
 	std::cout<<"ICM SERVER OK\n";
     }
     
-    CDRManager cdr(lm,DBWorker);
+    CDRManager cdr(lm,webservaddr,"80","/ext/statistic/insert","/ext/keepalive",DBWorker);
+//    CDRManager cdr(lm,"127.0.0.1","80","/IaEQvJmntW/autocall.php","/ext/keepalive");
+    
     
     EventReader reader("127.0.0.1",5038,lm);
     
-    CRMUrlBuilder sender("sipuni.com","80",&icm,&cdr);
+    CRMUrlBuilder sender(webservaddr,"80",&icm,&cdr/*NULL*/);
     Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
     sender.AddParser(&newParser);
     
@@ -63,7 +67,7 @@ int main()
     
     MonitorParser monitorServiceParser("/api/testing/record?callId=",lm);
     MonitorParserCRM monitorServiceParserCRM("/api/testing/crm?callId=",DBWorker,lm);
-    MonitorManager monitorServiceManager("sipuni.com","80");
+    MonitorManager monitorServiceManager(webservaddr,"80");
     monitorServiceManager.AddParser(&monitorServiceParser);
     monitorServiceManager.AddParser(&monitorServiceParserCRM);
     

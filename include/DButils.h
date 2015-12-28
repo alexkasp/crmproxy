@@ -26,6 +26,7 @@ class DButils
     public:
 	DButils();
 	
+	void getCDR(string callid,map<string,string>& data);
 	void putCDR(map<string,string>& data);
 	int getCallData(string userId,string clientNum,string& operatorNum);
 	int getCrmUsers(map<string,int>& users);

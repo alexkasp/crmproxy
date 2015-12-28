@@ -1,12 +1,38 @@
 #include <MergedCalls.h>
+#include <iostream>
+
 
 void MergedCalls::addMergedCall(string newcallid,string callid)
 {
+    boost::mutex::scoped_lock lock(Lock);
     callList[callid]=newcallid;
+}
+
+int MergedCalls::getSize()
+{
+    return callList.size();
+}
+
+boost::mutex&  MergedCalls::getLock()
+{
+    return Lock;                                                                                          
+}
+
+map<string,string>& MergedCalls::getData()
+{
+    return callList;
+}
+
+void MergedCalls::print()
+{
+    boost::mutex::scoped_lock lock(Lock);
+    for(auto it=callList.begin();it!=callList.end();++it)
+	std::cout<<"MergedCalls "<<(it->first)<<"  "<<(it->second)<<"\n";
 }
 
 string MergedCalls::getMergedCall(string callid)
 {
+    boost::mutex::scoped_lock lock(Lock);
     auto c = callList.find(callid);
     if(c!=callList.end())
 	return c->second;
@@ -15,5 +41,9 @@ string MergedCalls::getMergedCall(string callid)
 
 void MergedCalls::eraseMergedCall(string callid)
 {
-    callList.erase(callid);
+    boost::mutex::scoped_lock lock(Lock);
+    
+    auto it = callList.find(callid);
+    if(it!=callList.end())
+	callList.erase(it);
 }

@@ -48,6 +48,7 @@ DButils::DButils()
 {
     cout<<"try to create connection object"<<endl;
     conn = shared_ptr<mysqlpp::Connection>(new mysqlpp::Connection(false));
+    
     cout<<"it is OK"<<endl;
 }
 
@@ -66,6 +67,29 @@ int DButils::getUidList(map<string,string>& uidToUserId)
      return 0;
 }
 
+void DButils::getCDR(string uniqueid,map<string,string>& data)
+{
+    mysqlpp::Query query = conn->query();
+    
+    query << "select label,raiting,newstatus,crmcall from additionaldata where uniqueid='"<<uniqueid<<"'";
+    std::cout<<query.str();
+    
+    if (mysqlpp::StoreQueryResult res = query.store()) 
+     {
+        for(auto it=res.begin();it!=res.end();++it)
+        {
+    	    
+    	    mysqlpp::Row row = *it;
+    	    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
+	    data["label"]=row[0].data();
+	    data["raiting"] = row[1].data();
+	    data["newstatus"] = row[2].data();
+	    data["crmcall"] = row[3].data();
+	}
+    }	 
+       
+     return;
+}
 void DButils::putCDR(map<string,string>& data)
 {
     std::cout<<"make query\n";
@@ -75,9 +99,21 @@ void DButils::putCDR(map<string,string>& data)
     if(treeId.empty())
 	treeId="0";
     
+    string dst = data["dst_num"];
+    if(dst.empty())
+    {
+	std::cout<<"dst empty\n";
+    	dst = data["destination"];
+    }
     
-    query<<"insert into callstat(calldate,src,dst,duration,billsec,disposition,uniqueid,numrecords,numnodes,answertime,treeId,from2,to2,userId,directProcess) values(Now(),"<<
-    "'"<<data["src_num"]<<"','"<<data["dst_num"]<<"',"<<0<<","<<0<<",'"<<data["status"]<<"','"<<data["call_id"]<<"',0"<<",6"<<",0,"<<treeId<<",'"<<data["src_num"]<<"','"<<data["dst_num"]<<"',"<<data["userId"]<<",1)";
+    string status = data["status"];
+    if(status=="NOANSWER")
+	status = "NO ANSWER";
+    
+    string recordName = data["recordname"];	
+    int numRecords = !(recordName.empty());
+    query<<"insert into callstat(calldate,src,dst,duration,billsec,disposition,uniqueid,numrecords,recordName,numnodes,answertime,treeId,from2,to2,userId,directProcess) values(Now(),"<<
+    "'"<<data["src_num"]<<"','"<<dst<<"',"<<data["duration"]<<","<<data["billableseconds"]<<",'"<<status<<"','"<<data["call_id"]<<"',"<<numRecords<<",'"<<data["recordname"]<<"',6"<<",0,"<<treeId<<",'"<<data["src_num"]<<"','"<<dst<<"',"<<data["userId"]<<",1)";
     
     std::cout<<query.str()<<"\n";
     
@@ -102,11 +138,12 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
     if(clientNum.length()>9)
 	clientNumSub = clientNum.substr(2,clientNum.length());
     
-    queryStr << "select froma,uniqueid, IF(froma = '"<<clientNum<<"','in','out' ) from cdr where accountcode='"<<userId<<"' and (dst like '%"<<clientNumSub<<"' or froma = '"<<clientNum<<"') and calldate > DATE_SUB(CURDATE(), INTERVAL 3 month) and accountcode="<<userId<<"  order by calldate DESC limit 100;";
+    queryStr << "select froma,uniqueid, IF(froma like '%"<<clientNum<<"','in','out' ) from cdr where accountcode='"<<userId<<"' and (dst like '%"<<clientNumSub<<"' or froma like '%"<<clientNum<<"') and calldate > DATE_SUB(CURDATE(), INTERVAL 3 month) and accountcode="<<userId<<
+    "  and disposition = 'ANSWERED' order by calldate DESC limit 100;";
     
     string queryStringPrepared = queryStr.str();
     
-    std::cout<<"getCallData "<<queryStringPrepared<<"\n";
+    std::cout<<"getCallData v 1.1 "<<queryStringPrepared<<"\n";
     
     mysqlpp::Query query = conn->query(queryStringPrepared);
         
@@ -114,8 +151,11 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
      {
         for(auto it=res.begin();it!=res.end();++it)
         {
+    	    
     	    mysqlpp::Row row = *it;
-    	    if(row[2].data() == "out")
+    	    
+    	    std::cout<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
+    	    if(strcmp(row[2].data(),"out")==0)
     	    {
     		operatorNum = row[0].data();
     		return 1;
@@ -130,7 +170,11 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
         }
          return -1;
      }
-     return 0;
+     else 
+     {
+          std::cout << "Failed to get item list: " << query.error() << endl;
+     }
+    return 0;
 
 }
 
@@ -233,8 +277,11 @@ int DButils::getUid(map<string,string>& uidToUserId,string uid,string& id)
 
 int DButils::connect()
 {
+    conn->set_option(new mysqlpp::ReconnectOption(true));
      if (conn->connect(db.c_str(),host.c_str(),login.c_str(),pass.c_str()))
      {
+        mysqlpp::Query query = conn->query("set names utf8");
+	query.execute();
         return 1;
      }
      else{

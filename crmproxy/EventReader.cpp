@@ -45,8 +45,8 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 	    
 	    lm.makeLog(info,"[Event AMI]:\n"+str);
 	    
-	    ParamMap data;
-	    boost::thread t(boost::bind(&EventReader::processevent,this,str,data));
+	    
+	    boost::thread t(boost::bind(&EventReader::processevent,this,str));
 	    tgroup.add_thread(&t);
 	    t.detach();
 	    //processevent(str,data);
@@ -141,13 +141,16 @@ int EventReader::parseline(string line,int& state,int& event,ParamMap& structdat
 	}
 	return 0;
 }
-int EventReader::processevent(const std::string data,ParamMap& structdata)
+int EventReader::processevent(const std::string data)
 {
 		try{
-		int state = 0;//try find event
-		int currentevent = 0;
-		std::vector<std::string> lines;
-		boost::algorithm::split(lines, data, boost::is_any_of("\n"));
+		
+		    ParamMap structdata;
+		    int state = 0;//try find event
+		    int currentevent = 0;
+		    std::vector<std::string> lines;
+		    boost::algorithm::split(lines, data, boost::is_any_of("\n"));
+		    
 		    for(auto x = lines.begin();x!=lines.end();++x)
 		    {
 			parseline(*x,state,currentevent,structdata);
@@ -192,7 +195,7 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 	}
 	
 	eventdata[key]=value;
-	//cout << "receive:"<<key<<value<<endl;
+//	cout << "receive:"<<key<<value<<endl;
 	return 0;
 }
 

@@ -2,7 +2,7 @@ default:
 	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"
 	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
 	
-	g++ -c ICMServer.cpp ICMStorage.cpp  -lpthread -std=c++11 -I ../include \
+	g++ -g -c ICMServer.cpp ICMStorage.cpp  -lpthread -std=c++11 -I ../include \
 	 -I /usr/include/mysql  -I /usr/include/mysql++ -I /usr/local/boost/include/ 
 	
 test:

@@ -72,13 +72,13 @@ void ICMServer::solveRequest(string strData,boost::shared_ptr<ip::udp::endpoint>
     size_t pos = 0;
     string aNumber;
     string userId;
-    string icmMSG = "not found\r\n";
+    string icmMSG = "";
 
     if((pos = strData.find(delimiter))!= std::string::npos)
     {
         userId = strData.substr(0, pos);
         strData.erase(0, pos + delimiter.length());
-        aNumber=strData;
+        aNumber=convertNumber(strData);
         
         CDRData cdr("Empty","Empty");
         if(storage.getCDRData(userId,aNumber,cdr))
@@ -104,6 +104,14 @@ void ICMServer::storeCDRData(std::map<std::string,std::string>& data)
         
 }
 
+string ICMServer::convertNumber(string num)
+{
+    const int numLimit = 10;
+    if(num.length()>9)
+        return num.substr(num.length()-numLimit,numLimit);
+    return num;    	    
+}
+
 int ICMServer::putCDREvent(map<string,string>& CDRData)
 {
     if (!CDRData.empty()) {
@@ -117,6 +125,8 @@ int ICMServer::putCDREvent(map<string,string>& CDRData)
         		CDRData["dst_num"] = operatorNum;
         		CDRData["src_num"] = clientNum;
         	    }
+        	    
+        	    CDRData["src_num"] = convertNumber(CDRData["src_num"]);
         	    if((!operatorNum.empty())&&(!clientNum.empty()))
             		storeCDRData(CDRData);
         	}

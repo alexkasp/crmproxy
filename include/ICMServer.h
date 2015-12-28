@@ -22,6 +22,7 @@ class ICMServer
     
     ICMStorage storage;
     void storeCDRData(std::map<std::string,std::string>& data);
+    string convertNumber(string num);
     void getRequest();
     void prepareAccept();
     void processICM(const boost::system::error_code& error,std::size_t bytes_transferred, boost::shared_ptr<ip::udp::endpoint> sender,char* databuf);
