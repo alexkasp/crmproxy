@@ -431,12 +431,16 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	    else
 	    {
 		//boost::mutex::scoped_lock lockEvent2Storage(event2storageLock);
-		event2storage[callid]="nocrm"+event2store;
+		std::cout<<"finish call no crm for "<<callid<<endl;
+		
+		event2store="nocrm"+event2store;
+		
+		event2storage[callid]=event2store;
 		
 		std::cout<<"PRINT EVENT2STORAGE\n";
 		for(auto a = event2storage.begin();a!=event2storage.end();++a)
 		    std::cout<<"storage "<<(a->first)<<"\n";
-		
+		std::cout<<"end finishcall no crm for "<<callid<<endl;
 	    }
 	}
 	return "";
@@ -585,9 +589,9 @@ void Parser::parse_setcallbackId(string callid,string callbackId)
 
 string Parser::parsedata(ParserData& data)
 {
-	//std::cout<<"parseData >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-	//for(auto it=data.begin();it!=data.end();++it)
-	//    std::cout<<"DATA "<<(it->first)<<"  "<<(it->second)<<"\n";
+	std::cout<<"parseData >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+	for(auto it=data.begin();it!=data.end();++it)
+	    std::cout<<"DATA "<<(it->first)<<"  "<<(it->second)<<"\n";
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{

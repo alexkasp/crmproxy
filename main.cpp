@@ -26,7 +26,7 @@ int main()
 {
     //string webservaddr = "212.193.100.104";
     string webservaddr = "crm.sipuni.com";
-    cout<<"CDR by NET version 3.1(cdr) (add parsetask)\n";
+    cout<<"CDR by NET version 3.2(fix no use crm) (add parsetask)\n";
     LoggerModule lm;
     DButils DBWorker;
     
