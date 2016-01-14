@@ -123,8 +123,11 @@ void CDRManager::putCDR(map<string,string>& data)
     string dst = data["destination"];
     string answernum = data["dst_num"];
     
-    if(src.length()==10)
+    string uidcode = data["uidcode"];
+    
+    if((src.length()==10)&&(!uidcode.empty())&&(src.substr(0,uidcode.length()).compare(uidcode)!=0))
 	{
+	    
 	    src = "8"+src;
 	}
 	else if((src.length()>11)&&(src.substr(0,3)=="100"))

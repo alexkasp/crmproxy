@@ -234,31 +234,36 @@ void Parser::cleanCalls()
 	
 }
 
-string Parser::parse_numtype(string num)
+string Parser::parse_numtype(string num,string uidcode)
 {
-	int num_type = (num.length()<10)+1;
+	int num_type= 0 ;
+	if(!uidcode.empty()&&(num.length()>(uidcode.length()+1)))
+	    num_type = ((num.length()<10)&&((num.substr(0,uidcode.length()).compare(uidcode)==0)||((num.substr(1,uidcode.length()).compare(uidcode)==0))))+1;
+	else
+	    num_type = (num.length()<10)+1;
+	
 	return boost::lexical_cast<std::string>(num_type);
 }
-string Parser::format_srcdstnum(string src,string dst)
+string Parser::format_srcdstnum(string src,string dst,string uidcode)
 {
 	string result = "&src_num=";
 	result+=src;
 	result+="&src_type=";
-	result+=parse_numtype(src);
+	result+=parse_numtype(src,uidcode);
 	result+="&dst_num=";
 	result+=dst;
 	result+="&dst_type=";
-	result+=parse_numtype(dst);
+	result+=parse_numtype(dst,uidcode);
 	return result;
 }
-string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm)
+string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode)
 {
 
 	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
 	request+=callid;
-	request+=format_srcdstnum(src,dst);
+	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&timestamp=";
 	request+=timestamp;
 	
@@ -276,52 +281,52 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 	
 	return request;
 }
-string Parser::parse_outcall(string src,string dst,string uid,string timestamp,string callid)
+string Parser::parse_outcall(string src,string dst,string uid,string timestamp,string callid,string uidcode)
 {
 	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
 	request+=callid;
-	request+=format_srcdstnum(src,dst);
+	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&timestamp=";
 	request+=timestamp;
 	return request;
 }
-string Parser::parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid)
+string Parser::parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid,string uidcode)
 {
 	string request = request_str;
 	request += uid;
 	request += "&event=4&call_id=";
 	request += callid;
-	request += format_srcdstnum(src, dst);
+	request += format_srcdstnum(src, dst,uidcode);
 	request += "&timestamp=";
 	request += timestamp;
 	return request;
 }
 
-string Parser::parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype)
+string Parser::parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype,string uidcode)
 {
 
 	string request = request_str;
 	request+=uid;
 	request+="&event=5&call_id=";
 	request+=callid;
-	request+=format_srcdstnum(src,dst);
+	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&timestamp=";
 	request+=timestamp;
 	return request;
 }
 
-string Parser::parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm)
+string Parser::parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode)
 {
-	int src_type = (src.length()<10)+1;
-	int dst_type = (dst.length()<10)+1;
+	//int src_type = (src.length()<10)+1;
+	//int dst_type = (dst.length()<10)+1;
 	
 	string request = request_str;
 	request+=uid;
 	request+="&event=3&call_id=";
 	request+=callid;
-	request+=format_srcdstnum(src,dst);
+	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&timestamp=";
 	request+=timestamp;
 	if(usecrm=="1")
@@ -345,7 +350,7 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	return request;
 }
 
-string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string usecrm)
+string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string usecrm,string uidcode)
 {
 	std::cout<<"START FINISHCALL\n";
 	string event2store;
@@ -364,9 +369,11 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	return "";
 	
 	request+=uid;
+	request+="&uidcode=";
+	request+=uidcode;
 	request+="&call_id=";
 	request+=callid;
-	request+=format_srcdstnum(src,dst);
+	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&call_start_timestamp=";
 	request+=callstart;
 	request+="&call_answer_timestamp=";
@@ -445,14 +452,14 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	}
 	return "";
 }
-string Parser::parse_transfercall(string src,string dst,string uid,string timestamp,string callid)
+string Parser::parse_transfercall(string src,string dst,string uid,string timestamp,string callid,string uidcode)
 {
 
 	string request = request_str;
 	request+=uid;
 	request+="&event=1&call_id=";
 	request+=callid;
-	request+=format_srcdstnum(src,dst);
+	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&timestamp=";
 	request+=timestamp;
 	return request;
@@ -598,17 +605,17 @@ string Parser::parsedata(ParserData& data)
 		
 		if(data["UserEvent:"]=="incomecall")
 		{
-			 str = parse_incomecall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["srctype"]);
+			 str = parse_incomecall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["srctype"],data["uidcode"]);
 			
 		}
 		if(data["UserEvent:"]=="outcall")
 		{
-			 str = parse_outcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"]);
+			 str = parse_outcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["uidcode"]);
 			
 		}
 		if(data["UserEvent:"]=="answercall")
 		{
-			 str = parse_answercall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["calltype"],data["usecrm"]);
+			 str = parse_answercall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["calltype"],data["usecrm"],data["uidcode"]);
 			
 		}
 		if(data["UserEvent:"]=="initcall")
@@ -616,22 +623,22 @@ string Parser::parsedata(ParserData& data)
 			if(!(data["callbackId"]).empty())
 			    callbackIdList[data["callid"]] = data["callbackId"];
 			    
-			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["recordfile"],data["usecrm"]);
+			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["recordfile"],data["usecrm"],data["uidcode"]);
 			
 		}
 		if(data["UserEvent:"]=="transfercall")
 		{
-			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],"","");
+			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],"","",data["uidcode"]);
 			
 		}
 		if(data["UserEvent:"]=="finishcall")
 		{
-			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"],data["TreeId"],data["ChannelName"],data["serverId"],data["recordfile"],data["label"],data["rating"],data["usecrm"]);
+			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"],data["TreeId"],data["ChannelName"],data["serverId"],data["recordfile"],data["label"],data["rating"],data["usecrm"],data["uidcode"]);
 			
 		}
 		if (data["UserEvent:"] == "finish_transfer")
 		{
-			str = parse_finishtransfer(data["src"], data["dst"], data["userid"], data["time"], data["callid"]);
+			str = parse_finishtransfer(data["src"], data["dst"], data["userid"], data["time"], data["callid"],data["uidcode"]);
 
 		}
 		if(data["UserEvent:"] == "mergecall")
