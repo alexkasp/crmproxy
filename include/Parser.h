@@ -77,7 +77,7 @@ class Parser: public IParser
 	void clearStorages();
 	
 	boost::mutex event2storageLock;
-	boost::mutex event2CDRstorageLock;
+	boost::timed_mutex event2CDRstorageLock;
 	
 	 CallRecords currentCalls;
 	 map<string,string> event2storage;

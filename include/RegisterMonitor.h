@@ -10,7 +10,7 @@ using namespace std;
 class RegisterMonitor: public ExecuterInterface
 {
 	RegisterParser* parser;
-	DButils DBWorker;
+	DButils& DBWorker;
 	
 	map<string,string> UidToIdStorage;
     protected:

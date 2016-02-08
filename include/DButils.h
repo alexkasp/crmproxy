@@ -1,5 +1,7 @@
 #ifndef DBUTILS_HEADER
 #define DBUTILS_HEADER 1
+
+#include <boost/thread/mutex.hpp>
 #include <string>
 #include <map>
 #include <mysql++.h>
@@ -23,6 +25,8 @@ class DButils
 	int parseParam(string msg,string& param,string& value);
 	int getIncomeCallData(string uniqueid,string& operatorNum);
     
+    
+	boost::mutex dblock;
     public:
 	DButils();
 	

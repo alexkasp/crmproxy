@@ -15,9 +15,10 @@ using ParserData = map < string, string > ;
 
 class IParser
 {
-	LoggerModule &lm;
+	
 	//IParser(){};
     protected:
+	LoggerModule &lm;
 	const string request_str;
 	void debugParseString(string str,string module="Unknown")
 	{

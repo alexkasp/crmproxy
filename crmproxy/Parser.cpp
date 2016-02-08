@@ -206,7 +206,10 @@ void Parser::clearStorages()
 	lockEvent2Storage.unlock();
 	std::cout<<"release lock clearStorages\n";
 	
-	boost::mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock);
+	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+	if(!lockEvent2CDRStorage)
+	    exit(-1);
+	    
 	clearStorageAlg(event2CDRstorage,timestamp);
 	//clearStorageAlg(useridToCallId,timestamp);
 	lockEvent2CDRStorage.unlock();
@@ -268,8 +271,12 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 	request+=timestamp;
 	
 	useridToCallId[callid]=uid;
-	currentCalls.addCall(callid,src,dst,timestamp,recordfile);
 	
+	CallRecord call;
+	if(!currentCalls.getCall(callid,call))
+	{
+	    currentCalls.addCall(callid,src,dst,timestamp,recordfile);
+	}
 	if(usecrm=="1")
 	{
 	    return request;
@@ -399,7 +406,10 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	event2store+="&callbackId=";
 	event2store+=callbackId;
 	
-	boost::mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock);
+	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+	
+	if(!lockEvent2CDRStorage)
+	    exit(-1);
 	
 	auto cdrdata = event2CDRstorage.find(callid);
 	
@@ -535,7 +545,10 @@ string Parser::parse_cdrevent(string callid,string destination,string duration,s
 	}
 	else
 	{
-	    boost::mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock);
+	    boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+	    if(!lockEvent2CDRStorage)
+		exit(-1);
+		
 	    std::cout<<"CDR for callid "<<callid<<" not found\n";
 	    std::cout<<"Prepare request \n"<<request<<"For callid="<<callid<"\n";
 	    //boost::mutex::scoped_lock lockEvent2Storage(event2storageLock);
@@ -596,9 +609,8 @@ void Parser::parse_setcallbackId(string callid,string callbackId)
 
 string Parser::parsedata(ParserData& data)
 {
-	std::cout<<"parseData >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
 	for(auto it=data.begin();it!=data.end();++it)
-	    std::cout<<"DATA "<<(it->first)<<"  "<<(it->second)<<"\n";
+	    lm.makeLog(boost::log::trivial::severity_level::info,"DATA "+(it->first)+"  "+(it->second));
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{

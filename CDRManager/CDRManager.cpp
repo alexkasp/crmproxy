@@ -240,7 +240,7 @@ void CDRManager::sendCurlRequest(string url)
     std::cout<<"curlUrl "<<curlUrl<<std::endl;
     
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, curlUrl.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+//    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
                              
      /* Perform the request, res will get the return code */ 
       res = curl_easy_perform(curl);

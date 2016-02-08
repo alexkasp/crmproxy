@@ -54,6 +54,8 @@ DButils::DButils()
 
 int DButils::getUidList(map<string,string>& uidToUserId)
 {
+    boost::mutex::scoped_lock Lock(dblock);
+    
     mysqlpp::Query query = conn->query("select id,uid from UserConfig");
         
      if (mysqlpp::StoreQueryResult res = query.store()) 
@@ -69,6 +71,8 @@ int DButils::getUidList(map<string,string>& uidToUserId)
 
 void DButils::getCDR(string uniqueid,map<string,string>& data)
 {
+    boost::mutex::scoped_lock Lock(dblock);
+    
     mysqlpp::Query query = conn->query();
     
     query << "select label,raiting,newstatus,crmcall from additionaldata where uniqueid='"<<uniqueid<<"'";
@@ -92,6 +96,8 @@ void DButils::getCDR(string uniqueid,map<string,string>& data)
 }
 void DButils::putCDR(map<string,string>& data)
 {
+    boost::mutex::scoped_lock Lock(dblock);
+    
     std::cout<<"make query\n";
     mysqlpp::Query query = conn->query();
     
@@ -131,7 +137,11 @@ void DButils::putCDR(map<string,string>& data)
 
 int DButils::getCallData(string userId,string clientNum,string& operatorNum)
 {
+    boost::mutex::scoped_lock Lock(dblock);
+    
     map<string,map<string,string>> callsWithDate;
+    
+
     
     stringstream queryStr;
     string clientNumSub;
@@ -184,6 +194,7 @@ int DButils::getIncomeCallData(string uniqueid,string& operatorNum)
     stringstream ss;
     ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 order by time DESC";
     
+    
     std::cout<<" getIncomeCallData "<<(ss.str())<<"\n";
     mysqlpp::Query query = conn->query(ss.str());
         
@@ -207,6 +218,8 @@ int DButils::getIncomeCallData(string uniqueid,string& operatorNum)
 
 int DButils::getCrmUsers(map<string,int>& users)
 {
+    boost::mutex::scoped_lock Lock(dblock);
+    
     std::cout<<"getCrmUsers"<<std::endl;
     mysqlpp::Query query = conn->query("select id from UserConfig where usecrm=1");
         
@@ -249,6 +262,7 @@ void DButils::PutRegisterEvent(string id,string number,string status,string addr
 
 void DButils::addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult::const_iterator it)
 {
+    
     mysqlpp::Row row = *it;
     string uid = string(row[1].data(),row[1].length());
     string id = string(row[0].data(),row[0].length());
@@ -258,6 +272,8 @@ void DButils::addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult:
 
 int DButils::getUid(map<string,string>& uidToUserId,string uid,string& id)
 {
+    boost::mutex::scoped_lock Lock(dblock);
+    
     mysqlpp::Query query = conn->query("select id,uid from UserConfig where uid="+uid);
     
      if (mysqlpp::StoreQueryResult res = query.store()) 
