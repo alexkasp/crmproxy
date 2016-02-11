@@ -27,6 +27,7 @@ public:
 	~CallRecord();
 	int addNumber(string);
 	int removeNumber(string);
+	int setRecordFile(string);
 	
 	const string& getdst() const;
 	const string& getuid() const;
@@ -45,6 +46,7 @@ class CallRecords
 	void print();
 	int size();
 	CallRecords();
+	void updateCall(string callid,CallRecord cr);
 	void addCall(string callid,string src,string dst,string timestamp,string recordfile);
 	void removeCall(string callid);
 	int getCall(string callid,CallRecord& cr);

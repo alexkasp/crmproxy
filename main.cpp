@@ -24,8 +24,8 @@ using namespace std;
 
 int main()
 {
-    string webservaddr = "212.193.100.104";
-    //string webservaddr = "crm.sipuni.com";
+    //string webservaddr = "212.193.100.104";
+    string webservaddr = "crm.sipuni.com";
     cout<<"CDR by NET version 4.21(timed_mutex)\n";
     LoggerModule lm;
     DButils DBWorker;

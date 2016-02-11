@@ -76,6 +76,16 @@ int CallRecord::removeNumber(string num)
     return involvedNumbers.size();
 }
 
+int CallRecord::setRecordFile(string filename)
+{
+    if(!filename.empty())
+    {
+	recordfile = filename;
+	return 1;
+    }
+    return 0;
+}
+
 CallRecords::CallRecords()
 {}
 
@@ -111,6 +121,11 @@ void CallRecords::addCall(string callid,string src,string dst,string timestamp,s
     std::cout<<"ADD CALL with "<<callid<<" src="<<src<<" dst="<<dst<<" time="<<timestamp<<"\n";
     
     callList[callid] = cr;
+}
+
+void CallRecords::updateCall(string callid,CallRecord cr)
+{
+    callList[callid]=cr;
 }
 
 void CallRecords::removeCall(string callid)
@@ -276,6 +291,13 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 	if(!currentCalls.getCall(callid,call))
 	{
 	    currentCalls.addCall(callid,src,dst,timestamp,recordfile);
+	}
+	else
+	{
+	    std::cout<<"SET RECORDFILE = "<<recordfile<<endl;
+	    call.setRecordFile(recordfile);
+	    
+	    currentCalls.updateCall(callid,call);
 	}
 	if(usecrm=="1")
 	{
