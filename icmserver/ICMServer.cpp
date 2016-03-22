@@ -112,7 +112,7 @@ string ICMServer::convertNumber(string num)
     return num;    	    
 }
 
-int ICMServer::putCDREvent(map<string,string>& CDRData)
+int ICMServer::putCDREvent(map<string,string> CDRData)
 {
     if (!CDRData.empty()) {
         	if(CDRData["event"]=="2")

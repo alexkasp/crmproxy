@@ -25,7 +25,7 @@ class CDRManager
     boost::asio::ip::tcp::endpoint ep;
     
     map<string,vector<string>> involvedNums;
-    void sendCurlRequest(string url);
+    void sendCurlRequest(string url,string requestId);
     void keepAlive();
     void sendRequest(string url);
     void putCDR(map<string,string>& data);

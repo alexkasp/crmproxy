@@ -28,6 +28,8 @@ int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
         std::vector<std::string> lines;
         boost::algorithm::split(lines, url, boost::is_any_of("?"));
         
+        //std::cout<<"processURL "<<url<<endl;
+        
         if(lines.size()==2)
         {
             std::vector<std::string> params;
@@ -39,11 +41,13 @@ int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
                 size_t pos = 0;
                 if((pos = data.find(delimiter))!= std::string::npos)
                 {
+            	    //std::cout<<"processURL split params "<<data<<std::endl;
+            	    
                     std::string param = data.substr(0, pos);
                     data.erase(0, pos + delimiter.length());
                     std::string value=data;
                     CDRData[param] = value;
-                    
+                    //std::cout<<"processURL split params complete"<<param<<" = "<<value<<std::endl;
                 }
                 
             }

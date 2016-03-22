@@ -9,7 +9,20 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/random/random_device.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
 
+
+
+std::string cdrchars(
+        "abcdefghijklmnopqrstuvwxyz"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "1234567890");
+                
+    
+boost::random::random_device cdrrng;
+boost::random::uniform_int_distribution<> cdrindex_dist(0, cdrchars.size() - 1);
+    
 size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     return size*nmemb;
@@ -117,8 +130,8 @@ void CDRManager::putCDR(map<string,string>& data)
 	treeId="0";
     
     string src = data["src_num"];
-    if(data["calltype"]=="out")
-	src = data["dst_num"];
+    //if(data["calltype"]=="out")
+//	src = data["dst_num"];
     
     string dst = data["destination"];
     string answernum = data["dst_num"];
@@ -217,10 +230,19 @@ void CDRManager::putCDR(map<string,string>& data)
     CDRData["rating"] = additionalData["raiting"];  
     CDRData["newstatus"] = additionalData["newstatus"];    
     
-    sendCurlRequest(map2json(CDRData));
+    
+    
+    string requestId = "";
+    for(int i = 0; i < 8; ++i) {
+    requestId += cdrchars[cdrindex_dist(cdrrng)];
+    }
+    
+    CDRData["requestId"]=requestId;
+    
+    sendCurlRequest(map2json(CDRData),requestId);
 }
 
-void CDRManager::sendCurlRequest(string url)
+void CDRManager::sendCurlRequest(string url,string requestId)
 {
      CURL *curl;
        CURLcode res;
@@ -231,7 +253,7 @@ void CDRManager::sendCurlRequest(string url)
      /* First set the URL that is about to receive our POST. This URL can
      just as well be a https:// URL if that is what should receive the
                 data. */ 
-    string curlBaseUrl = "http://sipuni.com"+baseUrl;
+    string curlBaseUrl = "http://sipuni.com"+baseUrl+"?requestId="+requestId;
     std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
     curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
     /* Now specify the POST data */ 
@@ -335,11 +357,18 @@ std::string CDRManager::map2json (const std::map<std::string, std::string>& map)
     {
 	std::cout<<"json decode "<<entry.first<<"  "<<entry.second<<"\n";
 	//pt.put (entry.first, entry.second);
+	
 	buf+="\"";
 	buf+=entry.first;
-	buf+="\":\"";
-	buf+=entry.second;
-	buf+="\",";
+	if(entry.second!="NULL")
+	{   buf+="\":\"";
+	    buf+=entry.second;
+	    buf+="\",";
+	}
+	else
+	{
+	    buf+="\":null,";
+	}
     }
     buf.pop_back();
     buf+="}";
