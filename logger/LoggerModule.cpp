@@ -1,12 +1,13 @@
 #include <LoggerModule.h>
 
 
-void LoggerModule::init()
+void LoggerModule::init(std::string logname)
 {
+    std::cout<<"CREATE LOGFILE (v2.2)"<<logname<<"\n";
     logging::add_file_log
     (
 	keywords::auto_flush = true,
-        keywords::file_name = "/var/log/crmproxy_%m%d%Y_%H%M%S_%5N.log",                                        /*< file name pattern >*/
+        keywords::file_name = logname,                                        /*< file name pattern >*/
         keywords::rotation_size = 100 * 1024 * 1024,                                   /*< rotate files every 10 MiB... >*/
         keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0), /*< ...or at midnight >*/
         keywords::format = "[%TimeStamp%]: %Message%"                                 /*< log record format >*/
@@ -18,9 +19,12 @@ void LoggerModule::init()
     );
 }
 
-LoggerModule::LoggerModule()
+LoggerModule::LoggerModule(std::string logname)
 {
-    init();
+    if(logname.empty())
+	init("/var/log/crmproxy_%m%d%Y_%H%M%S_%5N.log");
+    else
+	init(logname);
     logging::add_common_attributes();
 
 }

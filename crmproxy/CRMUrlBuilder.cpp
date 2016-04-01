@@ -66,6 +66,7 @@ int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
 
 int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
 {
+    try{
     string httpsign = "nocrm";
     
 	string request = currentParser->parsedata(data);
@@ -87,6 +88,14 @@ int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
             }
             return 1;
         }
+    }
+     catch(exception &ec)
+         {
+        	string errmsg = "Error in makeAction ";
+//        	lm.makeLog(boost::log::trivial::severity_level::error,errmsg+ec.what());
+		std::cout<<errmsg<<"Error in makeAction  "<<ec.what()<<"\n";
+             }
+             
     return 0;
 }
 

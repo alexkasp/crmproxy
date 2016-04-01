@@ -17,19 +17,19 @@ int DButils::getAuthParams(string filename)
 	
 	if(parseParam(strbuf,param,value))
 	{
-	    if(param == "ConnectStr")
+	    if(param == getHostParamName())
 	    {
 		host = value;
 	    }
-	    else if(param == "ConnectPass")
+	    else if(param == getPassParamName())
 	    {
 		pass = value;
 	    }
-	    else if(param == "ConnectUser")
+	    else if(param == getUserParamName())
 	    {
 		login = value;
 	    }
-	    else if(param == "ConnectDB")
+	    else if(param == getDBParamName())
 	    {
 		db=value;
 	    }
@@ -43,6 +43,27 @@ int DButils::getAuthParams(string filename)
     return 0;
 
 }
+
+string DButils::getHostParamName()
+{
+    return "ConnectStr";
+}
+
+string DButils::getPassParamName()
+{
+    return "ConnectPass";
+}
+
+string DButils::getUserParamName()
+{
+    return "ConnectUser";
+}
+
+string DButils::getDBParamName()
+{
+    return "ConnectDB";
+}
+
 
 DButils::DButils()
 {
@@ -134,6 +155,7 @@ void DButils::putCDR(map<string,string>& data)
                                   std::cout << "Failed to get item list: " << query.error() << endl;
                                               }
 }
+
 
 int DButils::getCallData(string userId,string clientNum,string& operatorNum)
 {

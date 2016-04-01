@@ -36,7 +36,10 @@ class EventReader
 	io_service service;
 	std::vector<ExecuterInterface*> Executer;
 	LoggerModule& lm;
-
+protected:
+	virtual string getMark();
+	
+	int processevent(const std::string data);
 public:
 	EventReader(std::string host,int port,LoggerModule& lm);
 	~EventReader(void);
@@ -52,7 +55,7 @@ private:
 	int connect(boost::asio::ip::tcp::socket& socket, boost::asio::ip::tcp::endpoint& ep);
 	int SendRequest(std::string url);
 	int parseline(std::string line,int& _state,int& _event,ParamMap& structdata);
-	int processevent(const std::string data);
+	
 public:
 	void AddExecuter(ExecuterInterface* iexecuter);
 	int AddParam(std::string data, ParamMap& eventdata);

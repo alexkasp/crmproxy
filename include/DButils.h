@@ -11,7 +11,7 @@ using namespace std;
 class DButils
 {
 	
-	shared_ptr<mysqlpp::Connection> conn;
+	
 	const string delimiter = "=";
 	const string vardelimiter = "$";
 	
@@ -27,6 +27,13 @@ class DButils
     
     
 	boost::mutex dblock;
+    protected:
+	virtual string getHostParamName();
+        virtual string getPassParamName();
+        virtual string getUserParamName();
+        virtual string getDBParamName();
+	            
+	shared_ptr<mysqlpp::Connection> conn;
     public:
 	DButils();
 	

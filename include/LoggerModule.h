@@ -24,10 +24,10 @@ class LoggerModule
 {
     
     src::severity_logger< logging::trivial::severity_level > lg;
-    void init();
+    void init(std::string);
     
     public:
 	void makeLog(boost::log::v2s_mt_posix::trivial::severity_level lvl,std::string message);
-	LoggerModule();
+	LoggerModule(std::string logname = "");
 };
 #endif

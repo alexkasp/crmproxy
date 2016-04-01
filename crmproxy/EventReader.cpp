@@ -105,9 +105,16 @@ int EventReader::start(void)
 	return 0;
 }
 
+string EventReader::getMark()
+{
+    return "Event:";
+}
+
 int EventReader::parseline(string line,int& state,int& event,ParamMap& structdata)
 {
-	if(line.find("Event:")==0)
+	string startEventMark = getMark();
+	
+	if(line.find(startEventMark)==0)
 	{
 		state = 1;	
 	}
@@ -132,7 +139,9 @@ int EventReader::parseline(string line,int& state,int& event,ParamMap& structdat
 		case(3):
 		{
 			for(auto i=Executer.begin();i!=Executer.end();++i)
+			{
 			    (*i)->Execute(structdata);
+			}
 			state = 0;
 			break;
 		}
