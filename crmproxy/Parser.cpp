@@ -333,6 +333,27 @@ string Parser::parse_finishtransfer(string src, string dst, string uid, string t
 	return request;
 }
 
+string Parser::parse_webphoneUUID(string src,string dst,string uid,string timestamp,string callid,string webphoneid)
+{
+    string request = request_str;
+    request+=uid;
+    request+="&event=6&src=";
+    request+=src;
+    request+="&dst";
+    request+=dst;
+    request+="&callid=";
+    request+=callid;
+    request+="&webphoneid=";
+    request+=webphoneid;
+    request+="&timestamp=";
+    request+=timestamp;
+    
+    std::cout<<request<<"\n";
+    
+    return request;
+
+}
+
 string Parser::parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype,string uidcode)
 {
 
@@ -636,7 +657,10 @@ string Parser::parsedata(ParserData& data)
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{
-		
+		if(data["UserEvent:"]=="webphonecall")
+		{
+		    str = parse_webphoneUUID(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["webcallid"]);
+		}
 		if(data["UserEvent:"]=="incomecall")
 		{
 			 str = parse_incomecall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["srctype"],data["uidcode"]);

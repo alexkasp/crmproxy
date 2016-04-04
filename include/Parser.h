@@ -58,6 +58,7 @@ class CallRecords
 
 class Parser: public IParser
 {
+	string parse_webphoneUUID(string src,string dst,string uid,string timestamp,string callid,string webphoneid);
 	string parse_hangupevent(string callid);
 	string parse_peerstatus(string peer,string status,string address);
 	string parse_agentcalled(string callid,string agent,string queueid);

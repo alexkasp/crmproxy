@@ -15,10 +15,13 @@ int DButils::getAuthParams(string filename)
 	string param;
 	string value;
 	
+	std::cout<<strbuf<<"\n";
+	
 	if(parseParam(strbuf,param,value))
 	{
 	    if(param == getHostParamName())
 	    {
+		
 		host = value;
 	    }
 	    else if(param == getPassParamName())
@@ -36,7 +39,7 @@ int DButils::getAuthParams(string filename)
 	    
 	}
     }
-    cout<<db<<" "<<host<<" "<<login<<" "<<pass<<endl;
+    cout<<"db " <<db<<" host "<<host<<" login( "<<getUserParamName()<<" )"<<login<<" pass "<<pass<<endl;
     if((!host.empty())&&(!db.empty())&&(!pass.empty())&&(!login.empty()))
 	return 1;
 
