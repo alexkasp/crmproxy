@@ -339,7 +339,7 @@ string Parser::parse_webphoneUUID(string src,string dst,string uid,string timest
     request+=uid;
     request+="&event=6&src=";
     request+=src;
-    request+="&dst";
+    request+="&dst=";
     request+=dst;
     request+="&callid=";
     request+=callid;
