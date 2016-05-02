@@ -24,9 +24,9 @@ using namespace std;
 
 int main()
 {
-    string webservaddr = "212.193.100.104";
-    //string webservaddr = "crm.sipuni.com";
-    cout<<"CDR by NET version 4.32(json fixed)\n";
+    //string webservaddr = "212.193.100.104";
+    string webservaddr = "wss.sipuni.com";
+    cout<<"CDR by NET version 4.33(new ports)\n";
     LoggerModule lm;
     DButils DBWorker;
     
@@ -53,8 +53,9 @@ int main()
     
     EventReader reader("127.0.0.1",5038,lm);
     
-    CRMUrlBuilder sender(webservaddr,"80",&icm,&cdr/*NULL*/);
-    Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
+    CRMUrlBuilder sender(webservaddr,"9102",&icm,&cdr/*NULL*/);
+    //Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
+    Parser newParser("/?userId=",lm);
     sender.AddParser(&newParser);
     
     RegisterParser rparser("not need",lm);
@@ -76,8 +77,8 @@ int main()
     
     reader.AddExecuter(&sender);
     reader.AddExecuter(&recallManager);
-    reader.AddExecuter(&rmonitor);
-    reader.AddExecuter(&monitorServiceManager);
+    //reader.AddExecuter(&rmonitor);
+    //reader.AddExecuter(&monitorServiceManager);
     
     reader.start();
     

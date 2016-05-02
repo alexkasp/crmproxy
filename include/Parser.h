@@ -79,6 +79,8 @@ class Parser: public IParser
 	string clearStorage(map<string,string>& storage,string key);
 	void clearStorages();
 	
+//	boost::timed_mutex::scoped_lock&& getCDRLock();
+	
 	boost::mutex event2storageLock;
 	boost::timed_mutex event2CDRstorageLock;
 	

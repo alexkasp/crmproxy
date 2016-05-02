@@ -26,8 +26,9 @@ class DButils
 	int getIncomeCallData(string uniqueid,string& operatorNum);
     
     
-	boost::mutex dblock;
+	
     protected:
+	boost::mutex dblock;
 	virtual string getHostParamName();
         virtual string getPassParamName();
         virtual string getUserParamName();

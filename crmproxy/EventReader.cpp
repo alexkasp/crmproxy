@@ -14,6 +14,8 @@ void EventReader::AddExecuter(ExecuterInterface* iexecuter)
 }
 EventReader::EventReader(std::string host,int port,LoggerModule& _lm):asthost(host),astport(port),lm(_lm),_sock(service),ep(ip::address::from_string(asthost), astport)
 {
+	servhost = host;
+	servport = port;
 	//ip::tcp::endpoint ep(ip::address::from_string(asthost), astport);
 	//ip::tcp::socket _sock(service);
 }
@@ -88,7 +90,7 @@ int EventReader::start(void)
 		readRequest();
 		service.run();
 		lm.makeLog(boost::log::trivial::severity_level::error,"Disconnect from ATS");
-		tgroup.join_all();
+		//tgroup.join_all();
 		lm.makeLog(info,"Start reconnect");
 			
 		while(!connect(_sock,ep))

@@ -221,10 +221,14 @@ void Parser::clearStorages()
 	lockEvent2Storage.unlock();
 	std::cout<<"release lock clearStorages\n";
 	
+//	boost::timed_mutex::scoped_lock& lockEvent2CDRStorage  = getCDRLock();
+	
 	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
 	if(!lockEvent2CDRStorage)
+	{
+	    cout<<"ERROR GET CDR LOCK\n";
 	    exit(-1);
-	    
+	}    
 	clearStorageAlg(event2CDRstorage,timestamp);
 	//clearStorageAlg(useridToCallId,timestamp);
 	lockEvent2CDRStorage.unlock();
@@ -449,10 +453,14 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	event2store+="&callbackId=";
 	event2store+=callbackId;
 	
-	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+//	boost::timed_mutex::scoped_lock& lockEvent2CDRStorage  = getCDRLock();
 	
+	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));	
 	if(!lockEvent2CDRStorage)
+	{
+	    cout<<"ERROR GET CDR LOCK\n";
 	    exit(-1);
+	}
 	
 	auto cdrdata = event2CDRstorage.find(callid);
 	
@@ -588,10 +596,13 @@ string Parser::parse_cdrevent(string callid,string destination,string duration,s
 	}
 	else
 	{
+	//    boost::timed_mutex::scoped_lock& lockEvent2CDRStorage  = getCDRLock();
 	    boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
 	    if(!lockEvent2CDRStorage)
-		exit(-1);
-		
+	    {
+		cout<<"ERROR GET CDR LOCK\n";
+	    	exit(-1);
+	    }	
 	    std::cout<<"CDR for callid "<<callid<<" not found\n";
 	    std::cout<<"Prepare request \n"<<request<<"For callid="<<callid<"\n";
 	    //boost::mutex::scoped_lock lockEvent2Storage(event2storageLock);
@@ -632,6 +643,19 @@ string Parser::parse_agentcalled(string callid,string agent,string queueid)
     return "";
 }
 
+/*
+boost::timed_mutex::scoped_lock&& Parser::getCDRLock()
+{
+     boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+     if(!lockEvent2CDRStorage)
+     {
+        lm.makeLog(boost::log::trivial::severity_level::error,"FAILED GET CDR LOCK");
+        exit(-1);
+     }
+     
+     return lockEvent2CDRStorage;
+}
+*/
 string Parser::parse_hangupevent(string callid)
 {
     std::cout<<"CLEAR FOR HANGUP["<<callid<<"]\n";
@@ -653,7 +677,9 @@ void Parser::parse_setcallbackId(string callid,string callbackId)
 string Parser::parsedata(ParserData& data)
 {
 	for(auto it=data.begin();it!=data.end();++it)
+	{
 	    lm.makeLog(boost::log::trivial::severity_level::info,"DATA "+(it->first)+"  "+(it->second));
+	}
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{
@@ -734,7 +760,7 @@ string Parser::parsedata(ParserData& data)
 	else
 	    return str;
 	
-	if((!str.empty())&&(data["Event:"]!="Cdr")&&(data["Event:"]!="answercall")&&(data["Event:"]!="Hangup:"))
+	if((!str.empty())&&(data["UserEvent:"]!="finishcall")&&(data["Event:"]!="Cdr")&&(data["UserEvent:"]!="answercall")&&(data["Event:"]!="Hangup:"))
 	{    
 		str += "&TreeId=";
 		str += data["TreeId"];
@@ -753,7 +779,6 @@ string Parser::parsedata(ParserData& data)
 	}
 	
 		
-	
 	
 	debugParseString(str);
 //	std::cout<<"END PROCESS DATA>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";

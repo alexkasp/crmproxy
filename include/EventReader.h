@@ -37,6 +37,10 @@ class EventReader
 	std::vector<ExecuterInterface*> Executer;
 	LoggerModule& lm;
 protected:
+	
+	string servhost;
+	int servport;
+	
 	virtual string getMark();
 	
 	int processevent(const std::string data);

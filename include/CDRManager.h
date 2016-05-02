@@ -28,6 +28,7 @@ class CDRManager
     void sendCurlRequest(string url,string requestId);
     void keepAlive();
     void sendRequest(string url);
+    void sendJsonRequest(string url);
     void putCDR(map<string,string>& data);
     string map2json (const std::map<std::string, std::string>& map);
     void read_handler(boost::shared_ptr<boost::asio::streambuf> databuf,const boost::system::error_code& ec,std::size_t size);

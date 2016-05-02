@@ -115,7 +115,19 @@ void DButils::getCDR(string uniqueid,map<string,string>& data)
 	    data["crmcall"] = row[3].data();
 	}
     }	 
-       
+     
+     query << "select isblock from records where callid='"<<uniqueid<<"'";
+    std::cout<<query.str();
+    
+    if (mysqlpp::StoreQueryResult res = query.store()) 
+     {
+        for(auto it=res.begin();it!=res.end();++it)
+        {
+    	    
+    	    mysqlpp::Row row = *it;
+	    data["isblock"]=row[0].data();
+	}
+    }  
      return;
 }
 void DButils::putCDR(map<string,string>& data)
