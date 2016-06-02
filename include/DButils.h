@@ -38,6 +38,9 @@ class DButils
     public:
 	DButils();
 	
+	void addSendEventReportEntry(string callid,string request,int type);
+	void completeEventReportEntry(string request,string responce);
+	
 	void getCDR(string callid,map<string,string>& data);
 	void putCDR(map<string,string>& data);
 	int getCallData(string userId,string clientNum,string& operatorNum);

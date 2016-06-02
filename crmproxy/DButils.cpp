@@ -93,6 +93,16 @@ int DButils::getUidList(map<string,string>& uidToUserId)
      return 0;
 }
 
+void DButils::addSendEventReportEntry(string callid,string request,int type)
+{
+    return;
+}
+
+void DButils::completeEventReportEntry(string request,string responce)
+{
+    return;
+}
+
 void DButils::getCDR(string uniqueid,map<string,string>& data)
 {
     boost::mutex::scoped_lock Lock(dblock);
