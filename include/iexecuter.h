@@ -10,7 +10,7 @@ class ExecuterInterface
 {
        std::vector<IParser*> parser;
     protected:
-        virtual int makeAction(ParamMap& data,IParser*) = 0;
+        virtual int makeAction(ParamMap data,IParser*) = 0;
 	public:
         void AddParser(IParser* parsertostr);
 		virtual int Execute(ParamMap& data);

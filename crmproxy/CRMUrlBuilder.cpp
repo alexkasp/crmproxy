@@ -2,21 +2,78 @@
 #include <boost/bind.hpp>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
+#include <curl/curl.h>
 
-CRMUrlBuilder::CRMUrlBuilder(string webserver,string port,ICMServer* _icm,CDRManager* _cdr):icm(_icm),cdr(_cdr)
+CRMUrlBuilder::CRMUrlBuilder(string webserver,string _port,DButils* _db,ICMServer* _icm,CDRManager* _cdr):icm(_icm),cdr(_cdr)
 {
     server = webserver;
+    port = _port;
     boost::asio::ip::tcp::resolver resolver(io);
     boost::asio::ip::tcp::resolver::query query(server,port);
     
     boost::asio::ip::tcp::resolver::iterator iter = resolver.resolve( query);
     ep = *iter;
     std::cout << ep.address().to_string() << std::endl;
-
+    db = _db;
     
     
     
 };
+
+struct callbackParam
+{
+    DButils* db;
+    string requestId;
+};
+        
+
+size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    int answerSize = size*nmemb;
+    callbackParam *cbp = (callbackParam*)userdata;
+    DButils* db = (DButils*)(cbp)->db;
+    string requestId = (cbp)->requestId;
+    delete cbp;
+
+    if(db==NULL)
+	return answerSize;
+	
+    string answerData(ptr,answerSize);
+    string responceId="";
+
+    if(answerSize>0)
+    {
+        string json(&ptr[1],answerSize-2);
+
+        size_t pos = 0;
+        while(((pos = json.find(','))!= std::string::npos)||(!json.empty()))
+        {
+            string param = "";
+            if(pos == std::string::npos)
+            {
+                param = json;
+                json.clear();
+            }
+            else
+            {
+                param = json.substr(0, pos);
+                json.erase(0, pos + 1);
+            }
+            if((pos = param.find(':'))!= std::string::npos)
+            {
+                string paramName = param.substr(1,pos-2);
+                string value = (param.erase(0,pos + 1));
+                if(paramName.compare("responseId")==0)
+                    responceId  = value;
+            }
+        }
+
+        db->completeEventReportEntry(requestId,responceId,answerData);
+    }
+    else
+        db->completeEventReportEntry("OJ2Ap3yr","ERROR PARSER","ERROR PARSER");
+    return answerSize;
+}
 
 int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
 {
@@ -64,23 +121,31 @@ int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
 }
 
 
-int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
+int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
 {
+    map<string,string> data;
     try{
+    
+	
+    
     string httpsign = "nocrm";
     
-	string request = currentParser->parsedata(data);
+	string request = currentParser->parsedata(rawdata);
 	if (!request.empty())
         {
-    	    if(request.compare(0,httpsign.length(),httpsign)!=0)
-    	    {
-		SendRequest(request);
-	    }
-
-	    map<string,string> data;
-	    
 	    if(processURL(request,data))
 	    {
+		
+		
+		if(request.compare(0,httpsign.length(),httpsign)!=0)
+    		{
+    		    if(db!=NULL)
+    			db->addSendEventReportEntry(data["call_id"],data["requestId"],data["serverId"],data["userId"],"2",request);
+    		    
+    		    sendRequestAndStore(request,data["requestId"]);
+    		    
+		}
+		
 		if(icm!=NULL)
 		    icm->putCDREvent(data);
         	if(cdr!=NULL)
@@ -94,10 +159,56 @@ int CRMUrlBuilder::makeAction(ParamMap& data,IParser* currentParser)
         	string errmsg = "Error in makeAction ";
 //        	lm.makeLog(boost::log::trivial::severity_level::error,errmsg+ec.what());
 		std::cout<<errmsg<<"Error in makeAction  "<<ec.what()<<"\n";
+		
+		for(auto x = data.begin();x!=data.end();++x)
+		{
+		    std::cout<<"DATA WITH ERROR"<<((*x).first)<<"    "<<((*x).second)<<"\n";
+		}
              }
              
     return 0;
 }
+
+void CRMUrlBuilder::sendRequestAndStore(string url,string requestId)
+{
+     CURL *curl;
+       CURLcode res;
+
+      /* get a curl handle */
+    curl = curl_easy_init();
+     if(curl) {
+     /* First set the URL that is about to receive our POST. This URL can
+     just as well be a https:// URL if that is what should receive the
+                data. */
+    string curlBaseUrl = "http://"+server+":"+port+url;
+    
+    std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
+    
+    curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
+
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+
+    callbackParam* sendParam =new callbackParam();
+
+    sendParam->db=db;
+    sendParam->requestId = requestId;
+
+
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, sendParam);
+
+     /* Perform the request, res will get the return code */
+      res = curl_easy_perform(curl);
+     /* Check for errors */
+      if(res != CURLE_OK)
+         fprintf(stderr, "curl_easy_perform() failed: %s\n",
+      curl_easy_strerror(res));
+      curl_easy_cleanup(curl);
+    }
+    std::cout<<"send url complete\n";
+}
+
+
 
 int CRMUrlBuilder::SendRequest(std::string url)
 {

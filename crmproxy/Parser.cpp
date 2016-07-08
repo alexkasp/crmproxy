@@ -712,7 +712,7 @@ string Parser::parsedata(ParserData& data)
 		}
 		if(data["UserEvent:"]=="transfercall")
 		{
-			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],"","",data["uidcode"]);
+			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["recordfile"],data["usecrm"],data["uidcode"]);
 			
 		}
 		if(data["UserEvent:"]=="finishcall")

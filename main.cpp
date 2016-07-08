@@ -47,13 +47,13 @@ int main()
 	std::cout<<"ICM SERVER OK\n";
     }
     
-    CDRManager cdr(lm,webservaddr,"80","/ext/statistic/insert","/ext/keepalive",DBWorker);
+    CDRManager cdr(lm,webservaddr,"80","http://"+webservaddr+":9104","/ext/keepalive",DBWorker);
 //    CDRManager cdr(lm,"127.0.0.1","80","/IaEQvJmntW/autocall.php","/ext/keepalive");
     
     
     EventReader reader("127.0.0.1",5038,lm);
     
-    CRMUrlBuilder sender(webservaddr,"9102",&icm,&cdr/*NULL*/);
+    CRMUrlBuilder sender(webservaddr,"9102",&DBWorker,&icm,&cdr/*NULL*/);
     //Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
     Parser newParser("/?userId=",lm);
     sender.AddParser(&newParser);
@@ -66,11 +66,11 @@ int main()
     RecallParser recall("/IaEQvJmntW/callbackcrm.php?",lm);
     recallManager.AddParser(&recall);
     
-    MonitorParser monitorServiceParser("/api/testing/record?callId=",lm);
-    MonitorParserCRM monitorServiceParserCRM("/api/testing/crm?callId=",DBWorker,lm);
-    MonitorManager monitorServiceManager(webservaddr,"80");
-    monitorServiceManager.AddParser(&monitorServiceParser);
-    monitorServiceManager.AddParser(&monitorServiceParserCRM);
+//    MonitorParser monitorServiceParser("/api/testing/record?callId=",lm);
+//    MonitorParserCRM monitorServiceParserCRM("/api/testing/crm?callId=",DBWorker,lm);
+//    MonitorManager monitorServiceManager(webservaddr,"80",&DBWorker);
+//    monitorServiceManager.AddParser(&monitorServiceParser);
+//    monitorServiceManager.AddParser(&monitorServiceParserCRM);
     
     
     

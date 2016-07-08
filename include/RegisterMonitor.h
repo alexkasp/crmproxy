@@ -15,7 +15,7 @@ class RegisterMonitor: public ExecuterInterface
 	map<string,string> UidToIdStorage;
     protected:
     
-	virtual int makeAction(ParamMap& data,IParser* currentParser);
+	virtual int makeAction(ParamMap data,IParser* currentParser);
     public:
 	RegisterMonitor(DButils& db):DBWorker(db)
 	{

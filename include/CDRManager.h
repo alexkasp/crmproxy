@@ -28,14 +28,14 @@ class CDRManager
     void sendCurlRequest(string url,string requestId);
     void keepAlive();
     void sendRequest(string url);
-    void sendJsonRequest(string url);
-    void putCDR(map<string,string>& data);
+    void putCDR(map<string,string> data);
     string map2json (const std::map<std::string, std::string>& map);
     void read_handler(boost::shared_ptr<boost::asio::streambuf> databuf,const boost::system::error_code& ec,std::size_t size);
     void addInvolvedNums(map<string,string>& data);
     public:
+	void sendJsonRequest(string url,string requestId);
 	CDRManager(LoggerModule& lm,string server,string port,string baseUrl,string keepAliveUrl,DButils& db);
-	void processCDR(map<string,string>& data);
+	void processCDR(map<string,string> data);
 	~CDRManager();
 };
 #endif

@@ -10,6 +10,7 @@
 #include <vector>
 #include <ICMServer.h>
 #include <CDRManager.h>
+#include <DButils.h>
 
 class CRMUrlBuilder: public ExecuterInterface
 {
@@ -22,17 +23,21 @@ class CRMUrlBuilder: public ExecuterInterface
 	int processURL(string url,map<string,string>& CDRData);
     
     protected:
+		DButils* db;
 		CDRManager* cdr;
 		ICMServer* icm;
 		boost::thread_group tgroup;
 		boost::asio::ip::tcp::endpoint ep;
     
         string server;
+        string port;
 	boost::asio::io_service io;
-        virtual int makeAction(ParamMap& data,IParser* currentParser);
+	
+        virtual int makeAction(ParamMap data,IParser* currentParser);
         
 	public:
-		CRMUrlBuilder(string server,string port,ICMServer* _icm = NULL,CDRManager* _cdr = NULL);
+		void sendRequestAndStore(std::string, std::string);
+		CRMUrlBuilder(string server,string port,DButils* _db,ICMServer* _icm = NULL,CDRManager* _cdr = NULL);
 		
     
 };

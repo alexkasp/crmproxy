@@ -1,7 +1,7 @@
 #include <RegisterMonitor.h>
 #include <iostream>
 
-int RegisterMonitor::makeAction(ParamMap& data,IParser* currentParser)
+int RegisterMonitor::makeAction(ParamMap data,IParser* currentParser)
 {
     string number;
     string status;

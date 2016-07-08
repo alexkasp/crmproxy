@@ -1,8 +1,8 @@
 default:
-	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"
+	export CFLAGS="$CFLAGS -O0 -fbuiltin -g -fsigned-char"
 	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
 	
-	g++ -g -c DButils.cpp Parser.cpp RegisterParser.cpp  RegisterMonitor.cpp  EventReader.cpp  CRMUrlBuilder.cpp MergedCalls.cpp -lpthread -std=c++11 -I ../include \
+	g++ -g -c DButils.cpp Parser.cpp RegisterParser.cpp  RegisterMonitor.cpp  EventReader.cpp  CRMUrlBuilder.cpp MergedCalls.cpp -lcurl -lpthread -std=c++11 -I ../include \
 	 -I /usr/include/mysql  -I /usr/include/mysql++ -I /usr/local/boost/include/ 
 	
 test:

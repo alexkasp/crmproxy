@@ -6,7 +6,7 @@
 
 using namespace std;
 
-MonitorManager::MonitorManager(string server,string port):CRMUrlBuilder(server,port)
+MonitorManager::MonitorManager(string server,string port,DButils* db):CRMUrlBuilder(server,port,db)
 {
     boost::asio::ip::tcp::socket sock(io);
     sock.connect(ep);

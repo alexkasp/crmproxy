@@ -4,9 +4,21 @@
 #include <boost/thread/mutex.hpp>
 #include <string>
 #include <map>
+#include <vector>
 #include <mysql++.h>
 using namespace std;
 
+class CDRReport
+{
+    public:
+	string callid;
+	string origcallid;
+	string responce;
+	string request;
+	string uniqueid;
+	string sendData;
+	string type;
+};
 
 class DButils
 {
@@ -38,8 +50,8 @@ class DButils
     public:
 	DButils();
 	
-	void addSendEventReportEntry(string callid,string request,int type);
-	void completeEventReportEntry(string request,string responce);
+	void addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData);
+	void completeEventReportEntry(string request,string responce,string answerData);
 	
 	void getCDR(string callid,map<string,string>& data);
 	void putCDR(map<string,string>& data);
@@ -50,6 +62,9 @@ class DButils
 	int connect();
 	int getUidList(map<string,string>& uidToUserId);
 	int getUid(map<string,string>& uidToUserId,string uid,string& id);
+	
+	void getCDRReports(vector<CDRReport>& reports,string period);
+	
 };
 
 

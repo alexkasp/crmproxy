@@ -6,7 +6,7 @@ RecallManager::RecallManager()
 {
 }
 
-int RecallManager::makeAction(ParamMap& data,IParser* iparser)
+int RecallManager::makeAction(ParamMap data,IParser* iparser)
 {
     string from;
     string to;

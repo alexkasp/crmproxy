@@ -22,10 +22,69 @@ std::string cdrchars(
     
 boost::random::random_device cdrrng;
 boost::random::uniform_int_distribution<> cdrindex_dist(0, cdrchars.size() - 1);
-    
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+
+struct callbackParam
 {
-    return size*nmemb;
+    DButils* db;
+    string requestId;
+};
+    
+size_t cdr_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+    callbackParam *cbp = (callbackParam*)userdata;
+    
+    DButils* db = (DButils*)(cbp)->db;
+    string requestId = (cbp)->requestId;
+    
+    delete cbp;
+    
+    //{"status":true,"responseId":"146487439569361101"}
+    
+    int answerSize = size*nmemb;
+    
+    string answerData(ptr,answerSize);
+    
+    string responceId="";
+    
+    if(answerSize>0)
+    {
+	string json(&ptr[1],answerSize-2);
+    
+	size_t pos = 0;
+	while(((pos = json.find(','))!= std::string::npos)||(!json.empty()))
+	{
+//	    std::cout<<"PARSE MSG "<<json<<"\n";
+	
+	    string param = "";    
+	    if(pos == std::string::npos)
+	    {
+    	        param = json;
+    		json.clear();
+    	    }
+    	    else
+    	    {
+    		param = json.substr(0, pos);
+    		json.erase(0, pos + 1);
+    	    }
+    	    if((pos = param.find(':'))!= std::string::npos)
+    	    {
+    		string paramName = param.substr(1,pos-2);
+    		string value = (param.erase(0,pos + 1));
+    		
+    		//std::cout<<"PARAMNAME = "<<paramName<<"  value = "<<value<<"\n";
+    		
+    		if(paramName.compare("responseId")==0)
+    		    responceId  = value;
+    	    }
+	}
+    
+    
+	db->completeEventReportEntry(requestId,responceId,answerData);
+    }
+    else
+	db->completeEventReportEntry("OJ2Ap3yr","ERROR PARSER","ERROR PARSER");
+//    std::cout<<"WRITE_CALLBACK\n";
+    return answerSize;
 }
 
 void CDRManager::keepAlive()
@@ -59,6 +118,7 @@ void CDRManager::keepAlive()
 CDRManager::CDRManager(LoggerModule& _lm,string webserver,string port,string _baseUrl,string _keepAliveUrl,DButils& _db):lm(_lm),baseUrl(_baseUrl),keepAliveUrl(_keepAliveUrl),db(_db)
 {
     server = webserver;
+    baseUrl = _baseUrl;
     
     boost::asio::ip::tcp::resolver resolver(io);
     boost::asio::ip::tcp::resolver::query query(server,port);
@@ -78,7 +138,7 @@ CDRManager::~CDRManager()
 //    sock.close();
 }
 
-void CDRManager::processCDR(map<string,string>& data)
+void CDRManager::processCDR(map<string,string> data)
 {
     std::cout<<"process CDR\n";
     
@@ -121,7 +181,7 @@ void CDRManager::addInvolvedNums(map<string,string>& data)
     
 }
 
-void CDRManager::putCDR(map<string,string>& data)
+void CDRManager::putCDR(map<string,string> data)
 {
     std::cout<<"make query\n";
     string callid = data["call_id"];
@@ -240,7 +300,12 @@ void CDRManager::putCDR(map<string,string>& data)
     CDRData["requestId"]=requestId;
     
 //    sendCurlRequest(map2json(CDRData),requestId);
-    sendJsonRequest(map2json(CDRData));
+    
+    string sendData = map2json(CDRData);
+    
+    
+    db.addSendEventReportEntry(CDRData["uniqueid"],CDRData["requestId"],CDRData["serverId"],CDRData["userId"],"1",sendData);
+    sendJsonRequest(sendData,CDRData["requestId"]);
 }
 
 void CDRManager::sendCurlRequest(string url,string requestId)
@@ -278,7 +343,7 @@ void CDRManager::sendCurlRequest(string url,string requestId)
     std::cout<<"send url complete\n";
 }
 
-void CDRManager::sendJsonRequest(string url)
+void CDRManager::sendJsonRequest(string url,string requestId)
 {
      CURL *curl;
        CURLcode res;
@@ -289,7 +354,7 @@ void CDRManager::sendJsonRequest(string url)
      /* First set the URL that is about to receive our POST. This URL can
      just as well be a https:// URL if that is what should receive the
                 data. */ 
-    string curlBaseUrl = "http://wss.sipuni.com:9104";
+    string curlBaseUrl = baseUrl;//"http://wss.sipuni.com:9104";
     std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
     curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
     /* Now specify the POST data */ 
@@ -304,8 +369,16 @@ void CDRManager::sendJsonRequest(string url)
     
     
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, curlUrl.c_str());
-//    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-                             
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cdr_write_callback);
+    
+    callbackParam* sendParam =new callbackParam();
+    
+    sendParam->db=&db;
+    sendParam->requestId = requestId;
+
+    
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, sendParam);
+                                 
      /* Perform the request, res will get the return code */ 
       res = curl_easy_perform(curl);
      /* Check for errors */ 

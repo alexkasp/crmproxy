@@ -1,4 +1,5 @@
 #include <CRMUrlBuilder.h>
+#include <DButils.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <sys/time.h>
@@ -26,5 +27,5 @@ protected:
     
     // virtual int makeAction(ParamMap& data,IParser* currentParser);
 public:
-    MonitorManager(string server,string port);
+    MonitorManager(string server,string port,DButils* db);
 };

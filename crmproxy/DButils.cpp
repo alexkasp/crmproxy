@@ -1,6 +1,7 @@
 #include <DButils.h>
 #include <fstream>
 #include <iostream>
+#include <exception>      // std::exception
 
 int DButils::getAuthParams(string filename)
 {
@@ -93,14 +94,117 @@ int DButils::getUidList(map<string,string>& uidToUserId)
      return 0;
 }
 
-void DButils::addSendEventReportEntry(string callid,string request,int type)
+void DButils::addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData)
 {
+
+    if(callid.empty())
+	callid="empty";
+    if(request.empty())
+	request= "empty";
+    if(ats.empty())
+	ats = "0";
+    if(userid.empty())
+	userid="0";
+    if(sendData.empty())
+	sendData = "empty";
+    if(type.empty())
+	type = "100";
+	
+    
+    
+     mysqlpp::Query query = conn->query("insert into crmreport(callid,request,sendtime,ats,userid,type,sendData) values('%0','%1',Now(),%2,%3,%4,'%5')");
+     cerr << query << " filling ...\n"; // this line supress the bug
+     query.parse();
+     mysqlpp::SQLQueryParms parms;
+     
+     
+    parms.push_back( mysqlpp::sql_varchar(callid) ); 
+    parms.push_back( mysqlpp::sql_varchar(request) ); 
+    parms.push_back( mysqlpp::sql_varchar( ats ) );
+    parms.push_back( mysqlpp::sql_varchar(userid) ); 
+    parms.push_back( mysqlpp::sql_varchar(type) );
+    parms.push_back( mysqlpp::sql_varchar(sendData) );  
+    
+    try
+    {
+	if(!query.execute( parms ))
+	{
+	    cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+		            //    exit(0);
+	                
+	}
+    }
+     catch (std::exception& e)
+       {
+           std::cerr << "exception caught: " << e.what() << '\n';
+           std::cerr << "callid = " << callid << " request = "<< request << " ats = " << ats << " userid = " << userid << " type = "<<type<<"\n send data \n"<<sendData<<"\n";
+             }                             
     return;
 }
 
-void DButils::completeEventReportEntry(string request,string responce)
+void DButils::completeEventReportEntry(string request,string responce,string answerData)
 {
+     if(request.empty())
+        request="empty";
+     if(responce.empty())
+        responce="empty";
+    if(answerData.empty())
+	answerData = "empty";
+
+     
+     mysqlpp::Query query = conn->query("update crmreport set responce = '%0',answertime = Now(), answerData = '%1' where request = '%2'");
+     query.parse();
+     mysqlpp::SQLQueryParms parms;
+     
+     
+    parms.push_back( mysqlpp::sql_varchar(responce) ); 
+    parms.push_back( mysqlpp::sql_varchar(answerData) ); 
+    parms.push_back( mysqlpp::sql_varchar( request ) );
+    
+    if(!query.execute( parms ))
+    {
+	cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+		            //    exit(0);
+	                
+    }
     return;
+}
+
+void DButils::getCDRReports(vector<CDRReport>& reports,string period)
+{
+    boost::mutex::scoped_lock Lock(dblock);
+    mysqlpp::Query query = conn->query();
+    
+    query << "select origcallid,callid,responce,request,uniqueid,sendData,type from cdr as a LEFT JOIN crmreport as b  ON b.callid = a.origcallid  where a.calldate > subdate(NOW(), INTERVAL "<<period<<" MINUTE)";
+//    std::cout<<query.str();
+    
+    query.parse();
+    mysqlpp::SQLQueryParms parms;
+    parms.push_back( mysqlpp::sql_varchar(period) );
+             
+    if (mysqlpp::StoreQueryResult res = query.store()) 
+     {
+        for(auto it=res.begin();it!=res.end();++it)
+        {
+    	    
+    	    mysqlpp::Row row = *it;
+    	    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
+
+	    CDRReport report;
+	    
+	    report.origcallid=row[0].data();
+	    report.callid = row[1].data();
+	    report.responce = row[2].data();
+	    report.request = row[3].data();
+	    report.uniqueid=row[4].data();
+	    report.sendData=row[5].data();
+	    report.type = row[6].data();
+	    
+	    reports.push_back(report);
+	}
+    }
+    else
+	cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
 }
 
 void DButils::getCDR(string uniqueid,map<string,string>& data)
