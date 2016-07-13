@@ -96,7 +96,8 @@ int DButils::getUidList(map<string,string>& uidToUserId)
 
 void DButils::addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData)
 {
-
+    boost::mutex::scoped_lock Lock(dblock);
+    std::cout<<"addSendEventReportEntry\n";
     if(callid.empty())
 	callid="empty";
     if(request.empty())
@@ -130,7 +131,6 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
 	if(!query.execute( parms ))
 	{
 	    cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
-		            //    exit(0);
 	                
 	}
     }
@@ -144,6 +144,7 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
 
 void DButils::completeEventReportEntry(string request,string responce,string answerData)
 {
+    boost::mutex::scoped_lock Lock(dblock);
      if(request.empty())
         request="empty";
      if(responce.empty())
@@ -151,22 +152,29 @@ void DButils::completeEventReportEntry(string request,string responce,string ans
     if(answerData.empty())
 	answerData = "empty";
 
-     
+     std::cout<<"completeEventReportEntry\n";
      mysqlpp::Query query = conn->query("update crmreport set responce = '%0',answertime = Now(), answerData = '%1' where request = '%2'");
      query.parse();
      mysqlpp::SQLQueryParms parms;
      
-     
-    parms.push_back( mysqlpp::sql_varchar(responce) ); 
-    parms.push_back( mysqlpp::sql_varchar(answerData) ); 
-    parms.push_back( mysqlpp::sql_varchar( request ) );
+    try
+    { 
+	parms.push_back( mysqlpp::sql_varchar(responce) ); 
+	parms.push_back( mysqlpp::sql_varchar(answerData) ); 
+	parms.push_back( mysqlpp::sql_varchar( request ) );
     
-    if(!query.execute( parms ))
-    {
-	cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+	if(!query.execute( parms ))
+	{
+	    cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
 		            //    exit(0);
 	                
+	}
     }
+    catch (std::exception& e)
+    {
+       std::cerr << "exception caught in completeEventReportEntry: " << e.what() << '\n';
+       std::cerr << " request = "<< request << "responce " << responce <<"\n"<<answerData<<"\n";
+    }                             
     return;
 }
 
@@ -391,6 +399,7 @@ int DButils::getCrmUsers(map<string,int>& users)
 
 void DButils::PutRegisterEvent(string id,string number,string status,string address)
 {
+    boost::mutex::scoped_lock Lock(dblock);
      mysqlpp::Query query = conn->query("insert into RegisterEvents(eventtime,number,status,uid,address) values(Now(),'%0','%1',%2,'%3')");
      query.parse();
      mysqlpp::SQLQueryParms parms;

@@ -44,8 +44,9 @@ void WSSMonitor::Check()
 	{
 	    CDRReport tmp = (*x);
 	    std::cout<<"["<<tmp.origcallid<<"] ["<<tmp.callid<<"]  ["<<tmp.request<<"] ["<<tmp.responce<<"] ["<<tmp.uniqueid<<"] ["<<tmp.type<<"]\n";
-	    if((tmp.request=="NULL")&&(tmp.callid!="NULL"))
-		WeHaveCDRButNotSendEvent(tmp.origcallid,tmp.callid);
+	//we do not have crmreport for all pbx
+	    //if((tmp.request=="NULL")&&(tmp.callid!="NULL"))
+	//	WeHaveCDRButNotSendEvent(tmp.origcallid,tmp.callid);
 	    if((tmp.request!="NULL")&&(tmp.callid=="NULL"))
 		WeHaveEventButNoCDR(tmp.request);
 	    if((tmp.request!="NULL")&&(tmp.responce=="NULL"))

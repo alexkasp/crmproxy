@@ -10,6 +10,13 @@
 
 using namespace std;
 
+class TransferData
+{
+    public:
+    string callid;
+    string recordname;
+};
+
 class CallRecord
 {
 	string dst;
@@ -78,18 +85,23 @@ class Parser: public IParser
 	template<typename T>void  clearStorageAlg(T& storage,string key); 
 	string clearStorage(map<string,string>& storage,string key);
 	void clearStorages();
+	int processTransfer(string callid,string linkedid,string record);
 	
 //	boost::timed_mutex::scoped_lock&& getCDRLock();
 	
+	boost::mutex reportedCallstorageLock;
+	boost::mutex transferstorageLock;
 	boost::mutex event2storageLock;
 	boost::timed_mutex event2CDRstorageLock;
 	
 	 CallRecords currentCalls;
+	 map<string,TransferData> transferstorage;
 	 map<string,string> event2storage;
 	 map<string,string> event2CDRstorage;
 	 map<string,int> accountcodes;
 	 map<string,string> useridToCallId;
 	 map<string,string> callbackIdList;
+	 map<string,string> reportedCall;
 	 
 	 MergedCalls mergedCalls;
 public:

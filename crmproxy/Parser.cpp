@@ -226,7 +226,7 @@ void Parser::clearStorages()
 	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
 	if(!lockEvent2CDRStorage)
 	{
-	    cout<<"ERROR GET CDR LOCK\n";
+	    cout<<"ERROR GET CDR LOCK in clear storage\n";
 	    exit(-1);
 	}    
 	clearStorageAlg(event2CDRstorage,timestamp);
@@ -420,7 +420,11 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	    recordfile = call.getrecordfile();
 	}
 	else
-	return "";
+	{
+	    std::cout<<"CALLRECORDS NOT FOUND FOR "<<callid<<" EXIT\n";
+	    return "";
+	}
+	
 	
 	request+=uid;
 	request+="&uidcode=";
@@ -462,10 +466,18 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	    exit(-1);
 	}
 	
+	std::cout<<"finishcall process get event2storageLock\n";
+	
 	auto cdrdata = event2CDRstorage.find(callid);
 	
-	if(cdrdata!=event2CDRstorage.end())
+	boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
+	auto report = reportedCall.find(callid);
+	if(report!=reportedCall.end())
+	    std::cout<<"REPORT for "<<callid<<" was sent early\n";
+	    
+	if((cdrdata!=event2CDRstorage.end())&&(!(report!=reportedCall.end())))
 	{
+	    
 	    
 	    int involvedNums = call.removeNumber(dst);
 	    if(involvedNums==0)
@@ -477,6 +489,7 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	        //clearCallEnviroment(callid);
 	        event2CDRstorage.erase(cdrdata);
 	        event2store+="&parsertask=finish";
+	        reportedCall[callid]=request;
 	        return event2store;
 	    }
 	    else
@@ -562,22 +575,58 @@ void Parser::clearCallEnviroment(string callid)
 */
 }
 
-string Parser::parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string Destinationcontext)
+int Parser::processTransfer(string callid,string linkedid,string record)
 {
+    boost::mutex::scoped_lock lockTransferStorage(transferstorageLock);
+    
+    TransferData tmp;
+    tmp.callid=linkedid;
+    tmp.recordname=record;
+    transferstorage[callid]=tmp;
+}
+
+string Parser::parse_cdrevent(string origcallid,string destination,string duration,string billableseconds,string starttime,string endtime,string Destinationcontext)
+{
+	string request="";
+	string transferedCallId = "";
+	string callid = mergedCalls.getMergedCall(origcallid);
+	
+	boost::mutex::scoped_lock lockTransferStorage(transferstorageLock);
+	auto x = transferstorage.find(callid);
+	if(x!=transferstorage.end())
+	{
+	    TransferData tmp = x->second;
+	    transferedCallId = tmp.callid;
+	    string transferrecord = tmp.recordname;
+	    
+	    std::cout<<"TRANSFERED CALLID "<<callid<<"   "<<transferedCallId<<"  "<<origcallid<<"\n";
+	    transferstorage.erase(x);
+	    request+="&transfercallid="+callid;
+	    request+="&transferrecord="+transferrecord;
+	    
+	    //callid=transferedCallId;
+	}
+	//else
+	    
+	
+	lockTransferStorage.unlock();
+	
 	clearStorage(useridToCallId,callid);
-	callid = mergedCalls.getMergedCall(callid);
 	
 	std::cout<<"parse cdr event\n";
-	boost::mutex::scoped_lock lockEvent2Storage(event2storageLock);
+	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
 	
 	std::cout<<"lock accepted\n";
 	for(auto a = event2storage.begin();a!=event2storage.end();++a)
 	std::cout<<"storage "<<(a->first)<<"\n";
 	
+	
 	auto it = event2storage.find(callid);
-	
-	string request="";
-	
+	if((!transferedCallId.empty())&&(!(it!=event2storage.end())))
+	{
+		std::cout<<"TRY SET TRANSFERED CALLID \n";
+	        it = event2storage.find(transferedCallId);
+	}
 	request+="&destination="+destination;
 	request+="&duration="+duration;
 	request+="&billableseconds="+billableseconds;
@@ -587,17 +636,25 @@ string Parser::parse_cdrevent(string callid,string destination,string duration,s
 	
 	if(it!=event2storage.end())
 	{
+	    boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
+	    auto report = reportedCall.find(callid);
+	    if(report!=reportedCall.end())
+		return "";
+		
 	    request = it->second+request;;
 	    
 	    event2storage.erase(it);
 	
 	    std::cout<<"cdr event "<<request<<"\n";
 	    request+="&parsetask=cdrevent";
+	    
+	    reportedCall[callid]=request;
+	    
 	}
 	else
 	{
 	//    boost::timed_mutex::scoped_lock& lockEvent2CDRStorage  = getCDRLock();
-	    boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+	    
 	    if(!lockEvent2CDRStorage)
 	    {
 		cout<<"ERROR GET CDR LOCK\n";
@@ -679,7 +736,10 @@ string Parser::parsedata(ParserData& data)
 	for(auto it=data.begin();it!=data.end();++it)
 	{
 	    lm.makeLog(boost::log::trivial::severity_level::info,"DATA "+(it->first)+"  "+(it->second));
+	    std::cout<<"DATA "<<(it->first)<<"  "<<(it->second)<<"\n";
 	}
+	std::cout<<"\n\n";
+	
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{
@@ -712,7 +772,8 @@ string Parser::parsedata(ParserData& data)
 		}
 		if(data["UserEvent:"]=="transfercall")
 		{
-			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["recordfile"],data["usecrm"],data["uidcode"]);
+			processTransfer(data["Uniqueid:"],data["callid"],data["recordfile"]);
+			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],"",data["usecrm"],data["uidcode"]);
 			
 		}
 		if(data["UserEvent:"]=="finishcall")

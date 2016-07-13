@@ -290,8 +290,19 @@ void CDRManager::putCDR(map<string,string> data)
     CDRData["rating"] = additionalData["raiting"];  
     CDRData["newstatus"] = additionalData["newstatus"];    
     
+    auto it = data.find("transfercallid");
+    if(it!=data.end())
+    {
+	std::cout<<"FIND TRANSFERED CALL "<<(it->second)<<"\n";
+	CDRData["uniqueid"]=it->second;
+    }
     
-    
+    it = data.find("transferrecord");
+    if(it!=data.end())
+    {
+	std::cout<<"FIND TRANSFERED RECORD "<<(it->second)<<"\n";
+	CDRData["recordName"]=it->second;
+    }
     string requestId = "";
     for(int i = 0; i < 8; ++i) {
     requestId += cdrchars[cdrindex_dist(cdrrng)];

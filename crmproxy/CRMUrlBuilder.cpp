@@ -142,8 +142,9 @@ int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
     		    if(db!=NULL)
     			db->addSendEventReportEntry(data["call_id"],data["requestId"],data["serverId"],data["userId"],"2",request);
     		    
+    		    std::cout<<"sendRequestAndStore\n";
     		    sendRequestAndStore(request,data["requestId"]);
-    		    
+    		    std::cout<<"END sendRequestAndstore\n";
 		}
 		
 		if(icm!=NULL)
