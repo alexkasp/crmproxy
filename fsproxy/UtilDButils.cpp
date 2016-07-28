@@ -22,7 +22,16 @@ string UtilDButils::getDBParamName()
 
 int UtilDButils::loadGateways(map<string,gatewayData>& gateways)
 {
-    boost::mutex::scoped_lock Lock(dblock);
+    //boost::mutex::scoped_lock Lock(dblock);
+
+boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+        {
+                cout<<"ERROR GET DB LOCK in dbutils\n";
+                        exit(-1);
+                            }
+                                cout<<"LOCK ACCEPTED\n";
+                                
     mysqlpp::Query query = conn->query();
     query << "select login,type,userId,uid,status from static_provs";
 //    std::cout<<query.str();
@@ -54,8 +63,16 @@ int UtilDButils::loadGateways(map<string,gatewayData>& gateways)
                 
 int UtilDButils::updateStaticProvs(string userId,string login,string status)
 {
-    boost::mutex::scoped_lock Lock(dblock);
-    
+//    boost::mutex::scoped_lock Lock(dblock);
+boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+        {
+                cout<<"ERROR GET DB LOCK in dbutils\n";
+                        exit(-1);
+                            }
+                                cout<<"LOCK ACCEPTED\n";
+                                
+
     string querystr="";
     if(status=="REGED")
 	querystr="update static_provs set status = 1 where login ='"+login+"' and userid="+userId;

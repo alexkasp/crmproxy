@@ -36,11 +36,12 @@ class DButils
 	void addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult::const_iterator it);
 	int parseParam(string msg,string& param,string& value);
 	int getIncomeCallData(string uniqueid,string& operatorNum);
-    
+	
     
 	
     protected:
-	boost::mutex dblock;
+	boost::timed_mutex dblock;
+	
 	virtual string getHostParamName();
         virtual string getPassParamName();
         virtual string getUserParamName();

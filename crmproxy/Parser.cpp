@@ -615,6 +615,11 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	
 	std::cout<<"parse cdr event\n";
 	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+	if(!lockEvent2CDRStorage)
+	{
+	    cout<<"ERROR GET CDR LOCK\n";
+	    exit(-1);
+	}
 	
 	std::cout<<"lock accepted\n";
 	for(auto a = event2storage.begin();a!=event2storage.end();++a)
@@ -633,6 +638,8 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	request+="&starttime="+starttime;
 	request+="&endtime="+endtime;
 	request+="&DestinationContext="+Destinationcontext;
+	
+	std::cout<<"REQUEST prepared = "<<request<<"\n";
 	
 	if(it!=event2storage.end())
 	{
@@ -653,16 +660,10 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	}
 	else
 	{
-	//    boost::timed_mutex::scoped_lock& lockEvent2CDRStorage  = getCDRLock();
-	    
-	    if(!lockEvent2CDRStorage)
-	    {
-		cout<<"ERROR GET CDR LOCK\n";
-	    	exit(-1);
-	    }	
 	    std::cout<<"CDR for callid "<<callid<<" not found\n";
-	    std::cout<<"Prepare request \n"<<request<<"For callid="<<callid<"\n";
-	    //boost::mutex::scoped_lock lockEvent2Storage(event2storageLock);
+	    std::cout<<"Prepare request and store it\n";
+	    //std::cout<<request<<"For callid="<<callid<"\n";
+	    std::cout<<"For callid="<<callid<<"\n";
 	    event2CDRstorage[callid]=request;
 	    request="";
 	}

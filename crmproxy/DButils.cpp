@@ -79,7 +79,13 @@ DButils::DButils()
 
 int DButils::getUidList(map<string,string>& uidToUserId)
 {
-    boost::mutex::scoped_lock Lock(dblock);
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getUidList\n";
+        return 0;
+    }
+    cout<<"LOCK ACCEPTED\n";
     
     mysqlpp::Query query = conn->query("select id,uid from UserConfig");
         
@@ -96,8 +102,19 @@ int DButils::getUidList(map<string,string>& uidToUserId)
 
 void DButils::addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData)
 {
-    boost::mutex::scoped_lock Lock(dblock);
+    return;
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils addSendEventReportEntry\n";
+        return;
+    }
+    cout<<"LOCK ACCEPTED\n";
+    std::cout<<"START addSendEventReportEntry\n";
     std::cout<<"addSendEventReportEntry\n";
+//    int a=0;
+//    cin>>a;
+    
     if(callid.empty())
 	callid="empty";
     if(request.empty())
@@ -113,9 +130,10 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
 	
     
     
-     mysqlpp::Query query = conn->query("insert into crmreport(callid,request,sendtime,ats,userid,type,sendData) values('%0','%1',Now(),%2,%3,%4,'%5')");
-     cerr << query << " filling ...\n"; // this line supress the bug
-     query.parse();
+//     mysqlpp::Query query = conn->query("insert into crmreport(callid,request,sendtime,ats,userid,type,sendData) values('%0','%1',Now(),%2,%3,%4,'%5')");
+      mysqlpp::Query query = conn->query("insert into crmreport(callid,request,sendtime,ats,userid,type,sendData) values('"+callid+"','"+request+"',Now(),"+ats+","+userid+","+type+",'"+sendData+"')");
+     cout << query << " filling ...\n"; // this line supress the bug
+/*     query.parse();
      mysqlpp::SQLQueryParms parms;
      
      
@@ -123,28 +141,41 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
     parms.push_back( mysqlpp::sql_varchar(request) ); 
     parms.push_back( mysqlpp::sql_varchar( ats ) );
     parms.push_back( mysqlpp::sql_varchar(userid) ); 
-    parms.push_back( mysqlpp::sql_varchar(type) );
-    parms.push_back( mysqlpp::sql_varchar(sendData) );  
-    
+    parms.push_back( mysqlpp::sql_varchar(type) );*/
+//    parms.push_back( mysqlpp::sql_varchar(sendData) );  
+    /*
     try
     {
 	if(!query.execute( parms ))
 	{
-	    cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+	    cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
 	                
 	}
     }
+    */
+    try{
+	query.execute();
+    }
      catch (std::exception& e)
        {
-           std::cerr << "exception caught: " << e.what() << '\n';
-           std::cerr << "callid = " << callid << " request = "<< request << " ats = " << ats << " userid = " << userid << " type = "<<type<<"\n send data \n"<<sendData<<"\n";
-             }                             
+           std::cout << "exception caught: " << e.what() << '\n';
+           std::cout << "callid = " << callid << " request = "<< request << " ats = " << ats << " userid = " << userid << " type = "<<type<<"\n send data \n"<<sendData<<"\n";
+             }
+    
+    cout<<"END "<<callid<<"  addSendEventReportEntry\n";         
     return;
 }
 
 void DButils::completeEventReportEntry(string request,string responce,string answerData)
 {
-    boost::mutex::scoped_lock Lock(dblock);
+    return;
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils completeEventReportEntry\n";
+        return;
+    }
+    cout<<"LOCK ACCEPTED\n";
      if(request.empty())
         request="empty";
      if(responce.empty())
@@ -153,34 +184,42 @@ void DButils::completeEventReportEntry(string request,string responce,string ans
 	answerData = "empty";
 
      std::cout<<"completeEventReportEntry\n";
-     mysqlpp::Query query = conn->query("update crmreport set responce = '%0',answertime = Now(), answerData = '%1' where request = '%2'");
+     mysqlpp::Query query = conn->query("update crmreport set responce = '"+responce+"',answertime = Now(), answerData = '"+answerData+"' where request = '"+request+"'");
+     //mysqlpp::Query query = conn->query("update crmreport set responce = '%0',answertime = Now() where request = '%2'");
+     cout << query << " filling ...\n";
      query.parse();
      mysqlpp::SQLQueryParms parms;
      
     try
     { 
 	parms.push_back( mysqlpp::sql_varchar(responce) ); 
-	parms.push_back( mysqlpp::sql_varchar(answerData) ); 
+//	parms.push_back( mysqlpp::sql_varchar(answerData) ); 
 	parms.push_back( mysqlpp::sql_varchar( request ) );
     
 	if(!query.execute( parms ))
 	{
-	    cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+	    cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
 		            //    exit(0);
 	                
 	}
     }
     catch (std::exception& e)
     {
-       std::cerr << "exception caught in completeEventReportEntry: " << e.what() << '\n';
-       std::cerr << " request = "<< request << "responce " << responce <<"\n"<<answerData<<"\n";
+       std::cout << "exception caught in completeEventReportEntry: " << e.what() << '\n';
+       std::cout << " request = "<< request << "responce " << responce <<"\n"<<answerData<<"\n";
     }                             
     return;
 }
 
 void DButils::getCDRReports(vector<CDRReport>& reports,string period)
 {
-    boost::mutex::scoped_lock Lock(dblock);
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getCDRReport\n";
+        return;
+    }
+    cout<<"LOCK ACCEPTED\n";
     mysqlpp::Query query = conn->query();
     
     query << "select origcallid,callid,responce,request,uniqueid,sendData,type from cdr as a LEFT JOIN crmreport as b  ON b.callid = a.origcallid  where a.calldate > subdate(NOW(), INTERVAL "<<period<<" MINUTE)";
@@ -212,13 +251,18 @@ void DButils::getCDRReports(vector<CDRReport>& reports,string period)
 	}
     }
     else
-	cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+	cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
 }
 
 void DButils::getCDR(string uniqueid,map<string,string>& data)
 {
-    boost::mutex::scoped_lock Lock(dblock);
-    
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getCDR\n";
+        return;
+    }
+    cout<<"LOCK ACCEPTED\n";    
     mysqlpp::Query query = conn->query();
     
     query << "select label,raiting,newstatus,crmcall from additionaldata where uniqueid='"<<uniqueid<<"'";
@@ -254,7 +298,13 @@ void DButils::getCDR(string uniqueid,map<string,string>& data)
 }
 void DButils::putCDR(map<string,string>& data)
 {
-    boost::mutex::scoped_lock Lock(dblock);
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils putCDR\n";
+        return;
+    }
+    cout<<"LOCK ACCEPTED\n";
     
     std::cout<<"make query\n";
     mysqlpp::Query query = conn->query();
@@ -296,8 +346,13 @@ void DButils::putCDR(map<string,string>& data)
 
 int DButils::getCallData(string userId,string clientNum,string& operatorNum)
 {
-    boost::mutex::scoped_lock Lock(dblock);
-    
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getCallDAta\n";
+        return 0;
+    }
+    cout<<"LOCK ACCEPTED\n";    
     map<string,map<string,string>> callsWithDate;
     
 
@@ -350,6 +405,13 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
 int DButils::getIncomeCallData(string uniqueid,string& operatorNum)
 {
 
+/*    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getIncomeCalldata\n";
+        exit(-1);
+    }*/
+    cout<<"LOCK ACCEPTED\n";
     stringstream ss;
     ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 order by time DESC";
     
@@ -377,8 +439,13 @@ int DButils::getIncomeCallData(string uniqueid,string& operatorNum)
 
 int DButils::getCrmUsers(map<string,int>& users)
 {
-    boost::mutex::scoped_lock Lock(dblock);
-    
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getCRMUsers\n";
+        return 0;
+    }
+    cout<<"LOCK ACCEPTED\n";    
     std::cout<<"getCrmUsers"<<std::endl;
     mysqlpp::Query query = conn->query("select id from UserConfig where usecrm=1");
         
@@ -399,7 +466,14 @@ int DButils::getCrmUsers(map<string,int>& users)
 
 void DButils::PutRegisterEvent(string id,string number,string status,string address)
 {
-    boost::mutex::scoped_lock Lock(dblock);
+    return;
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils PutRegisterevent\n";
+        exit(-1);
+    }
+    cout<<"LOCK ACCEPTED\n";
      mysqlpp::Query query = conn->query("insert into RegisterEvents(eventtime,number,status,uid,address) values(Now(),'%0','%1',%2,'%3')");
      query.parse();
      mysqlpp::SQLQueryParms parms;
@@ -412,7 +486,7 @@ void DButils::PutRegisterEvent(string id,string number,string status,string addr
     
     if(!query.execute( parms ))
     {
-	cerr << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+	cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
 		            //    exit(0);
 	                
     }
@@ -432,8 +506,14 @@ void DButils::addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult:
 
 int DButils::getUid(map<string,string>& uidToUserId,string uid,string& id)
 {
-    boost::mutex::scoped_lock Lock(dblock);
-    
+
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getUid\n";
+        exit(-1);
+    }
+    cout<<"LOCK ACCEPTED\n";    
     mysqlpp::Query query = conn->query("select id,uid from UserConfig where uid="+uid);
     
      if (mysqlpp::StoreQueryResult res = query.store()) 
@@ -461,7 +541,7 @@ int DButils::connect()
         return 1;
      }
      else{
-        cerr << "DB connection failed: " << conn->error() << endl;
+        cout << "DB connection failed: " << conn->error() << endl;
                 return 0;
      }
     

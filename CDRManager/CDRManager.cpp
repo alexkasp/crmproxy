@@ -293,14 +293,14 @@ void CDRManager::putCDR(map<string,string> data)
     auto it = data.find("transfercallid");
     if(it!=data.end())
     {
-	std::cout<<"FIND TRANSFERED CALL "<<(it->second)<<"\n";
+	lm.makeLog(info,"FIND TRANSFERED CALL "+(it->second));
 	CDRData["uniqueid"]=it->second;
     }
     
     it = data.find("transferrecord");
     if(it!=data.end())
     {
-	std::cout<<"FIND TRANSFERED RECORD "<<(it->second)<<"\n";
+	lm.makeLog(info,"FIND TRANSFERED RECORD "+(it->second));
 	CDRData["recordName"]=it->second;
     }
     string requestId = "";
@@ -331,12 +331,13 @@ void CDRManager::sendCurlRequest(string url,string requestId)
      just as well be a https:// URL if that is what should receive the
                 data. */ 
     string curlBaseUrl = "http://sipuni.com"+baseUrl+"?requestId="+requestId;
-    std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
+    lm.makeLog(info,"curlBaseUrl "+curlBaseUrl);
+    
     curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
     /* Now specify the POST data */ 
     string curlUrl = "params="+url;
     
-    std::cout<<"curlUrl "<<curlUrl<<std::endl;
+    lm.makeLog(info,"curlUrl:"+curlUrl);
     
     
     
@@ -365,7 +366,7 @@ void CDRManager::sendJsonRequest(string url,string requestId)
      /* First set the URL that is about to receive our POST. This URL can
      just as well be a https:// URL if that is what should receive the
                 data. */ 
-    string curlBaseUrl = baseUrl;//"http://wss.sipuni.com:9104";
+    string curlBaseUrl = baseUrl+"/?requestId="+requestId;//"http://wss.sipuni.com:9104";
     std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
     curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
     /* Now specify the POST data */ 

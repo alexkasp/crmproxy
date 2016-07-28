@@ -28,26 +28,36 @@ void ICMServer::getRequest()
     
     boost::shared_ptr<ip::udp::endpoint> sender = boost::shared_ptr<ip::udp::endpoint>(new ip::udp::endpoint());
     socket.async_receive_from(boost::asio::buffer(buf,128),*sender,boost::bind(&ICMServer::processICM,this,_1,_2,sender,buf));
+    std::cout<<"We wait for connect\n";
 }
 
 void ICMServer::prepareAccept()
 {
     //boost::shared_ptr<boost::asio::streambuf> buf = boost::shared_ptr<boost::asio::streambuf>(new boost::asio::streambuf());
     
+    std::cout<<"PREPARE ACCEPT\n";
     while(1)
     {
+	std::cout<<"getRequest from prepareaccept\n";
         getRequest();
+        std::cout<<"make service.run from PREPAREACCEPT\n";
         service.run();
     }
+    std::cout<<"END PREPARE ACCEPT\n";
 }
 
 void ICMServer::processICM(const boost::system::error_code& error,std::size_t bytes_transferred, boost::shared_ptr<ip::udp::endpoint> sender,char* databuf)
 {
     try{
     
+	
+	
 	if(!error)
 	{
     	    getRequest();
+    //	    std::cout<<"MAKE PAUSE HERE \n";
+//	int pause;
+//	std::cin>>pause;
         
     	    databuf[bytes_transferred]=0;
         
