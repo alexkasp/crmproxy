@@ -31,5 +31,6 @@ LoggerModule::LoggerModule(std::string logname)
 
 void LoggerModule::makeLog(boost::log::v2s_mt_posix::trivial::severity_level lvl,std::string msg)
 {
-    BOOST_LOG_SEV(lg, lvl) << msg;
+//    if(lvl!=debug)
+	BOOST_LOG_SEV(lg, lvl) << msg;
 }

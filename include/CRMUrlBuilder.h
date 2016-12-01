@@ -11,6 +11,7 @@
 #include <ICMServer.h>
 #include <CDRManager.h>
 #include <DButils.h>
+#include <LoggerModule.h>
 
 class CRMUrlBuilder: public ExecuterInterface
 {
@@ -26,6 +27,7 @@ class CRMUrlBuilder: public ExecuterInterface
 		DButils* db;
 		CDRManager* cdr;
 		ICMServer* icm;
+		LoggerModule* lm;
 		boost::thread_group tgroup;
 		boost::asio::ip::tcp::endpoint ep;
     
@@ -37,7 +39,7 @@ class CRMUrlBuilder: public ExecuterInterface
         
 	public:
 		void sendRequestAndStore(std::string, std::string);
-		CRMUrlBuilder(string server,string port,DButils* _db,ICMServer* _icm = NULL,CDRManager* _cdr = NULL);
+		CRMUrlBuilder(string server,string port,DButils* _db,ICMServer* _icm = NULL,CDRManager* _cdr = NULL,LoggerModule* _lm = NULL);
 		
     
 };

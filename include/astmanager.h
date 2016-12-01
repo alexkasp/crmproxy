@@ -25,6 +25,7 @@ class AsteriskManager
 		AsteriskManager();
 		~AsteriskManager();
 		
+		int onewaycall(std::string testerschema,std::string testedschema,std::string testid);
 		int call(std::string from,std::string to,std::string outline,std::string schema);
 		int callsimple(std::string from,std::string to,std::string outline,std::string schema);
 		int call(std::string from,std::string to);

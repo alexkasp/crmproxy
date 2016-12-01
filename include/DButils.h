@@ -20,6 +20,22 @@ class CDRReport
 	string type;
 };
 
+class TestResult
+{
+    public:
+    int time;
+    int nodetype;
+};
+
+class TestTemplate
+{
+    public:
+    int time;
+    int nodetype;
+    int timediffallow;
+    int checkaction;
+};
+
 class DButils
 {
 	
@@ -50,7 +66,8 @@ class DButils
 	shared_ptr<mysqlpp::Connection> conn;
     public:
 	DButils();
-	
+	int getTestResult(string testid,string callid,vector<TestResult>& result,vector<TestTemplate>& etalon);
+	int getTestById(string testid,string& from,string& to);
 	void addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData);
 	void completeEventReportEntry(string request,string responce,string answerData);
 	

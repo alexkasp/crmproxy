@@ -191,6 +191,22 @@ int AsteriskManager::callWithAnnounce(std::string from,std::string to,std::strin
 		  }
 }
 
+
+int AsteriskManager::onewaycall(std::string testerschema,std::string testedschema,std::string testid)
+{
+    try
+	{
+		init();
+	std::string command = "Action: Originate\r\nChannel: Local/"+testerschema+"@vatsl\r\nExten: "+testedschema+"\r\nContext: vatsl\r\nPriority: 1\r\nVariable: Testcall="+testid+"\r\nActionID: 2\r\n\r\n";
+    
+	_sock->write_some(buffer(command,command.size()));
+	}
+	catch (std::exception& e)
+		  {
+			std::cout<<"CATCH EXCEPTION!!! AsteriskManager::onewaycall(std::string schema)" << e.what() << '\n';
+		  }
+}
+
 int AsteriskManager::call(std::string from,std::string to,std::string schema)
 {
 	try

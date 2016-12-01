@@ -5,6 +5,7 @@
 	ICMSERVER = ./icmserver
 	CDRMANAGER = ./CDRManager
 	FSPROXY = ./fsproxy
+	TESTHEADERS = ./test
 	BUILDHEADERS = -I ./include -I /usr/include/mysql++ -I /usr/include/mysql
 default:
 	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"
@@ -69,4 +70,18 @@ wssmonitor:
 	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
 	
 	g++ -g ${FSPROXY}/*.o ${PROXYHEADERS}/*.o ${ICMSERVER}/*.o ${CDRMANAGER}/*.o ${LOGGER}/*.o ${RECALLHEADERS}/*.o ${BUILDHEADERS} ${MONITORHEADERS}/*.o wsmain.cpp -o wsmain iexecuter.cpp  -std=c++11 -L ./fsproxy/ -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
+	-Wl,-Bstatic -l esl -lboost_system -lboost_random -lboost_regex  -lboost_thread -lboost_date_time -lboost_log -lboost_log_setup -lboost_filesystem -Wl,-Bdynamic -lpthread -lm -lcurl -lrt -lmysqlpp -lmysqlclient
+	
+teststarter:
+	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"
+	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
+	
+	g++ -g ${RECALLHEADERS}/*.o ${BUILDHEADERS} ${PROXYHEADERS}/*.o ${LOGGER}/*.o ${ICMSERVER}/*.o ${CDRMANAGER}/*.o  teststarter.cpp -o teststart iexecuter.cpp -std=c++11 -L ./fsproxy/ -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
+	-Wl,-Bstatic -l esl -lboost_system -lboost_random -lboost_regex  -lboost_thread -lboost_date_time -lboost_log -lboost_log_setup -lboost_filesystem -Wl,-Bdynamic -lpthread -lm -lcurl -lrt -lmysqlpp -lmysqlclient
+	
+autotest:
+	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"
+	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
+	
+	g++ -g ${TESTHEADERS}/*.o ${LOGGER}/*.o ${ICMSERVER}/*.o ${PROXYHEADERS}/*.o ${RECALLHEADERS}/*.o ${CDRMANAGER}/*.o ${BUILDHEADERS}  autotest.cpp -o autotest iexecuter.cpp -std=c++11 -L ./fsproxy/ -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
 	-Wl,-Bstatic -l esl -lboost_system -lboost_random -lboost_regex  -lboost_thread -lboost_date_time -lboost_log -lboost_log_setup -lboost_filesystem -Wl,-Bdynamic -lpthread -lm -lcurl -lrt -lmysqlpp -lmysqlclient

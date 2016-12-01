@@ -225,33 +225,38 @@ void DButils::getCDRReports(vector<CDRReport>& reports,string period)
     query << "select origcallid,callid,responce,request,uniqueid,sendData,type from cdr as a LEFT JOIN crmreport as b  ON b.callid = a.origcallid  where a.calldate > subdate(NOW(), INTERVAL "<<period<<" MINUTE)";
 //    std::cout<<query.str();
     
-    query.parse();
-    mysqlpp::SQLQueryParms parms;
-    parms.push_back( mysqlpp::sql_varchar(period) );
-             
-    if (mysqlpp::StoreQueryResult res = query.store()) 
-     {
-        for(auto it=res.begin();it!=res.end();++it)
+//    query.parse();
+//    mysqlpp::SQLQueryParms parms;
+//    parms.push_back( mysqlpp::sql_varchar(period) );
+    try{         
+	if (mysqlpp::StoreQueryResult res = query.store()) 
         {
+    	    for(auto it=res.begin();it!=res.end();++it)
+    	    {
     	    
-    	    mysqlpp::Row row = *it;
-    	    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
+    		mysqlpp::Row row = *it;
+    		std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
 
-	    CDRReport report;
+		CDRReport report;
 	    
-	    report.origcallid=row[0].data();
-	    report.callid = row[1].data();
-	    report.responce = row[2].data();
-	    report.request = row[3].data();
-	    report.uniqueid=row[4].data();
-	    report.sendData=row[5].data();
-	    report.type = row[6].data();
+		report.origcallid=row[0].data();
+		report.callid = row[1].data();
+		report.responce = row[2].data();
+		report.request = row[3].data();
+		report.uniqueid=row[4].data();
+		report.sendData=row[5].data();
+		report.type = row[6].data();
 	    
-	    reports.push_back(report);
+		reports.push_back(report);
+	    }
 	}
+	else
+	    cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
     }
-    else
-	cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+    catch (std::exception& e)
+    {
+       std::cout<<"ERROR EXCEPTION in getCDRReports "<< e.what()<<"\n";
+    }
 }
 
 void DButils::getCDR(string uniqueid,map<string,string>& data)
@@ -268,32 +273,39 @@ void DButils::getCDR(string uniqueid,map<string,string>& data)
     query << "select label,raiting,newstatus,crmcall from additionaldata where uniqueid='"<<uniqueid<<"'";
     std::cout<<query.str();
     
-    if (mysqlpp::StoreQueryResult res = query.store()) 
-     {
-        for(auto it=res.begin();it!=res.end();++it)
+    try
+    {
+	if (mysqlpp::StoreQueryResult res = query.store()) 
         {
+    	    for(auto it=res.begin();it!=res.end();++it)
+    	    {
     	    
-    	    mysqlpp::Row row = *it;
-    	    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
-	    data["label"]=row[0].data();
-	    data["raiting"] = row[1].data();
-	    data["newstatus"] = row[2].data();
-	    data["crmcall"] = row[3].data();
-	}
-    }	 
+    		mysqlpp::Row row = *it;
+    		std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
+		data["label"]=row[0].data();
+		data["raiting"] = row[1].data();
+		data["newstatus"] = row[2].data();
+		data["crmcall"] = row[3].data();
+	    }
+	}	 
      
-     query << "select isblock from records where callid='"<<uniqueid<<"'";
-    std::cout<<query.str();
+        query << "select isblock from records where callid='"<<uniqueid<<"'";
+	std::cout<<query.str();
     
-    if (mysqlpp::StoreQueryResult res = query.store()) 
-     {
-        for(auto it=res.begin();it!=res.end();++it)
+	if (mysqlpp::StoreQueryResult res = query.store()) 
         {
+    	    for(auto it=res.begin();it!=res.end();++it)
+    	    {
     	    
-    	    mysqlpp::Row row = *it;
-	    data["isblock"]=row[0].data();
+    		mysqlpp::Row row = *it;
+		data["isblock"]=row[0].data();
+	    }
 	}
-    }  
+    }
+    catch (std::exception& e)
+    {
+       std::cout<<"ERROR EXCEPTION in getCDR["<<uniqueid<< "] "<< e.what()<<"\n";
+    }		 	 
      return;
 }
 void DButils::putCDR(map<string,string>& data)
@@ -436,6 +448,117 @@ int DButils::getIncomeCallData(string uniqueid,string& operatorNum)
 
 
 }
+int DButils::getTestResult(string testid,string callid,vector<TestResult>& result,vector<TestTemplate>& etalon)
+{
+    
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getCRMUsers\n";
+        return 0;
+    }
+    cout<<"LOCK ACCEPTED getTestResult v.1\n";
+    string querystr = "select time,nodetype from CallRun where uniqueid = '"+callid+"'";
+    mysqlpp::Query query = conn->query(querystr);
+    cout <<querystr<<"\n"<< query<<"\n";
+     
+    try{ 
+        if (mysqlpp::StoreQueryResult res = query.store()) 
+        {
+    	    for(auto it=res.begin();it!=res.end();++it)
+    	    {
+    		mysqlpp::Row row = *it;
+    		TestResult tr;
+    	    
+    		std::cout<<"getTestResult "<<row[0].data()<<"  "<<row[1].data()<<std::endl;
+    	    
+    		tr.time = row[0];
+    		tr.nodetype = row[1];
+    	    
+    		result.push_back(tr);
+    	    
+    	    
+    	    }
+        }
+        else
+        {
+    	    cout << "DB connection failed: " << conn->error()<< "["<<query.str() << "]\n" << endl;
+    	    return 0;
+        }
+     }
+     catch (std::exception& e)
+    {
+       std::cout << "exception caught in getTestResult(get results): " << e.what() << '\n';
+       return 0;
+    }
+     
+     querystr = "select time,nodetype,timediffallow,checkaction from testcheck where testid = "+testid;
+     mysqlpp::Query queryResult = conn->query(querystr);
+     cout <<querystr<<"\n"<< queryResult<<"\n";
+     try
+     {
+        if (mysqlpp::StoreQueryResult res = queryResult.store()) 
+        {
+    	    for(auto it=res.begin();it!=res.end();++it)
+    	    {
+    		mysqlpp::Row row = *it;
+    		TestTemplate tt;
+    	    
+    		tt.time = row[0];
+    		tt.nodetype = row[1];
+    		tt.timediffallow = row[2];
+    		tt.checkaction = row[3];
+    	    
+    		etalon.push_back(tt);
+    	    
+    		std::cout<<"getTestEtalon "<<row[0].data()<<"  "<<row[1].data()<<std::endl;
+    	    }
+        }
+        else
+        {
+    	    cout << "DB connection failed: " << conn->error()<< "["<<queryResult.str() << "]\n" << endl;
+    	    return 0;
+        }
+     }
+     catch (std::exception& e)
+    {
+       std::cout << "exception caught in getTestREsult(get etalon): " << e.what() << '\n';
+       return 0;
+    }
+     return 1;
+
+}
+
+int DButils::getTestById(string testid,string& from,string& to)
+{
+    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+    if(!Lock)
+    {
+        cout<<"ERROR GET DB LOCK in dbutils getCRMUsers\n";
+        return 0;
+    }
+    cout<<"LOCK ACCEPTED getTestById v.1\n";
+    string querystr = "select treeA,treeB from testlist where id = "+testid;//+testid;
+    mysqlpp::Query query = conn->query(querystr);
+     cout <<querystr<<"\n"<< query<<"\n";
+     
+     if (mysqlpp::StoreQueryResult res = query.store()) 
+     {
+        for(auto it=res.begin();it!=res.end();++it)
+        {
+    	    mysqlpp::Row row = *it;
+    	    from = row[0].data();
+    	    to = row[0].data();
+    	    
+    	    std::cout<<"getTestById "<<row[0].data()<<"  "<<row[1].data()<<std::endl;
+        }
+         return 1;
+     }
+     else
+        cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+     return 0;
+
+}
 
 int DButils::getCrmUsers(map<string,int>& users)
 {
@@ -471,7 +594,7 @@ void DButils::PutRegisterEvent(string id,string number,string status,string addr
     if(!Lock)
     {
         cout<<"ERROR GET DB LOCK in dbutils PutRegisterevent\n";
-        exit(-1);
+        return;
     }
     cout<<"LOCK ACCEPTED\n";
      mysqlpp::Query query = conn->query("insert into RegisterEvents(eventtime,number,status,uid,address) values(Now(),'%0','%1',%2,'%3')");
@@ -511,7 +634,7 @@ int DButils::getUid(map<string,string>& uidToUserId,string uid,string& id)
     if(!Lock)
     {
         cout<<"ERROR GET DB LOCK in dbutils getUid\n";
-        exit(-1);
+        return 0;
     }
     cout<<"LOCK ACCEPTED\n";    
     mysqlpp::Query query = conn->query("select id,uid from UserConfig where uid="+uid);

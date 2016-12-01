@@ -4,7 +4,7 @@
 #include <boost/algorithm/string.hpp>
 #include <curl/curl.h>
 
-CRMUrlBuilder::CRMUrlBuilder(string webserver,string _port,DButils* _db,ICMServer* _icm,CDRManager* _cdr):icm(_icm),cdr(_cdr)
+CRMUrlBuilder::CRMUrlBuilder(string webserver,string _port,DButils* _db,ICMServer* _icm,CDRManager* _cdr,LoggerModule *_lm):icm(_icm),cdr(_cdr),lm(_lm)
 {
     server = webserver;
     port = _port;
@@ -24,6 +24,7 @@ struct callbackParam
 {
     DButils* db;
     string requestId;
+    LoggerModule* lm;
 };
         
 
@@ -32,6 +33,8 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     int answerSize = size*nmemb;
     callbackParam *cbp = (callbackParam*)userdata;
     DButils* db = (DButils*)(cbp)->db;
+    LoggerModule* lm = (LoggerModule*)(cbp)->lm;
+    
     string requestId = (cbp)->requestId;
     delete cbp;
 
@@ -68,6 +71,8 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
             }
         }
 
+	if(lm!=NULL)
+	    lm->makeLog(info,"ANSWER DATA "+answerData);
         db->completeEventReportEntry(requestId,responceId,answerData);
     }
     else
@@ -193,6 +198,7 @@ void CRMUrlBuilder::sendRequestAndStore(string url,string requestId)
     callbackParam* sendParam =new callbackParam();
 
     sendParam->db=db;
+    sendParam->lm = lm;
     sendParam->requestId = requestId;
 
 

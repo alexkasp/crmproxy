@@ -10,6 +10,8 @@ class gatewayData
 	string servid;
 	string gatewayname;
 	string status;
+	int maxtrycount;
+	int buntime;
 
 };
 

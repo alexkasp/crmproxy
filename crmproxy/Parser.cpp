@@ -737,7 +737,7 @@ string Parser::parsedata(ParserData& data)
 	for(auto it=data.begin();it!=data.end();++it)
 	{
 	    lm.makeLog(boost::log::trivial::severity_level::info,"DATA "+(it->first)+"  "+(it->second));
-	    std::cout<<"DATA "<<(it->first)<<"  "<<(it->second)<<"\n";
+	    std::cout<<"DATA ["<<(it->first)<<"]  ["<<(it->second)<<"]\n";
 	}
 	std::cout<<"\n\n";
 	
@@ -768,6 +768,7 @@ string Parser::parsedata(ParserData& data)
 			if(!(data["callbackId"]).empty())
 			    callbackIdList[data["callid"]] = data["callbackId"];
 			    
+			std::cout<<"DEBUG initcall "<<data["src"]<<" "<<data["dst"]<<" "<<data["userid"]<<" "<<data["time"]<<" "<<data["callid"]<<" "<<data["recordfile"]<<" "<<data["usecrm"]<<" "<<data["uidcode"]<<"\n";
 			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["recordfile"],data["usecrm"],data["uidcode"]);
 			
 		}

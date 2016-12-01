@@ -12,18 +12,21 @@ int FSConnector::connect(string servhost,int servport)
     cout<<"processing\n";
 
     esl_send_recv(&handle,"api linger");
-
+    cout<<"api linger\n";
+    
     esl_send_recv(&handle, "event plain ALL\n\n");
+    cout<<"event plain ALL\n";
     
     if (handle.last_sr_event && handle.last_sr_event->body)
     {
-    	printf("%s\n", handle.last_sr_event->body);
+    	cout<<" all OK\n"<<(handle.last_sr_event->body)<<"\n";
     }
      else 
      {
 	    // this is unlikely to happen with api or bgapi (which is hardcoded above) but prefix but may be true for other commands
-        printf("%s\n", handle.last_sr_reply);
+        cout<<"ERROR\n"<<handle.last_sr_reply<<"\n";
     }
+    cout<<"exit from connect\n";
     return 1;
 }
 int FSConnector::readEvents(string& data)

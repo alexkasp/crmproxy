@@ -27,6 +27,7 @@ struct callbackParam
 {
     DButils* db;
     string requestId;
+    LoggerModule *lm;
 };
     
 size_t cdr_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
@@ -34,10 +35,11 @@ size_t cdr_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     callbackParam *cbp = (callbackParam*)userdata;
     
     DButils* db = (DButils*)(cbp)->db;
+    LoggerModule* lm = (LoggerModule*)(cbp)->lm;
     string requestId = (cbp)->requestId;
     
     delete cbp;
-    
+    lm->makeLog(info,"CDRManager cdr_write_callback");
     //{"status":true,"responseId":"146487439569361101"}
     
     int answerSize = size*nmemb;
@@ -53,7 +55,6 @@ size_t cdr_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	size_t pos = 0;
 	while(((pos = json.find(','))!= std::string::npos)||(!json.empty()))
 	{
-//	    std::cout<<"PARSE MSG "<<json<<"\n";
 	
 	    string param = "";    
 	    if(pos == std::string::npos)
@@ -71,19 +72,18 @@ size_t cdr_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     		string paramName = param.substr(1,pos-2);
     		string value = (param.erase(0,pos + 1));
     		
-    		//std::cout<<"PARAMNAME = "<<paramName<<"  value = "<<value<<"\n";
     		
     		if(paramName.compare("responseId")==0)
     		    responceId  = value;
     	    }
 	}
     
-    
+	if(lm!=NULL)
+	    lm->makeLog(info,"AnswerData "+answerData);
 	db->completeEventReportEntry(requestId,responceId,answerData);
     }
     else
 	db->completeEventReportEntry("OJ2Ap3yr","ERROR PARSER","ERROR PARSER");
-//    std::cout<<"WRITE_CALLBACK\n";
     return answerSize;
 }
 
@@ -109,7 +109,7 @@ void CDRManager::keepAlive()
 	}
 	catch (exception& e)
 	{
-    	    cout<<"CATCH EXCEPTION!!!" << e.what() << '\n';
+    	    std::cout<<"CATCH EXCEPTION!!!" << e.what() << '\n';
 	}
     }
     return;
@@ -140,27 +140,25 @@ CDRManager::~CDRManager()
 
 void CDRManager::processCDR(map<string,string> data)
 {
-    std::cout<<"process CDR\n";
+    
     
     for(auto x=data.begin();x!=data.end();++x)
-	std::cout<<(x->first)<<" : "<<(x->second)<<"\n";
+	lm.makeLog(info,(x->first)+" : "+(x->second));
     
     if(data["event"]=="2")
     {
-	std::cout<<"CDRManager::processCDR -> DBWorker.putCDR\n";
+	lm.makeLog(info,"process CDR");
 	putCDR(data);
     }
     else if(data["event"]=="3")
     {
 	addInvolvedNums(data);
     }
-    else
-	std::cout<<"not 2 or 3 event\n";
 }
 
 void CDRManager::addInvolvedNums(map<string,string>& data)
 {
-    std::cout<<"add involved nums\n";
+    lm.makeLog(info,"add involved nums");
     
     string callid = data["call_id"];
     string answeredNum = data["dst_num"];
@@ -183,7 +181,6 @@ void CDRManager::addInvolvedNums(map<string,string>& data)
 
 void CDRManager::putCDR(map<string,string> data)
 {
-    std::cout<<"make query\n";
     string callid = data["call_id"];
     string treeId = data["TreeId"];
     if(treeId.empty())
@@ -198,7 +195,9 @@ void CDRManager::putCDR(map<string,string> data)
     
     string uidcode = data["uidcode"];
     
-    if((src.length()==10)&&(!uidcode.empty())&&(src.substr(0,uidcode.length()).compare(uidcode)!=0))
+    if(data["serverId"]!="101")
+    {
+	if((src.length()==10)&&(!uidcode.empty())&&(src.substr(0,uidcode.length()).compare(uidcode)!=0))
 	{
 	    
 	    src = "8"+src;
@@ -213,11 +212,13 @@ void CDRManager::putCDR(map<string,string> data)
 	    dst = dst.substr(3, string::npos);
 	    dst = "8"+dst;
 	}
+
+    }	
 	
     string recordName = data["call_record_link"];
     int numRecords = !(recordName.empty());
 
-    std::cout<<"Process involvedNums\n";
+/*
     for(auto x=involvedNums.begin();x!=involvedNums.end();++x)
     {
     	std::cout<<(x->first)<<"\n";
@@ -225,11 +226,12 @@ void CDRManager::putCDR(map<string,string> data)
     	for(auto nums=(x->second).begin();nums!=(x->second).end();++nums)
     	    std::cout<<(*nums)<<"\n";
     }
+    */
     string answeredNums = "";
     auto x = involvedNums.find(callid);
     if(x!=involvedNums.end())
     {
-	std::cout<<"start calculate answerednums\n";
+	//std::cout<<"start calculate answerednums\n";
 	vector<string>& nums = x->second;
 	
 	for(auto num=nums.begin();num!=nums.end();++num)
@@ -244,7 +246,7 @@ void CDRManager::putCDR(map<string,string> data)
 	involvedNums.erase(x);
     }
 	
-	std::cout<<"Stop process involvedNums\n";
+//	std::cout<<"Stop process involvedNums\n";
     
     string status = data["status"];
     
@@ -352,7 +354,7 @@ void CDRManager::sendCurlRequest(string url,string requestId)
       curl_easy_strerror(res));
       curl_easy_cleanup(curl);
     }
-    std::cout<<"send url complete\n";
+    lm.makeLog(info,"send url complete");
 }
 
 void CDRManager::sendJsonRequest(string url,string requestId)
@@ -367,12 +369,12 @@ void CDRManager::sendJsonRequest(string url,string requestId)
      just as well be a https:// URL if that is what should receive the
                 data. */ 
     string curlBaseUrl = baseUrl+"/?requestId="+requestId;//"http://wss.sipuni.com:9104";
-    std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
+    lm.makeLog(info,"curlBaseUrl "+curlBaseUrl);
     curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
     /* Now specify the POST data */ 
     string curlUrl = url;
     
-    std::cout<<"curlUrl "<<curlUrl<<std::endl;
+    lm.makeLog(info,"curlUrl "+curlUrl);
     
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, "Accept: application/json");
@@ -386,6 +388,7 @@ void CDRManager::sendJsonRequest(string url,string requestId)
     callbackParam* sendParam =new callbackParam();
     
     sendParam->db=&db;
+    sendParam->lm = &lm;
     sendParam->requestId = requestId;
 
     
@@ -399,7 +402,7 @@ void CDRManager::sendJsonRequest(string url,string requestId)
       curl_easy_strerror(res));
       curl_easy_cleanup(curl);
     }
-    std::cout<<"send url complete\n";
+    lm.makeLog(info,"send url complete");
 }
 
 void CDRManager::sendRequest(string url)
@@ -482,7 +485,7 @@ std::string CDRManager::map2json (const std::map<std::string, std::string>& map)
     string buf = "{"; 
     for (auto& entry: map) 
     {
-	std::cout<<"json decode "<<entry.first<<"  "<<entry.second<<"\n";
+	lm.makeLog(info,"json decode "+entry.first+"  "+entry.second);
 	//pt.put (entry.first, entry.second);
 	
 	buf+="\"";

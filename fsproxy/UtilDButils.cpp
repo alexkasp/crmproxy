@@ -33,7 +33,7 @@ boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::po
                                 cout<<"LOCK ACCEPTED\n";
                                 
     mysqlpp::Query query = conn->query();
-    query << "select login,type,userId,uid,status from static_provs";
+    query << "select login,type,userId,uid,status,buntime from static_provs where extservid=4";
 //    std::cout<<query.str();
     if (mysqlpp::StoreQueryResult res = query.store())
     {
@@ -41,7 +41,7 @@ boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::po
       {	
     	
     	    mysqlpp::Row row = *it;
-    	//    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
+//    	    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
     	    string gatewayname=row[0].data();
     	    gatewayname+=row[2].data();
     	    
@@ -51,6 +51,10 @@ boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::po
     	    gwd.uid = row[3].data();
     	    gwd.login = row[0].data();
     	    gwd.type = row[1].data();
+    	    
+    	    gwd.maxtrycount=3;
+    	    gwd.buntime=row[5];
+    	    
     	    if(strcmp(row[4].data(),"1")==0)
         	gwd.status = "REGED";
 	    else

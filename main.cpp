@@ -26,8 +26,10 @@ int main()
 {
     //string webservaddr = "212.193.100.104";
     string webservaddr = "wss.sipuni.com";
-    cout<<"CDR by NET version 4.33(new ports)\n";
+    cout<<"CDR by NET version 4.4(DB lock withou exit)\n";
+    
     LoggerModule lm;
+    lm.makeLog(info,"Version 5.01. Log updated");
     DButils DBWorker;
     
     if(DBWorker.getAuthParams("/var/lib/asterisk/agi-bin/system_variables.php"))
@@ -82,6 +84,6 @@ int main()
     
     reader.start();
     
-    
+    lm.makeLog(info,"We EXIT unexpectedly");
     return 0;
 }

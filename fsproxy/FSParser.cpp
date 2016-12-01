@@ -15,14 +15,15 @@ string FSParser::unregEvent(string gateway)
     string request = request_str;
     gatewayData gwd = gatewaysList[gateway];
     
+    /*
     auto x = registeredList.find(gateway);
     if(x!=registeredList.end())
     {
         registeredList.erase(x);
         deletedList.insert(make_pair(gateway,gwd));
     }
-    
-    
+    */
+    deletedList.insert(make_pair(gateway,gwd));
     connector.unregLine(gwd.userId,gwd.login);
 
     
@@ -114,16 +115,24 @@ string FSParser::gateway_state_parser(ParserData& data)
 		    		    currentStatusObj.counter++;
 		    	    }
 		    	}
-		    	else if(currentStatusObj.counter==3)
+		    	else
 		    	{
-		    	//    std::cout<<"UNREG!!!!!! SEND \n";
+		    	//    std::cout<<"NOT REGISTERED STATUS\n";
+		    	    int maxtrycount = 3;
+		    	    auto gwd = gatewaysList.find(gateway);
+		    	    if(gwd!=gatewaysList.end())
+		    		maxtrycount = (gwd->second).maxtrycount;
+		    		
+		    	    if(currentStatusObj.counter==maxtrycount)
+		    	    {
+		    		std::cout<<"UNREG!!!!!! SEND \n";
 		    	    
-		    	    request = unregEvent(gateway);
+		    		request = unregEvent(gateway);
 		    	    
 		    	    
 		    	     
+		    	    }
 		    	}
-		    	
 		    }
 		    else
 		    {
@@ -173,6 +182,17 @@ string FSParser::parsedata(ParserData& data)
 FSParser::FSParser(const string str,LoggerModule& _lm,DButils& _DBWorker,FSConnector& _connector):IParser(str,_lm),DBWorker(_DBWorker),connector(_connector)
 {
     (dynamic_cast<UtilDButils&>(DBWorker)).loadGateways(gatewaysList);
+    
+    for(auto x = gatewaysList.begin();x!=gatewaysList.end();)
+    {
+	gatewayData gwd = x->second;
+	std::cout<<" recreate Line "<<gwd.login<<"\n";
+	connector.unregLine(gwd.userId,gwd.login);
+	
+	connector.regLine(gwd.userId,gwd.login);
+	x++;
+    
+    }
     tgroup.create_thread(boost::bind(&FSParser::CheckStateCicle,this));
     tgroup.create_thread(boost::bind(&FSParser::undelLine,this));
     
@@ -189,13 +209,23 @@ void FSParser::undelLine()
 	while(1)
 	{
 	    boost::this_thread::sleep( boost::posix_time::milliseconds(10000));
+	    //std::cout<<"UNDEL LINE CICLE\n";
 	    for(auto x = deletedList.begin();x!=deletedList.end();)
 	    {
-		gatewayData gwd = x->second;
+		gatewayData& gwd = x->second;
+		string gateway = x->first;
 		
-		connector.regLine(gwd.userId,gwd.login);
-		deletedList.erase(x++);
-	    }
+		//std::cout<<"undelLine "<<gwd.login<<" ("<<gwd.buntime<<")\n";
+		
+		if(--gwd.buntime==0)
+		{
+		    connector.regLine(gwd.userId,gwd.login);
+		    registeredList.insert(make_pair(gateway,FSRegStatus::REGSTATUS));
+		    deletedList.erase(x++);
+		}
+		else
+		    x++;
+    	    }
 	}
     
     }
