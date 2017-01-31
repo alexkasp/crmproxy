@@ -67,6 +67,7 @@ class Parser: public IParser
 {
 	string parse_webphoneUUID(string src,string dst,string uid,string timestamp,string callid,string webphoneid);
 	string parse_hangupevent(string callid);
+	string parse_gatewaycall(string src,string dst,string uid);
 	string parse_peerstatus(string peer,string status,string address);
 	string parse_agentcalled(string callid,string agent,string queueid);
 	string parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype,string uidcode);

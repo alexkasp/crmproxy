@@ -373,6 +373,8 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
     string clientNumSub;
     if(clientNum.length()>9)
 	clientNumSub = clientNum.substr(2,clientNum.length());
+    else
+	clientNumSub = clientNum;
     
     queryStr << "select froma,uniqueid, IF(froma like '%"<<clientNum<<"','in','out' ) from cdr where accountcode='"<<userId<<"' and (dst like '%"<<clientNumSub<<"' or froma like '%"<<clientNum<<"') and calldate > DATE_SUB(CURDATE(), INTERVAL 3 month) and accountcode="<<userId<<
     "  and disposition = 'ANSWERED' order by calldate DESC limit 100;";

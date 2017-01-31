@@ -274,7 +274,8 @@ void CDRManager::putCDR(map<string,string> data)
     CDRData["src"] = src;
     CDRData["dst"] = dst;
     CDRData["to2"] = answernum;
-    CDRData["duration"] = data["duration"];
+//    CDRData["duration"] = data["duration"];
+    CDRData["duration"] = std::to_string(std::stoi(data["timestamp"])-std::stoi(data["call_start_timestamp"]));
     CDRData["billsec"] = data["billableseconds"];
     CDRData["disposition"] = status;
     CDRData["uniqueid"] = callid;

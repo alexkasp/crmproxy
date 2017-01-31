@@ -78,8 +78,11 @@ int CallRecord::removeNumber(string num)
 
 int CallRecord::setRecordFile(string filename)
 {
-    if(!filename.empty())
+    std::cout<<"current recordfile = "<<recordfile<<"\n";
+    
+    if(!filename.empty()&&(recordfile.empty()))
     {
+	std::cout<<"try set recordfile "<<filename<<" for "<<callid<<"\n";
 	recordfile = filename;
 	return 1;
     }
@@ -298,7 +301,7 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 	}
 	else
 	{
-	    std::cout<<"SET RECORDFILE = "<<recordfile<<endl;
+	    std::cout<<"SET RECORDFILE = "<<recordfile<<"instead of "<<call.getrecordfile()<<endl;
 	    call.setRecordFile(recordfile);
 	    
 	    currentCalls.updateCall(callid,call);
@@ -540,6 +543,16 @@ string Parser::parse_transfercall(string src,string dst,string uid,string timest
 
 }
 
+string Parser::parse_gatewaycall(string src,string dst,string callid)
+{
+    string request = request_str;
+    request+="0&event=7&call_id=";
+    request+=callid;
+    request+="&dst=";
+    request+=dst;
+    return request;
+}
+
 string  Parser::clearStorage(map<string,string>& storage,string key)
 {
 	auto it = storage.find(key);
@@ -734,13 +747,13 @@ void Parser::parse_setcallbackId(string callid,string callbackId)
 
 string Parser::parsedata(ParserData& data)
 {
-	for(auto it=data.begin();it!=data.end();++it)
+/*	for(auto it=data.begin();it!=data.end();++it)
 	{
 	    lm.makeLog(boost::log::trivial::severity_level::info,"DATA "+(it->first)+"  "+(it->second));
 	    std::cout<<"DATA ["<<(it->first)<<"]  ["<<(it->second)<<"]\n";
 	}
 	std::cout<<"\n\n";
-	
+*/	
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{
@@ -792,7 +805,10 @@ string Parser::parsedata(ParserData& data)
 		{
 		    parse_mergecall(data["newcallid"],data["callid"]);
 		}
-		
+		if(data["UserEvent:"] == "gatewaycall")
+		{
+		    str = parse_gatewaycall(data["src"],data["dst"],data["callid"]);
+		}
 		if((data["callbackId"]).empty())
 		{
 		    auto x = callbackIdList.find(data["callid"]);
@@ -823,7 +839,7 @@ string Parser::parsedata(ParserData& data)
 	else
 	    return str;
 	
-	if((!str.empty())&&(data["UserEvent:"]!="finishcall")&&(data["Event:"]!="Cdr")&&(data["UserEvent:"]!="answercall")&&(data["Event:"]!="Hangup:"))
+	if((!str.empty())&&(data["UserEvent:"]!="finishcall")&&(data["UserEvent:"]!="gatewaycall")&&(data["Event:"]!="Cdr")&&(data["UserEvent:"]!="answercall")&&(data["Event:"]!="Hangup:"))
 	{    
 		str += "&TreeId=";
 		str += data["TreeId"];
