@@ -39,7 +39,7 @@ size_t cdr_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     string requestId = (cbp)->requestId;
     
     delete cbp;
-    lm->makeLog(info,"CDRManager cdr_write_callback");
+    lm->makeLog(info,"CDRManager cdr_write_callback"+requestId);
     //{"status":true,"responseId":"146487439569361101"}
     
     int answerSize = size*nmemb;
@@ -79,11 +79,14 @@ size_t cdr_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 	}
     
 	if(lm!=NULL)
-	    lm->makeLog(info,"AnswerData "+answerData);
+	    lm->makeLog(info,"AnswerData for "+requestId+"\n "+answerData);
 	db->completeEventReportEntry(requestId,responceId,answerData);
     }
     else
+    {
+	lm->makeLog(info,"AnswerData for "+requestId+" is missing!!!");
 	db->completeEventReportEntry("OJ2Ap3yr","ERROR PARSER","ERROR PARSER");
+    }
     return answerSize;
 }
 
@@ -195,7 +198,7 @@ void CDRManager::putCDR(map<string,string> data)
     
     string uidcode = data["uidcode"];
     
-    if(data["serverId"]!="101")
+    if((data["serverId"]!="101")&&(data["serverId"]!="102"))
     {
 	if((src.length()==10)&&(!uidcode.empty())&&(src.substr(0,uidcode.length()).compare(uidcode)!=0))
 	{

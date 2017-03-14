@@ -1,4 +1,6 @@
 #include <Parser.h>
+#include<ctime>
+#include <chrono>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -46,13 +48,34 @@ const string& CallRecord::getrecordfile() const
 	return recordfile;
 }
 
+const string& CallRecord::getuserid() const
+{
+    return userid;
+}
+
+const string& CallRecord::getsrctype() const
+{
+    return srctype;
+}
+
+const string& CallRecord::getTreeId() const
+{
+    return treeid;
+}
+
+const string& CallRecord::getChannel() const
+{
+    return channel;
+}
+
+
 CallRecord::~CallRecord(void)
 {
 	cout<<"CallRecords delete for "<<dst<<endl;
 }
 
-CallRecord::CallRecord(string _src,string _dst,string _timestamp,string _recordfile):
-	dst(_dst),src(_dst),timestamp(_timestamp),recordfile(_recordfile)
+CallRecord::CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string _uid,string _userid,string _srctype,string _treeid,string _channel):
+	dst(_dst),src(_dst),timestamp(_timestamp),recordfile(_recordfile),uid(_uid),userid(_userid),srctype(_srctype),treeid(_treeid),channel(_channel)
 {
 	cout<<"Create Call"<<dst<<endl;
 }
@@ -110,7 +133,7 @@ int CallRecords::size()
     return callList.size();
 }
 
-void CallRecords::addCall(string callid,string src,string dst,string timestamp,string recordfile)
+void CallRecords::addCall(string callid,string src,string dst,string timestamp,string recordfile,string uid,string uidcode,string srctype,string treeid,string channel)
 {
     boost::mutex::scoped_lock lock(CallLock);
     
@@ -119,7 +142,7 @@ void CallRecords::addCall(string callid,string src,string dst,string timestamp,s
     if(it!=callList.end())
 	return;
 	
-    CallRecord cr(src,dst,timestamp,recordfile);
+    CallRecord cr(src,dst,timestamp,recordfile,uidcode,uid,srctype,treeid,channel);
     
     std::cout<<"ADD CALL with "<<callid<<" src="<<src<<" dst="<<dst<<" time="<<timestamp<<"\n";
     
@@ -281,7 +304,7 @@ string Parser::format_srcdstnum(string src,string dst,string uidcode)
 	result+=parse_numtype(dst,uidcode);
 	return result;
 }
-string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode)
+string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,string channel)
 {
 
 	string request = request_str;
@@ -297,7 +320,7 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 	CallRecord call;
 	if(!currentCalls.getCall(callid,call))
 	{
-	    currentCalls.addCall(callid,src,dst,timestamp,recordfile);
+	    currentCalls.addCall(callid,src,dst,timestamp,recordfile,uid,uidcode,parse_numtype(src,uidcode),treeid,channel);
 	}
 	else
 	{
@@ -374,7 +397,7 @@ string Parser::parse_incomecall(string src,string dst,string uid,string timestam
 	return request;
 }
 
-string Parser::parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode)
+string Parser::parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode,string channel)
 {
 	//int src_type = (src.length()<10)+1;
 	//int dst_type = (dst.length()<10)+1;
@@ -386,6 +409,8 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&timestamp=";
 	request+=timestamp;
+	request+="&channel=";
+	request+=channel;
 	if(usecrm=="1")
 	{
 	    return request;
@@ -405,6 +430,22 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	
 	
 	return request;
+}
+
+string Parser::parse_queuecall(string src,string dst,string uid,string timestamp,string callid,string srctype,string uidcode)
+{
+    return "";
+}
+
+string Parser::parse_agentcalled(string src,string dst,string callid)
+{
+	string request = request_str;
+	CallRecord call;
+	if(currentCalls.getCall(callid,call))
+	{
+		return parse_incomecall(src,dst,call.getuserid(),"1111",callid,call.getsrctype(),call.getuid());
+	}
+	
 }
 
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string usecrm,string uidcode)
@@ -492,6 +533,7 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	        //clearCallEnviroment(callid);
 	        event2CDRstorage.erase(cdrdata);
 	        event2store+="&parsertask=finish";
+	        std::cout<<"FINISH CALL: ADD REPORTED CALL "<<callid<<"\n";
 	        reportedCall[callid]=request;
 	        return event2store;
 	    }
@@ -667,7 +709,7 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	
 	    std::cout<<"cdr event "<<request<<"\n";
 	    request+="&parsetask=cdrevent";
-	    
+	    std::cout<<"ADD REPORTED CALL "<<callid<<"\n";
 	    reportedCall[callid]=request;
 	    
 	}
@@ -692,6 +734,7 @@ const CallRecords& Parser::getCallRecords() const
 	return currentCalls;
 }
 
+/*
 string Parser::parse_agentcalled(string callid,string agent,string queueid)
 {
     
@@ -713,7 +756,7 @@ string Parser::parse_agentcalled(string callid,string agent,string queueid)
     }
     return "";
 }
-
+*/
 /*
 boost::timed_mutex::scoped_lock&& Parser::getCDRLock()
 {
@@ -747,13 +790,14 @@ void Parser::parse_setcallbackId(string callid,string callbackId)
 
 string Parser::parsedata(ParserData& data)
 {
-/*	for(auto it=data.begin();it!=data.end();++it)
+	lm.makeLog(boost::log::trivial::severity_level::info,"EVENT DATA "+data["Event:"]);
+	for(auto it=data.begin();it!=data.end();++it)
 	{
 	    lm.makeLog(boost::log::trivial::severity_level::info,"DATA "+(it->first)+"  "+(it->second));
 	    std::cout<<"DATA ["<<(it->first)<<"]  ["<<(it->second)<<"]\n";
 	}
 	std::cout<<"\n\n";
-*/	
+	
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{
@@ -766,6 +810,11 @@ string Parser::parsedata(ParserData& data)
 			 str = parse_incomecall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["srctype"],data["uidcode"]);
 			
 		}
+		if(data["UserEvent:"]=="queuecall")
+		{
+			 str = parse_queuecall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["srctype"],data["uidcode"]);
+			
+		}
 		if(data["UserEvent:"]=="outcall")
 		{
 			 str = parse_outcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["uidcode"]);
@@ -773,7 +822,7 @@ string Parser::parsedata(ParserData& data)
 		}
 		if(data["UserEvent:"]=="answercall")
 		{
-			 str = parse_answercall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["calltype"],data["usecrm"],data["uidcode"]);
+			 str = parse_answercall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["calltype"],data["usecrm"],data["uidcode"],data["ChannelName"]);
 			
 		}
 		if(data["UserEvent:"]=="initcall")
@@ -782,18 +831,78 @@ string Parser::parsedata(ParserData& data)
 			    callbackIdList[data["callid"]] = data["callbackId"];
 			    
 			std::cout<<"DEBUG initcall "<<data["src"]<<" "<<data["dst"]<<" "<<data["userid"]<<" "<<data["time"]<<" "<<data["callid"]<<" "<<data["recordfile"]<<" "<<data["usecrm"]<<" "<<data["uidcode"]<<"\n";
-			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["recordfile"],data["usecrm"],data["uidcode"]);
+			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["recordfile"],data["usecrm"],data["uidcode"],data["TreeId"],data["ChannelName"]);
 			
 		}
 		if(data["UserEvent:"]=="transfercall")
 		{
 			processTransfer(data["Uniqueid:"],data["callid"],data["recordfile"]);
-			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],"",data["usecrm"],data["uidcode"]);
+			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],"",data["usecrm"],data["uidcode"],data["TreeId"],data["ChannelName"]);
 			
 		}
 		if(data["UserEvent:"]=="finishcall")
 		{
-			 str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"],data["TreeId"],data["ChannelName"],data["serverId"],data["recordfile"],data["label"],data["rating"],data["usecrm"],data["uidcode"]);
+			int skipfinish = 0;
+			if(data["callbacktype"].compare("CallBackTreeReverse")==0)
+			{
+			    if(!(data["newexten"]).empty())
+			    {
+				if(data["dialstatus"].compare("CANCEL")==0)
+				{
+				    
+				    data["callanswer"]="0";
+				    data["status"]="NOANSWER";
+				    parse_cdrevent(data["callid"],data["newexten"],"0","0",data["callstart"],data["time"],data["callbacktype"]);
+				    
+				}
+				else
+				{
+				    std::string duration = "0";
+				    if((!(data["time"]).empty())&&((data["callstart"]).empty()))
+					duration =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callstart"]));
+				    parse_cdrevent(data["callid"],data["newexten"],duration,duration,data["callstart"],data["time"],data["callbacktype"]);
+				}
+				data["dst"] = data["newexten"];
+			    }
+			    else if((data["status"].compare("NOANSWER")==0)||(data["status"].compare("CHANUNAVAIL")==0))
+			    {
+				data["callanswer"]="0";
+				data["status"]="NOANSWER";
+				string formdst = data["uidcode"]+"001";
+				parse_cdrevent(data["callid"],formdst,"0","0",data["callstart"],data["time"],data["callbacktype"]);
+				data["dst"]=formdst;
+			    }
+			    else
+				skipfinish = 1;
+			}
+			else if(data["callbacktype"].compare("standart")==0)
+			{
+			    if(data["dialstatus"].compare("ANSWER")!=0)
+			    {
+				string formdst = data["uidcode"]+"001";
+				parse_cdrevent(data["callid"],data["dst"],"0","0",data["callstart"],data["time"],data["callbacktype"]);
+				data["dst"]=formdst;
+			    }
+			    
+			    if((data["dst"]).empty())
+				data["dst"] = data["src"];
+			}
+			else if(data["callbacktype"].compare("crmredirect")==0)
+			{
+			    std::string duration = "0";
+			    std::string billsec = "0";
+			    if((!(data["time"]).empty())&&(!(data["callstart"]).empty()))
+    				duration =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callstart"]));
+			    if((!(data["time"]).empty())&&(!(data["callanswer"]).empty())&&(data["callanswer"].compare("0")!=0))
+				billsec =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callanswer"]));
+			    parse_cdrevent(data["callid"],data["dst"],duration,billsec,data["callstart"],data["time"],data["callbacktype"]);
+			}
+			
+			
+			if(!skipfinish)    
+			    str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"],data["TreeId"],data["ChannelName"],data["serverId"],data["recordfile"],data["label"],data["rating"],data["usecrm"],data["uidcode"]);
+			else
+			    str = "";
 			
 		}
 		if (data["UserEvent:"] == "finish_transfer")
@@ -824,6 +933,24 @@ string Parser::parsedata(ParserData& data)
 		    str+= data["callbackId"];
 		}
 	}
+	else if(data["Event:"] == "AgentCalled")
+	{
+		std::cout<<"AGENT CALLED\n\n\n";
+	    	string request = request_str;
+		CallRecord call;
+		string callid = data["Uniqueid:"];
+		if(currentCalls.getCall(callid,call))
+		{
+		    std::cout<<"FIND CALL\n";
+		    data["TreeId"] = call.getTreeId();
+		    data["ChannelName"] = call.getChannel();
+		    auto millis = std::time(0);
+		    str =  parse_incomecall(data["CallerIDNum:"],data["AgentName:"],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid());
+		
+		}
+		else
+		    std::cout<<"NO CALL FOUND\n";
+	}
 	else if(data["Event:"] == "Cdr")
 	{
 		str = parse_cdrevent(data["UniqueID:"],data["Destination:"],data["Duration:"],data["BillableSeconds:"],data["StartTime:"],data["EndTime:"],data["DestinationContext:"]);
@@ -832,10 +959,10 @@ string Parser::parsedata(ParserData& data)
 	{
 		str = parse_hangupevent(data["Uniqueid:"]);
 	}*/
-	else if(data["Event:"] == "AgentCalled")
+/*	else if(data["Event:"] == "AgentCalled")
 	{
 		str = parse_agentcalled(data["Uniqueid:"],data["AgentName:"],data["Queue:"]);
-	}
+	}*/
 	else
 	    return str;
 	

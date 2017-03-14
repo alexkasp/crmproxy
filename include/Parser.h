@@ -22,15 +22,19 @@ class CallRecord
 	string dst;
 	string src;
 	string uid;
+	string srctype;
+	string userid;
 	string callid;
 	string timestamp;
 	string recordfile;
+	string treeid;
+	string channel;
 	
 	set<string> involvedNumbers;
 	
 public:
 	CallRecord();
-	CallRecord(string _src,string _dst,string _timestamp,string _recordfile);
+	CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string userid,string uid,string srctype,string treeid,string channel);
 	~CallRecord();
 	int addNumber(string);
 	int removeNumber(string);
@@ -41,6 +45,10 @@ public:
 	const string& getcallid() const;
 	const string& gettimestamp() const;
 	const string& getrecordfile() const;
+	const string& getuserid() const;
+	const string& getsrctype() const;
+	const string& getTreeId() const;
+	const string& getChannel() const;
 };
 
 class CallRecords
@@ -54,7 +62,7 @@ class CallRecords
 	int size();
 	CallRecords();
 	void updateCall(string callid,CallRecord cr);
-	void addCall(string callid,string src,string dst,string timestamp,string recordfile);
+	void addCall(string callid,string src,string dst,string timestamp,string recordfile,string uid,string uidcode,string srctype,string treeid,string channel);
 	void removeCall(string callid);
 	int getCall(string callid,CallRecord& cr);
 	boost::mutex& getLock();
@@ -65,16 +73,17 @@ class CallRecords
 
 class Parser: public IParser
 {
+	string parse_queuecall(std::string, std::string, std::string, std::string, std::string, std::string, std::string);
 	string parse_webphoneUUID(string src,string dst,string uid,string timestamp,string callid,string webphoneid);
 	string parse_hangupevent(string callid);
 	string parse_gatewaycall(string src,string dst,string uid);
 	string parse_peerstatus(string peer,string status,string address);
 	string parse_agentcalled(string callid,string agent,string queueid);
 	string parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype,string uidcode);
-	string parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode);
+	string parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode,string channel);
 	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype,string callbackId,string TreeID,string ChannelName,string serverId,string recordfile,string label,string rating,string usecrm,string uidcode);
 	string parse_transfercall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
-	string parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode);
+	string parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,string channel);
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 	string parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid,string uidcode);
 	string parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string DestinationContext);
