@@ -15,6 +15,7 @@ class MergedCalls
     
     void addMergedCall(string newcallid,string callid);
     string getMergedCall(string callid);
+    string getParentCall(string callid);
     void eraseMergedCall(string callid);
     int getSize();
     void print();

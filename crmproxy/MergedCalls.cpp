@@ -30,6 +30,17 @@ void MergedCalls::print()
 	std::cout<<"MergedCalls "<<(it->first)<<"  "<<(it->second)<<"\n";
 }
 
+string MergedCalls::getParentCall(string callid)
+{
+    boost::mutex::scoped_lock lock(Lock);
+    for(auto x = callList.begin();x!=callList.end();++x)
+    {
+	if((x->second).compare(callid)==0)	
+	    return x->first;
+    }
+    return "";
+}
+
 string MergedCalls::getMergedCall(string callid)
 {
     boost::mutex::scoped_lock lock(Lock);

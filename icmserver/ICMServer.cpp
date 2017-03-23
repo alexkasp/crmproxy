@@ -90,13 +90,13 @@ void ICMServer::solveRequest(string strData,boost::shared_ptr<ip::udp::endpoint>
         strData.erase(0, pos + delimiter.length());
         aNumber=convertNumber(strData);
         
-        CDRData cdr("Empty","Empty");
+        CDRData cdr("Empty","Empty","Empty");
         if(storage.getCDRData(userId,aNumber,cdr))
             icmMSG = cdr.operatorNum;
         else if(db.getCallData(userId,aNumber,icmMSG)>0)
         {
     	    int status = 0;
-    	    if((status = storage.putCDRData("unknown",userId,aNumber,icmMSG))<1)
+    	    if((status = storage.putCDRData("unknown",userId,aNumber,icmMSG,"fromDB"))<1)
     		std::cout<<"ERROR PUT CDR "<<status<<"\n";
         }    
         

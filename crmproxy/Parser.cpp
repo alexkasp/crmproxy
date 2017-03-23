@@ -858,7 +858,7 @@ string Parser::parsedata(ParserData& data)
 				else
 				{
 				    std::string duration = "0";
-				    if((!(data["time"]).empty())&&((data["callstart"]).empty()))
+				    if((!(data["time"]).empty())&&(!(data["callstart"]).empty()))
 					duration =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callstart"]));
 				    parse_cdrevent(data["callid"],data["newexten"],duration,duration,data["callstart"],data["time"],data["callbacktype"]);
 				}
@@ -874,6 +874,12 @@ string Parser::parsedata(ParserData& data)
 			    }
 			    else
 				skipfinish = 1;
+			}
+			else if(data["callbacktype"].compare("CallBackReverse")==0)
+			{
+			//    std::string prevcallid = data["callid"];
+			//    data["callid"] = mergedCalls.getParentCall(data["callid"]);
+			//    std::cout<<"PREV CALLID = "<<prevcallid<<" new callid "<<data["callid"]<<"\n";
 			}
 			else if(data["callbacktype"].compare("standart")==0)
 			{
@@ -953,6 +959,8 @@ string Parser::parsedata(ParserData& data)
 	}
 	else if(data["Event:"] == "Cdr")
 	{
+	    if(data["DestinationContext:"]=="vatscallbackreverse")
+	    data["UniqueID:"] = mergedCalls.getMergedCall(data["UniqueID:"]);
 		str = parse_cdrevent(data["UniqueID:"],data["Destination:"],data["Duration:"],data["BillableSeconds:"],data["StartTime:"],data["EndTime:"],data["DestinationContext:"]);
 	}
 /*	else if(data["Event:"] == "Hangup")

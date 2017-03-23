@@ -17,7 +17,7 @@ int ICMStorage::getCDRData(string userId,string aNum,CDRData& data)
         if(numData!=(clientMap->second).end())
         {
             data = numData->second;
-            std::cout<<"FIND operator "<<data.operatorNum<<"\n";
+            std::cout<<"FIND operator "<<data.operatorNum<<"  "<<data.callid<<" from  "<<data.clientNum<<"\n";
             return 1;
         }
         std::cout<<"NO SUCH NUMBER\n";
@@ -26,7 +26,7 @@ int ICMStorage::getCDRData(string userId,string aNum,CDRData& data)
     std::cout<<"NOT USER CALL at all\n";
     return 0;
 }
-int ICMStorage::putCDRData(string calldate,string userId,string aNum,string operatorNum)
+int ICMStorage::putCDRData(string calldate,string userId,string aNum,string operatorNum,string callid)
 {
 
     if(!userId.empty())
@@ -66,10 +66,14 @@ int ICMStorage::putCDRData(string calldate,string userId,string aNum,string oper
             {
                 (numData->second).calldate = calldate;
                 (numData->second).operatorNum = operatorNum;
+                (numData->second).callid = callid;
+                (numData->second).clientNum = aNum;
+                std::cout<<"UPDATE CDRDATA "<<(numData->second).calldate<<" "<<(numData->second).operatorNum<<" "<<(numData->second).callid<<" "<<(numData->second).clientNum<<"\n";
             }
             else
             {
-        	CDRData cdr(calldate,operatorNum);
+        	CDRData cdr(calldate,operatorNum,callid);
+        	std::cout<<"ADD CDRDATA "<<calldate<<" "<<operatorNum<<" "<<callid<<" for "<<clientNum<<"\n";
                 (clientMap->second).insert(make_pair(clientNum,cdr));
             }
             
@@ -86,5 +90,5 @@ int ICMStorage::putCDRData(map<string,string> rawData)
 {
     for(auto x=rawData.begin();x!=rawData.end();++x)
 	std::cout<<(x->first)<<" : "<<(x->second)<<"\n";
-    return putCDRData(rawData["call_start_timestamp"],rawData["userId"],rawData["src_num"],rawData["dst_num"]);
+    return putCDRData(rawData["call_start_timestamp"],rawData["userId"],rawData["src_num"],rawData["dst_num"],rawData["UniqueID"]);
 }
