@@ -73,7 +73,6 @@ DButils::DButils()
 {
     cout<<"try to create connection object"<<endl;
     conn = shared_ptr<mysqlpp::Connection>(new mysqlpp::Connection(false));
-    
     cout<<"it is OK"<<endl;
 }
 
@@ -662,7 +661,14 @@ int DButils::connect()
      if (conn->connect(db.c_str(),host.c_str(),login.c_str(),pass.c_str()))
      {
         mysqlpp::Query query = conn->query("set names utf8");
+	    try{
 	query.execute();
+    }
+     catch (std::exception& e)
+       {
+           std::cout << "exception caught: " << e.what() << '\n';
+             }
+
         return 1;
      }
      else{

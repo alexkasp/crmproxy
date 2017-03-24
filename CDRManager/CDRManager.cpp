@@ -193,7 +193,19 @@ void CDRManager::putCDR(map<string,string> data)
     //if(data["calltype"]=="out")
 //	src = data["dst_num"];
     
-    string dst = data["destination"];
+    string calltype = data["calltype"];
+    string dst;
+    string destinationcontext;
+    if((calltype == "callback_standart")&&(data["status"]=="ANSWER"))
+    {
+	dst = data["dst_num"];
+	destinationcontext = "vatsout";
+    }
+    else
+    {
+	destinationcontext = data["DestinationContext"];
+ 	dst = data["destination"];
+    }
     string answernum = data["dst_num"];
     
     string uidcode = data["uidcode"];
@@ -287,7 +299,7 @@ void CDRManager::putCDR(map<string,string> data)
     CDRData["answertime"] = data["call_answer_timestamp"];
     CDRData["treeId"] = treeId;
     CDRData["userId"] = data["userId"];
-    CDRData["context"] = data["DestinationContext"];
+    CDRData["context"] = destinationcontext;
     CDRData["serverId"] = data["serverId"];
     CDRData["isBlock"] = additionalData["isblock"];
     CDRData["callapiorder"] = data["callbackId"];
