@@ -74,6 +74,30 @@ DButils::DButils()
     cout<<"try to create connection object"<<endl;
     conn = shared_ptr<mysqlpp::Connection>(new mysqlpp::Connection(false));
     cout<<"it is OK"<<endl;
+    cout<<"try to create redis connection object"<<endl;
+    unsigned int j;
+    redisReply *reply;
+    struct timeval timeout = { 1, 500000 }; // 1.5 seconds
+    redis = redisConnectWithTimeout("127.0.0.1", 6379, timeout);
+    if (redis == NULL || redis->err)
+    {
+	if (redis)
+	{
+    	    printf("Connection error: %s\n", redis->errstr);
+	    redisFree(redis);
+	}
+        else 
+	{
+	    printf("Connection error: can't allocate redis context\n");
+	}
+	exit(1);
+    }
+}
+
+DButils::~DButils()
+{
+    
+    redisFree(redis);
 }
 
 int DButils::getUidList(map<string,string>& uidToUserId)
@@ -111,8 +135,6 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
     cout<<"LOCK ACCEPTED\n";
     std::cout<<"START addSendEventReportEntry\n";
     std::cout<<"addSendEventReportEntry\n";
-//    int a=0;
-//    cin>>a;
     
     if(callid.empty())
 	callid="empty";
@@ -127,33 +149,29 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
     if(type.empty())
 	type = "100";
 	
-    
-    
-//     mysqlpp::Query query = conn->query("insert into crmreport(callid,request,sendtime,ats,userid,type,sendData) values('%0','%1',Now(),%2,%3,%4,'%5')");
-      mysqlpp::Query query = conn->query("insert into crmreport(callid,request,sendtime,ats,userid,type,sendData) values('"+callid+"','"+request+"',Now(),"+ats+","+userid+","+type+",'"+sendData+"')");
-     cout << query << " filling ...\n"; // this line supress the bug
-/*     query.parse();
-     mysqlpp::SQLQueryParms parms;
-     
-     
-    parms.push_back( mysqlpp::sql_varchar(callid) ); 
-    parms.push_back( mysqlpp::sql_varchar(request) ); 
-    parms.push_back( mysqlpp::sql_varchar( ats ) );
-    parms.push_back( mysqlpp::sql_varchar(userid) ); 
-    parms.push_back( mysqlpp::sql_varchar(type) );*/
-//    parms.push_back( mysqlpp::sql_varchar(sendData) );  
-    /*
     try
-    {
-	if(!query.execute( parms ))
-	{
-	    cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
-	                
-	}
-    }
-    */
-    try{
-	query.execute();
+    {	
+    
+     redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"sadd calls %s", callid.c_str()));
+     printf("SET: %s\n", reply->str);
+     freeReplyObject(reply);
+	 
+     reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "request",request.c_str()));
+     printf("SET: %s\n", reply->str);
+     freeReplyObject(reply);
+        
+     reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "userid",userid.c_str()));
+     printf("SET: %s\n", reply->str);
+     freeReplyObject(reply);
+    
+     reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "type",type.c_str()));
+     printf("SET: %s\n", reply->str);
+     freeReplyObject(reply);
+    
+     reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "sendData",sendData.c_str()));
+     printf("SET: %s\n", reply->str);
+     freeReplyObject(reply);         
+    
     }
      catch (std::exception& e)
        {
@@ -165,7 +183,7 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
     return;
 }
 
-void DButils::completeEventReportEntry(string request,string responce,string answerData)
+void DButils::completeEventReportEntry(string callid,string responce,string answerData)
 {
     return;
     boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
@@ -175,37 +193,28 @@ void DButils::completeEventReportEntry(string request,string responce,string ans
         return;
     }
     cout<<"LOCK ACCEPTED\n";
-     if(request.empty())
-        request="empty";
      if(responce.empty())
         responce="empty";
     if(answerData.empty())
 	answerData = "empty";
 
      std::cout<<"completeEventReportEntry\n";
-     mysqlpp::Query query = conn->query("update crmreport set responce = '"+responce+"',answertime = Now(), answerData = '"+answerData+"' where request = '"+request+"'");
-     //mysqlpp::Query query = conn->query("update crmreport set responce = '%0',answertime = Now() where request = '%2'");
-     cout << query << " filling ...\n";
-     query.parse();
-     mysqlpp::SQLQueryParms parms;
      
     try
     { 
-	parms.push_back( mysqlpp::sql_varchar(responce) ); 
-//	parms.push_back( mysqlpp::sql_varchar(answerData) ); 
-	parms.push_back( mysqlpp::sql_varchar( request ) );
+        redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "responce",responce.c_str()));
+        printf("SET: %s\n", reply->str);
+        freeReplyObject(reply);
+        
+	reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "answerData",answerData.c_str()));
+	printf("SET: %s\n", reply->str);
+        freeReplyObject(reply);
     
-	if(!query.execute( parms ))
-	{
-	    cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
-		            //    exit(0);
-	                
-	}
     }
     catch (std::exception& e)
     {
        std::cout << "exception caught in completeEventReportEntry: " << e.what() << '\n';
-       std::cout << " request = "<< request << "responce " << responce <<"\n"<<answerData<<"\n";
+       std::cout << " callid = "<< callid << "responce " << responce <<"\n"<<answerData<<"\n";
     }                             
     return;
 }
@@ -219,38 +228,52 @@ void DButils::getCDRReports(vector<CDRReport>& reports,string period)
         return;
     }
     cout<<"LOCK ACCEPTED\n";
-    mysqlpp::Query query = conn->query();
-    
-    query << "select origcallid,callid,responce,request,uniqueid,sendData,type from cdr as a LEFT JOIN crmreport as b  ON b.callid = a.origcallid  where a.calldate > subdate(NOW(), INTERVAL "<<period<<" MINUTE)";
-//    std::cout<<query.str();
-    
-//    query.parse();
-//    mysqlpp::SQLQueryParms parms;
-//    parms.push_back( mysqlpp::sql_varchar(period) );
-    try{         
-	if (mysqlpp::StoreQueryResult res = query.store()) 
-        {
-    	    for(auto it=res.begin();it!=res.end();++it)
-    	    {
-    	    
-    		mysqlpp::Row row = *it;
-    		std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
 
-		CDRReport report;
+    try{
+	         
+	    CDRReport report;
 	    
-		report.origcallid=row[0].data();
-		report.callid = row[1].data();
-		report.responce = row[2].data();
-		report.request = row[3].data();
-		report.uniqueid=row[4].data();
-		report.sendData=row[5].data();
-		report.type = row[6].data();
+	    redisReply* Callsreply = static_cast<redisReply*>(redisCommand(redis,"smembers calls"));
 	    
+	    for (int j = 0; j < Callsreply->elements; j++)
+	    {
+	        printf("%u) %s\n", j, Callsreply->element[j]->str);
+	     
+		redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s callid",Callsreply->element[j]->str));
+		printf(": %s\n", reply->str);
+		report.origcallid=reply->str;
+		report.callid = reply->str;
+	    
+		reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s responce",Callsreply->element[j]->str));
+		printf(": %s\n", reply->str);
+		report.responce = reply->str;;
+	    
+		reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s request",Callsreply->element[j]->str));
+		printf(": %s\n", reply->str);
+		report.request = reply->str;;
+	    
+	//    redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s request",Callsreply->element[j]->str));
+	//    printf(": %s\n", reply->string);
+	//    report.uniqueid=row[4].data();
+	    
+		reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s sendData",Callsreply->element[j]->str));
+		printf(": %s\n", reply->str);
+		report.sendData=reply->str;;
+	    
+		reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s type",Callsreply->element[j]->str));
+		printf(": %s\n", reply->str);
+		report.type = reply->str;;
+    
 		reports.push_back(report);
+	     
+	     
+	        freeReplyObject(reply);
 	    }
-	}
-	else
-	    cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+	     
+	    freeReplyObject(Callsreply);
+	                                                                                      
+	    
+    
     }
     catch (std::exception& e)
     {
@@ -269,12 +292,12 @@ void DButils::getCDR(string uniqueid,map<string,string>& data)
     cout<<"LOCK ACCEPTED\n";    
     mysqlpp::Query query = conn->query();
     
-    query << "select label,raiting,newstatus,crmcall from additionaldata where uniqueid='"<<uniqueid<<"'";
-    std::cout<<query.str();
+//    query << "select label,raiting,newstatus,crmcall from additionaldata where uniqueid='"<<uniqueid<<"'";
+//    std::cout<<query.str();
     
     try
     {
-	if (mysqlpp::StoreQueryResult res = query.store()) 
+/*	if (mysqlpp::StoreQueryResult res = query.store()) 
         {
     	    for(auto it=res.begin();it!=res.end();++it)
     	    {
@@ -287,7 +310,7 @@ void DButils::getCDR(string uniqueid,map<string,string>& data)
 		data["crmcall"] = row[3].data();
 	    }
 	}	 
-     
+*/     
         query << "select isblock from records where callid='"<<uniqueid<<"'";
 	std::cout<<query.str();
     

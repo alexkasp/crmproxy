@@ -1,4 +1,5 @@
 #include <CRMUrlBuilder.h>
+#include <CurlCallback.h>
 #include <boost/bind.hpp>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
@@ -20,64 +21,10 @@ CRMUrlBuilder::CRMUrlBuilder(string webserver,string _port,DButils* _db,ICMServe
     
 };
 
-struct callbackParam
-{
-    DButils* db;
-    string requestId;
-    LoggerModule* lm;
-};
-        
-
 size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-    int answerSize = size*nmemb;
-    callbackParam *cbp = (callbackParam*)userdata;
-    DButils* db = (DButils*)(cbp)->db;
-    LoggerModule* lm = (LoggerModule*)(cbp)->lm;
-    
-    string requestId = (cbp)->requestId;
-    delete cbp;
-
-    if(db==NULL)
-	return answerSize;
-	
-    string answerData(ptr,answerSize);
-    string responceId="";
-
-    if(answerSize>0)
-    {
-        string json(&ptr[1],answerSize-2);
-
-        size_t pos = 0;
-        while(((pos = json.find(','))!= std::string::npos)||(!json.empty()))
-        {
-            string param = "";
-            if(pos == std::string::npos)
-            {
-                param = json;
-                json.clear();
-            }
-            else
-            {
-                param = json.substr(0, pos);
-                json.erase(0, pos + 1);
-            }
-            if((pos = param.find(':'))!= std::string::npos)
-            {
-                string paramName = param.substr(1,pos-2);
-                string value = (param.erase(0,pos + 1));
-                if(paramName.compare("responseId")==0)
-                    responceId  = value;
-            }
-        }
-
-	if(lm!=NULL)
-	    lm->makeLog(info,"ANSWER DATA "+answerData);
-        db->completeEventReportEntry(requestId,responceId,answerData);
-    }
-    else
-        db->completeEventReportEntry("OJ2Ap3yr","ERROR PARSER","ERROR PARSER");
-    return answerSize;
+    CurlCallback curlcb;
+    return curlcb.callback(ptr,size, nmemb,userdata);
 }
 
 int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
@@ -148,14 +95,16 @@ int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
     			db->addSendEventReportEntry(data["call_id"],data["requestId"],data["serverId"],data["userId"],"2",request);
     		    
     		    std::cout<<"sendRequestAndStore\n";
-    		    sendRequestAndStore(request,data["requestId"]);
+    		    sendRequestAndStore(request,data["requestId"],data["call_id"]);
     		    std::cout<<"END sendRequestAndstore\n";
 		}
-		
+		std::cout<<"check icm and run\n";
 		if(icm!=NULL)
 		    icm->putCDREvent(data);
+		std::cout<<"check cdr and run\n";
         	if(cdr!=NULL)
         	    cdr->processCDR(data);
+        	std::cout<<"complete makeAction\n";
             }
             return 1;
         }
@@ -175,7 +124,7 @@ int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
     return 0;
 }
 
-void CRMUrlBuilder::sendRequestAndStore(string url,string requestId)
+void CRMUrlBuilder::sendRequestAndStore(string url,string requestId,string callid)
 {
      CURL *curl;
        CURLcode res;
@@ -195,11 +144,7 @@ void CRMUrlBuilder::sendRequestAndStore(string url,string requestId)
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
-    callbackParam* sendParam =new callbackParam();
-
-    sendParam->db=db;
-    sendParam->lm = lm;
-    sendParam->requestId = requestId;
+    callbackParam* sendParam =new callbackParam(db,requestId,callid,lm);
 
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, sendParam);

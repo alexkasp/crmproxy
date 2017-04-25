@@ -1,3 +1,4 @@
+#include <CurlCallback.h>
 #include <curl/curl.h>
 #include <CDRManager.h>
 #include <iostream>
@@ -23,71 +24,10 @@ std::string cdrchars(
 boost::random::random_device cdrrng;
 boost::random::uniform_int_distribution<> cdrindex_dist(0, cdrchars.size() - 1);
 
-struct callbackParam
-{
-    DButils* db;
-    string requestId;
-    LoggerModule *lm;
-};
-    
 size_t cdr_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-    callbackParam *cbp = (callbackParam*)userdata;
-    
-    DButils* db = (DButils*)(cbp)->db;
-    LoggerModule* lm = (LoggerModule*)(cbp)->lm;
-    string requestId = (cbp)->requestId;
-    
-    delete cbp;
-    lm->makeLog(info,"CDRManager cdr_write_callback"+requestId);
-    //{"status":true,"responseId":"146487439569361101"}
-    
-    int answerSize = size*nmemb;
-    
-    string answerData(ptr,answerSize);
-    
-    string responceId="";
-    
-    if(answerSize>0)
-    {
-	string json(&ptr[1],answerSize-2);
-    
-	size_t pos = 0;
-	while(((pos = json.find(','))!= std::string::npos)||(!json.empty()))
-	{
-	
-	    string param = "";    
-	    if(pos == std::string::npos)
-	    {
-    	        param = json;
-    		json.clear();
-    	    }
-    	    else
-    	    {
-    		param = json.substr(0, pos);
-    		json.erase(0, pos + 1);
-    	    }
-    	    if((pos = param.find(':'))!= std::string::npos)
-    	    {
-    		string paramName = param.substr(1,pos-2);
-    		string value = (param.erase(0,pos + 1));
-    		
-    		
-    		if(paramName.compare("responseId")==0)
-    		    responceId  = value;
-    	    }
-	}
-    
-	if(lm!=NULL)
-	    lm->makeLog(info,"AnswerData for "+requestId+"\n "+answerData);
-	db->completeEventReportEntry(requestId,responceId,answerData);
-    }
-    else
-    {
-	lm->makeLog(info,"AnswerData for "+requestId+" is missing!!!");
-	db->completeEventReportEntry("OJ2Ap3yr","ERROR PARSER","ERROR PARSER");
-    }
-    return answerSize;
+    CurlCallback curlcb;
+    return curlcb.callback(ptr,size, nmemb,userdata);
 }
 
 void CDRManager::keepAlive()
@@ -196,10 +136,13 @@ void CDRManager::putCDR(map<string,string> data)
     string calltype = data["calltype"];
     string dst;
     string destinationcontext;
-    if((calltype == "callback_standart")&&(data["status"]=="ANSWER"))
+    if(((calltype == "callback_standart")&&(data["status"]=="ANSWER"))||(calltype == "recall"))
     {
 	dst = data["dst_num"];
-	destinationcontext = "vatsout";
+	if(calltype=="recall")
+	    destinationcontext = "recall";
+	else
+	    destinationcontext = "vatsout";
     }
     else
     {
@@ -304,9 +247,10 @@ void CDRManager::putCDR(map<string,string> data)
     CDRData["isBlock"] = additionalData["isblock"];
     CDRData["callapiorder"] = data["callbackId"];
     CDRData["numbersInvolved"] = answeredNums;
-    CDRData["label"] = additionalData["label"];
-    CDRData["rating"] = additionalData["raiting"];  
-    CDRData["newstatus"] = additionalData["newstatus"];    
+    CDRData["label"] = data["label"];
+    CDRData["rating"] = data["raiting"];  
+    CDRData["newstatus"] = data["newstatus"];    
+    CDRData["hashtag"] = data["hashtag"];
     
     auto it = data.find("transfercallid");
     if(it!=data.end())
@@ -334,7 +278,7 @@ void CDRManager::putCDR(map<string,string> data)
     
     
     db.addSendEventReportEntry(CDRData["uniqueid"],CDRData["requestId"],CDRData["serverId"],CDRData["userId"],"1",sendData);
-    sendJsonRequest(sendData,CDRData["requestId"]);
+    sendJsonRequest(sendData,requestId,callid);
 }
 
 void CDRManager::sendCurlRequest(string url,string requestId)
@@ -370,10 +314,11 @@ void CDRManager::sendCurlRequest(string url,string requestId)
       curl_easy_strerror(res));
       curl_easy_cleanup(curl);
     }
+    
     lm.makeLog(info,"send url complete");
 }
 
-void CDRManager::sendJsonRequest(string url,string requestId)
+void CDRManager::sendJsonRequest(string url,string requestId,string callid)
 {
      CURL *curl;
        CURLcode res;
@@ -401,15 +346,11 @@ void CDRManager::sendJsonRequest(string url,string requestId)
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, curlUrl.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cdr_write_callback);
     
-    callbackParam* sendParam =new callbackParam();
-    
-    sendParam->db=&db;
-    sendParam->lm = &lm;
-    sendParam->requestId = requestId;
+    callbackParam* sendParam =new callbackParam(&db,requestId,callid,&lm);
 
-    
+    lm.makeLog(info,"SENDING...");
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, sendParam);
-                                 
+    lm.makeLog(info,"SEND COMPLETE!");                             
      /* Perform the request, res will get the return code */ 
       res = curl_easy_perform(curl);
      /* Check for errors */ 

@@ -448,7 +448,8 @@ string Parser::parse_agentcalled(string src,string dst,string callid)
 	
 }
 
-string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string usecrm,string uidcode)
+string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, 
+string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode)
 {
 	std::cout<<"START FINISHCALL\n";
 	string event2store;
@@ -492,6 +493,9 @@ string Parser::parse_finishcall(string src,string dst,string uid,string timestam
 	request+="&serverId="+serverId;
 	request+="&label="+label;
 	request+="&rating="+rating;
+	request+="&crmcall="+crmcall;
+	request+="&hashtag="+hashtag;
+	request+="&newstatus="+newstatus;
 	
 	event2store=request;
 	event2store+="&event=2";
@@ -883,15 +887,36 @@ string Parser::parsedata(ParserData& data)
 			}
 			else if(data["callbacktype"].compare("standart")==0)
 			{
+			    std::string duration = "0";
+			    std::string billsec = "0";
+
 			    if(data["dialstatus"].compare("ANSWER")!=0)
 			    {
 				string formdst = data["uidcode"]+"001";
-				parse_cdrevent(data["callid"],data["dst"],"0","0",data["callstart"],data["time"],data["callbacktype"]);
+				parse_cdrevent(data["callid"],data["dst"],duration,billsec,data["callstart"],data["time"],data["callbacktype"]);
 				data["dst"]=formdst;
 			    }
+			    else
+			    {
+				if((!(data["time"]).empty())&&(!(data["callstart"]).empty()))
+    				    duration =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callstart"]));
+				if((!(data["time"]).empty())&&(!(data["callanswer"]).empty())&&(data["callanswer"].compare("0")!=0))
+				    billsec =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callanswer"]));
+				    
+				if((data["dst"]).empty())
+				    data["dst"] = data["src"];
+				
+				parse_cdrevent(data["callid"],data["dst"],duration,billsec,data["callstart"],data["time"],data["callbacktype"]);
+			    }
 			    
-			    if((data["dst"]).empty())
-				data["dst"] = data["src"];
+			    
+			}
+			else if(data["callbacktype"].compare("recall")==0)
+			{
+			    if(data["status"]=="CHANUNAVAIL")
+			    {
+				parse_cdrevent(data["callid"],data["dst"],"0","0",data["callstart"],data["time"],data["callbacktype"]);
+			    }
 			}
 			else if(data["callbacktype"].compare("crmredirect")==0)
 			{
@@ -906,7 +931,9 @@ string Parser::parsedata(ParserData& data)
 			
 			
 			if(!skipfinish)    
-			    str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"],data["TreeId"],data["ChannelName"],data["serverId"],data["recordfile"],data["label"],data["rating"],data["usecrm"],data["uidcode"]);
+			    str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],
+			    data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"],data["TreeId"],
+			    data["ChannelName"],data["serverId"],data["recordfile"],data["label"],data["rating"],data["newstatus"],data["crmcall"],data["hashtag"],data["usecrm"],data["uidcode"]);
 			else
 			    str = "";
 			

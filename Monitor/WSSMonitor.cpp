@@ -1,4 +1,5 @@
 #include <WSSMonitor.h>
+#include <CurlCallback.h>
 
 
 WSSMonitor::WSSMonitor(DButils& _db,CRMUrlBuilder& _crm,CDRManager& _cdr):db(_db),crm(_crm),cdr(_cdr)
@@ -55,9 +56,9 @@ void WSSMonitor::Check()
 	    if(tmp.responce=="NULL")
 	    {
 		if(tmp.type=="1")
-		    cdr.sendJsonRequest(tmp.sendData,tmp.request);
+		    cdr.sendJsonRequest(tmp.sendData,tmp.request,tmp.callid);
 		else if(tmp.type=="2")
-		    crm.sendRequestAndStore(tmp.sendData,tmp.request);
+		    crm.sendRequestAndStore(tmp.sendData,tmp.request,tmp.callid);
 	    }
 	}
     }

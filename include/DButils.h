@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 #include <mysql++.h>
+#include <hiredis.h>
 using namespace std;
 
 class CDRReport
@@ -62,14 +63,15 @@ class DButils
         virtual string getPassParamName();
         virtual string getUserParamName();
         virtual string getDBParamName();
-	            
+	redisContext *redis;
 	shared_ptr<mysqlpp::Connection> conn;
     public:
 	DButils();
+	~DButils();
 	int getTestResult(string testid,string callid,vector<TestResult>& result,vector<TestTemplate>& etalon);
 	int getTestById(string testid,string& from,string& to);
 	void addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData);
-	void completeEventReportEntry(string request,string responce,string answerData);
+	void completeEventReportEntry(string callid,string responce,string answerData);
 	
 	void getCDR(string callid,map<string,string>& data);
 	void putCDR(map<string,string>& data);

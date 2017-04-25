@@ -12,6 +12,8 @@
 #include <CDRManager.h>
 #include <DButils.h>
 #include <LoggerModule.h>
+#include <CurlCallback.h>
+
 
 class CRMUrlBuilder: public ExecuterInterface
 {
@@ -19,11 +21,13 @@ class CRMUrlBuilder: public ExecuterInterface
 		
 		
 	
-    
+	CurlCallback curlcb;
+	
 	virtual	int SendRequest(std::string url);
 	int processURL(string url,map<string,string>& CDRData);
     
     protected:
+		
 		DButils* db;
 		CDRManager* cdr;
 		ICMServer* icm;
@@ -38,7 +42,7 @@ class CRMUrlBuilder: public ExecuterInterface
         virtual int makeAction(ParamMap data,IParser* currentParser);
         
 	public:
-		void sendRequestAndStore(std::string, std::string);
+		void sendRequestAndStore(std::string, std::string, std::string);
 		CRMUrlBuilder(string server,string port,DButils* _db,ICMServer* _icm = NULL,CDRManager* _cdr = NULL,LoggerModule* _lm = NULL);
 		
     

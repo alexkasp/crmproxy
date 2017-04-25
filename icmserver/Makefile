@@ -3,7 +3,7 @@ default:
 	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
 	
 	g++ -g -c ICMServer.cpp ICMStorage.cpp  -lpthread -std=c++11 -I ../include \
-	 -I /usr/include/mysql  -I /usr/include/mysql++ -I /usr/local/boost/include/ 
+	 -I /usr/include/mysql  -I /usr/include/mysql++ -I /usr/local/boost/include/ -I /usr/local/include/hiredis/
 	
 test:
 	g++ test.cpp corefunc.cpp sipheader.cpp sipmanager.cpp callbox.cpp -o test -std=c++0x -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic  -lboost_system -lboost_regex -Wl,-Bdynamic -lm

@@ -2,8 +2,8 @@ default:
 	export CFLAGS="$CFLAGS -O0 -fbuiltin -g -fsigned-char"
 	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
 	
-	g++ -g -c DButils.cpp Parser.cpp RegisterParser.cpp  RegisterMonitor.cpp  EventReader.cpp  CRMUrlBuilder.cpp MergedCalls.cpp -lcurl -lpthread -std=c++11 -I ../include \
-	 -I /usr/include/mysql  -I /usr/include/mysql++ -I /usr/local/boost/include/ 
+	g++ -g -c DButils.cpp Parser.cpp RegisterParser.cpp  RegisterMonitor.cpp  EventReader.cpp  CRMUrlBuilder.cpp MergedCalls.cpp CurlCallback.cpp -lhiredis -lcurl -lpthread -std=c++11 -I ../include \
+	 -I /usr/include/mysql  -I /usr/include/mysql++ -I /usr/local/boost/include/ -I /usr/local/include/hiredis/ 
 	
 test:
 	g++ test.cpp corefunc.cpp sipheader.cpp sipmanager.cpp callbox.cpp -o test -std=c++0x -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic  -lboost_system -lboost_regex -Wl,-Bdynamic -lm
