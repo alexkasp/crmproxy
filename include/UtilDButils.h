@@ -24,6 +24,6 @@ class UtilDButils: public DButils
         virtual string getDBParamName();
 	            
     public:
-	int loadGateways(map<string,gatewayData>& gateways);
+	int loadGateways(map<string,gatewayData>& gateways,std::string extregid);
 	int updateStaticProvs(string userId,string login,string status);
 };

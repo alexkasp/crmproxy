@@ -17,7 +17,7 @@ int ICMStorage::getCDRData(string userId,string aNum,CDRData& data)
         if(numData!=(clientMap->second).end())
         {
             data = numData->second;
-            std::cout<<"FIND operator "<<data.operatorNum<<"  "<<data.callid<<" from  "<<data.clientNum<<"\n";
+            std::cout<<"FIND operator "<<data.operatorNum<<" :  "<<data.calldate<<" : "<<data.callid<<" from  "<<data.clientNum<<"\n";
             return 1;
         }
         std::cout<<"NO SUCH NUMBER\n";

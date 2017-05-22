@@ -20,7 +20,7 @@ string UtilDButils::getDBParamName()
     return "ExtregDB";
 }
 
-int UtilDButils::loadGateways(map<string,gatewayData>& gateways)
+int UtilDButils::loadGateways(map<string,gatewayData>& gateways,std::string extregid)
 {
     //boost::mutex::scoped_lock Lock(dblock);
 
@@ -33,15 +33,15 @@ boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::po
                                 cout<<"LOCK ACCEPTED\n";
                                 
     mysqlpp::Query query = conn->query();
-    query << "select login,type,userId,uid,status,buntime from static_provs where extservid=4";
-//    std::cout<<query.str();
+    query << "select login,type,userId,uid,status,buntime from static_provs where extservid="<<extregid<<" and type <> 'SipRedirect'";
+    std::cout<<query.str();
     if (mysqlpp::StoreQueryResult res = query.store())
     {
       for(auto it=res.begin();it!=res.end();++it)
       {	
     	
     	    mysqlpp::Row row = *it;
-//    	    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
+    	    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
     	    string gatewayname=row[0].data();
     	    gatewayname+=row[2].data();
     	    

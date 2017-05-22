@@ -639,9 +639,14 @@ int Parser::processTransfer(string callid,string linkedid,string record)
     boost::mutex::scoped_lock lockTransferStorage(transferstorageLock);
     
     TransferData tmp;
+    /*
     tmp.callid=linkedid;
     tmp.recordname=record;
     transferstorage[callid]=tmp;
+    */
+    tmp.callid=callid;
+    tmp.recordname=record;
+    transferstorage[linkedid]=tmp;
 }
 
 string Parser::parse_cdrevent(string origcallid,string destination,string duration,string billableseconds,string starttime,string endtime,string Destinationcontext)
@@ -686,11 +691,12 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	
 	
 	auto it = event2storage.find(callid);
-	if((!transferedCallId.empty())&&(!(it!=event2storage.end())))
+/*	if((!transferedCallId.empty())&&(!(it!=event2storage.end())))
 	{
 		std::cout<<"TRY SET TRANSFERED CALLID \n";
 	        it = event2storage.find(transferedCallId);
 	}
+*/
 	request+="&destination="+destination;
 	request+="&duration="+duration;
 	request+="&billableseconds="+billableseconds;

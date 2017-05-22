@@ -124,7 +124,7 @@ string ICMServer::convertNumber(string num)
 
 int ICMServer::putCDREvent(map<string,string> CDRData)
 {
-    if (!CDRData.empty()) {
+    if ((!CDRData.empty())&&(CDRData["status"]=="ANSWER")) {
         	if(CDRData["event"]=="2")
         	{
         	    string clientNum,operatorNum;

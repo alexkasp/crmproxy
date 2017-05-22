@@ -3,6 +3,11 @@
 #include <iostream>
 #include <exception>      // std::exception
 
+string DButils::getServerId()
+{
+    return serverid;
+}
+
 int DButils::getAuthParams(string filename)
 {
     ifstream system_variables(filename);
@@ -22,25 +27,33 @@ int DButils::getAuthParams(string filename)
 	{
 	    if(param == getHostParamName())
 	    {
-		
 		host = value;
+//		std::cout<<"get host "<<host<<"\n";
 	    }
 	    else if(param == getPassParamName())
 	    {
 		pass = value;
+//		std::cout<<"get pass "<<pass<<"\n";
 	    }
 	    else if(param == getUserParamName())
 	    {
 		login = value;
+//		std::cout<<"get login "<<login<<"\n";
 	    }
 	    else if(param == getDBParamName())
 	    {
 		db=value;
+//		std::cout<<"get db "<<db<<"\n";
+	    }
+	    else if(param == "ServerID")
+	    {	
+		std::cout<<"We found serverID\n";
+		serverid = value;
 	    }
 	    
 	}
     }
-    cout<<"db " <<db<<" host "<<host<<" login( "<<getUserParamName()<<" )"<<login<<" pass "<<pass<<endl;
+    cout<<"db " <<db<<" host "<<host<<" login( "<<getUserParamName()<<" )"<<login<<" pass "<<pass<<" serverId "<<serverid<<endl;
     if((!host.empty())&&(!db.empty())&&(!pass.empty())&&(!login.empty()))
 	return 1;
 
@@ -76,6 +89,8 @@ DButils::DButils()
     cout<<"it is OK"<<endl;
     cout<<"try to create redis connection object"<<endl;
     unsigned int j;
+    serverid= "0";
+    
     redisReply *reply;
     struct timeval timeout = { 1, 500000 }; // 1.5 seconds
     redis = redisConnectWithTimeout("127.0.0.1", 6379, timeout);
@@ -90,7 +105,6 @@ DButils::DButils()
 	{
 	    printf("Connection error: can't allocate redis context\n");
 	}
-	exit(1);
     }
 }
 
@@ -422,7 +436,7 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
     	    }
     	    else
     	    {
-    		if(getIncomeCallData(row[1].data(),operatorNum) > 0)
+    		if(getIncomeCallData(row[1].data(),userId,operatorNum) > 0)
     		{
     		    return 1;
     		}
@@ -438,7 +452,7 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
 
 }
 
-int DButils::getIncomeCallData(string uniqueid,string& operatorNum)
+int DButils::getIncomeCallData(string uniqueid,string userId,string& operatorNum)
 {
 
 /*    boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
@@ -449,7 +463,7 @@ int DButils::getIncomeCallData(string uniqueid,string& operatorNum)
     }*/
     cout<<"LOCK ACCEPTED\n";
     stringstream ss;
-    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 order by time DESC";
+    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 and and answernum in (select accountcode from sipclientstable where userid="<<userId<<" and isprov=0) order by time DESC";
     
     
     std::cout<<" getIncomeCallData "<<(ss.str())<<"\n";
@@ -710,10 +724,11 @@ int DButils::parse(string msg,string delimiter,string& param,string& value)
         param = msg.substr(0, pos);
         msg.erase(0, pos + delimiter.length());
         value=msg;
+
         return 1;	
 		
     }
-    
+//    std::cout<<"in message \'"<<msg<<"\' we did not fine delimiter \'"<<delimiter<<"\'\n";
     return 0;
 }
 
@@ -721,10 +736,13 @@ int DButils::parseParam(string msg,string& param,string& value)
 {
     if(parse(msg,delimiter,param,value))
     {
+        std::cout<<"param = "<<param<<" value "<<value<<"\n";
         string tmpparam;
-        if((parse(param,vardelimiter, tmpparam,param))&&(value.length()>3))
+        if((parse(param,vardelimiter, tmpparam,param))/*&&(value.length()>3)*/)
         {
-            value = value.substr(VALUEPREFIXLENGTH,value.length()-VALUEPOSTFIXLENGTH);
+    	    std::cout<<"VALUE prepare "<<value<<"\n";
+    	    value = value.substr(VALUEPREFIXLENGTH,value.length()-VALUEPOSTFIXLENGTH);
+            std::cout<<"VALUE post "<<value<<"\n";
             return 1;
         }
     }

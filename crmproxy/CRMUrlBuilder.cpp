@@ -104,14 +104,14 @@ int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
 		std::cout<<"check cdr and run\n";
         	if(cdr!=NULL)
         	    cdr->processCDR(data);
-        	std::cout<<"complete makeAction\n";
+        	std::cout<<"complete makeAction "<<data["requestId"]<<"\n";
             }
             return 1;
         }
     }
      catch(exception &ec)
          {
-        	string errmsg = "Error in makeAction ";
+        	string errmsg = "Error in makeAction"+ data["requestId"];
 //        	lm.makeLog(boost::log::trivial::severity_level::error,errmsg+ec.what());
 		std::cout<<errmsg<<"Error in makeAction  "<<ec.what()<<"\n";
 		

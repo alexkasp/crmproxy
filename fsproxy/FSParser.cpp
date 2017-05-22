@@ -15,6 +15,8 @@ string FSParser::unregEvent(string gateway)
     string request = request_str;
     gatewayData gwd = gatewaysList[gateway];
     
+    if((gwd.uid.empty())||(gwd.login.empty())||(gwd.userId.empty()))
+	return "";
     /*
     auto x = registeredList.find(gateway);
     if(x!=registeredList.end())
@@ -179,11 +181,11 @@ string FSParser::parsedata(ParserData& data)
     return request;
 }
 
-FSParser::FSParser(const string str,LoggerModule& _lm,DButils& _DBWorker,FSConnector& _connector):IParser(str,_lm),DBWorker(_DBWorker),connector(_connector)
+FSParser::FSParser(const string str,LoggerModule& _lm,DButils& _DBWorker,FSConnector& _connector,std::string _extregid):IParser(str,_lm),DBWorker(_DBWorker),connector(_connector),extregid(_extregid)
 {
-    (dynamic_cast<UtilDButils&>(DBWorker)).loadGateways(gatewaysList);
+    (dynamic_cast<UtilDButils&>(DBWorker)).loadGateways(gatewaysList,extregid);
     
-    for(auto x = gatewaysList.begin();x!=gatewaysList.end();)
+/*    for(auto x = gatewaysList.begin();x!=gatewaysList.end();)
     {
 	gatewayData gwd = x->second;
 	std::cout<<" recreate Line "<<gwd.login<<"\n";
@@ -193,6 +195,7 @@ FSParser::FSParser(const string str,LoggerModule& _lm,DButils& _DBWorker,FSConne
 	x++;
     
     }
+    */
     tgroup.create_thread(boost::bind(&FSParser::CheckStateCicle,this));
     tgroup.create_thread(boost::bind(&FSParser::undelLine,this));
     
@@ -254,7 +257,7 @@ void FSParser::CheckStateCicle()
 		    indexCounter=0;
 		    
 		    //refresh object list
-		    (dynamic_cast<UtilDButils&>(DBWorker)).loadGateways(gatewaysList);
+		    (dynamic_cast<UtilDButils&>(DBWorker)).loadGateways(gatewaysList,extregid);
 		}
 		for(auto it=statusMap.begin();it!=statusMap.end();++it)
 		{

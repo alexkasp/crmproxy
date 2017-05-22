@@ -47,12 +47,13 @@ class DButils
 	const int VALUEPREFIXLENGTH = 1;
 	const int VALUEPOSTFIXLENGTH = 3;
 	
-	string host,pass,login,db;
+	string host,pass,login,db,serverid;
+	
 	
 	int parse(string msg,string delimiter,string& param,string& value);
 	void addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult::const_iterator it);
 	int parseParam(string msg,string& param,string& value);
-	int getIncomeCallData(string uniqueid,string& operatorNum);
+	int getIncomeCallData(string uniqueid,string userId,string& operatorNum);
 	
     
 	
@@ -68,6 +69,7 @@ class DButils
     public:
 	DButils();
 	~DButils();
+	string getServerId();
 	int getTestResult(string testid,string callid,vector<TestResult>& result,vector<TestTemplate>& etalon);
 	int getTestById(string testid,string& from,string& to);
 	void addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData);

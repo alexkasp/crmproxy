@@ -263,7 +263,7 @@ void CDRManager::putCDR(map<string,string> data)
     if(it!=data.end())
     {
 	lm.makeLog(info,"FIND TRANSFERED RECORD "+(it->second));
-	CDRData["recordName"]=it->second;
+	CDRData["transferrecordName"]=it->second;
     }
     string requestId = "";
     for(int i = 0; i < 8; ++i) {

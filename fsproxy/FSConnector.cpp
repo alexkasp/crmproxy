@@ -57,28 +57,39 @@ int FSConnector::sendRegRequest(string userId,string gateway,string method)
     CURL *curl;
     CURLcode res;
 
-    /* get a curl handle */
-   curl = curl_easy_init();
-    if(curl)
+    if(gateway.empty())
     {
-	string curlBaseUrl = "http://extreg04.sipuni.com/IaEQvJmntW/refreshAll.php?userId="+userId+"&lines={\""+gateway+"\":[\""+method+"\"]}";
-	std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
-	curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
-	res = curl_easy_perform(curl);
-    /* Check for errors */
-    
-	if(res != CURLE_OK)
-	{
-	    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-    	    curl_easy_strerror(res));
-    	    curl_easy_cleanup(curl);
-	}
-	else
-	    return 1;
-    
-    std::cout<<"send url complete\n";
+	std::cout<<"gateway empty\n";
+	return 0;
     }
-
+    /* get a curl handle */
+    try
+    {
+	curl = curl_easy_init();
+	if(curl)
+	{
+	    string curlBaseUrl = "http://extreg04.sipuni.com/IaEQvJmntW/refreshAll.php?userId="+userId+"&lines={\""+gateway+"\":[\""+method+"\"]}";
+	    std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
+	    curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
+	    res = curl_easy_perform(curl);
+	/* Check for errors */
+	    std::cout<<"curlBaseUrl complete send\n";
+	    if(res != CURLE_OK)
+	    {
+		fprintf(stderr, "curl_easy_perform() failed: %s\n",
+    		curl_easy_strerror(res));
+    		curl_easy_cleanup(curl);
+	    }
+	    else
+		return 1;
+    
+	std::cout<<"send url complete\n";
+	}
+    }
+    catch (std::exception e)
+    {
+	 cout<<" sendRegRequest CATCH " << e.what() << endl;
+    }
     return 0;
 }
 

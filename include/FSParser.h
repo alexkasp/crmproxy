@@ -35,6 +35,8 @@ class FSParser: public IParser
     DButils& DBWorker;
     FSConnector& connector;
     
+    string extregid;
+    
     map<string,string> registeredList;
     map<string,gatewayData> deletedList;
     map<string,gatewayData> gatewaysList;
@@ -50,7 +52,7 @@ class FSParser: public IParser
     string regEvent(string gateway);
     
 public:
-	FSParser(const string str,LoggerModule& _lm,DButils& _DBWorker,FSConnector& _connector);
+	FSParser(const string str,LoggerModule& _lm,DButils& _DBWorker,FSConnector& _connector,std::string _extregid);
 	virtual ~FSParser(void);
 	string parsedata(ParamMap& data);
 };

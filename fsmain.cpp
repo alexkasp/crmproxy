@@ -35,13 +35,14 @@ int main()
 	std::cout<<"ERROR CREATE DButils object\n";
     
     
+    string serverid =DBWorker.getServerId();
     FSConnector connector;
     
-    FSEventReader reader("212.193.100.96",8021,lm,connector);
-//    FSEventReader reader("213.248.34.111",8021,lm);
+    FSEventReader reader("127.0.0.1",8021,lm,connector);
+//    FSEventReader reader("212.193.100.206",8021,lm,connector);
     
     CRMUrlBuilder sender("sipuni.com","80",NULL,NULL,NULL);
-    FSParser newParser("/api/ats/linefail",lm,DBWorker,connector);
+    FSParser newParser("/api/ats/linefail",lm,DBWorker,connector,serverid);
     sender.AddParser(&newParser);
             
     
