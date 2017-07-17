@@ -13,10 +13,13 @@ FSRegStatus::FSRegStatus()
 string FSParser::unregEvent(string gateway)
 {
     string request = request_str;
-    gatewayData gwd = gatewaysList[gateway];
+    gatewayData gwd;
+    auto gtit =  gatewaysList.find(gateway);
     
-    if((gwd.uid.empty())||(gwd.login.empty())||(gwd.userId.empty()))
+    if(!(gtit!=gatewaysList.end()))
 	return "";
+    gwd = gtit->second;
+    
     /*
     auto x = registeredList.find(gateway);
     if(x!=registeredList.end())
@@ -43,7 +46,15 @@ string FSParser::unregEvent(string gateway)
 string FSParser::regEvent(string gateway)
 {
     string request = request_str;
-    gatewayData gwd = gatewaysList[gateway];
+    gatewayData gwd;
+    
+    auto gtit =  gatewaysList.find(gateway);
+    
+    if(!(gtit!=gatewaysList.end()))
+	return "";
+    gwd = gtit->second;
+
+    
     request+="?status=REGED";
     request+= "&uid=";
     request+=gwd.uid;
@@ -58,6 +69,7 @@ string FSParser::regEvent(string gateway)
 string FSParser::gateway_state_parser(ParserData& data)
 {
 	string request;
+		std::cout<<"REGEVENT "<<data["Gateway:"]<<" "<<data["State:"]<<"\n";
 		boost::timed_mutex::scoped_lock statusMapList(statusMapLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
 		if(statusMapList)
 		{
@@ -143,11 +155,8 @@ string FSParser::gateway_state_parser(ParserData& data)
 		    }
 		    
 		    
-		    /*
-		    for(auto it=statusMap.begin();it!=statusMap.end();++it)
-		    {
-			std::cout<<"statusMap "<<(it->first)<<"  "<<(it->second).stateString<<"\n";
-		    }*/
+		    
+		    
 		}
 	return request;
 }
@@ -184,8 +193,9 @@ string FSParser::parsedata(ParserData& data)
 FSParser::FSParser(const string str,LoggerModule& _lm,DButils& _DBWorker,FSConnector& _connector,std::string _extregid):IParser(str,_lm),DBWorker(_DBWorker),connector(_connector),extregid(_extregid)
 {
     (dynamic_cast<UtilDButils&>(DBWorker)).loadGateways(gatewaysList,extregid);
-    
-/*    for(auto x = gatewaysList.begin();x!=gatewaysList.end();)
+
+/*    
+    for(auto x = gatewaysList.begin();x!=gatewaysList.end();)
     {
 	gatewayData gwd = x->second;
 	std::cout<<" recreate Line "<<gwd.login<<"\n";
@@ -195,7 +205,7 @@ FSParser::FSParser(const string str,LoggerModule& _lm,DButils& _DBWorker,FSConne
 	x++;
     
     }
-    */
+*/    
     tgroup.create_thread(boost::bind(&FSParser::CheckStateCicle,this));
     tgroup.create_thread(boost::bind(&FSParser::undelLine,this));
     
@@ -259,13 +269,28 @@ void FSParser::CheckStateCicle()
 		    //refresh object list
 		    (dynamic_cast<UtilDButils&>(DBWorker)).loadGateways(gatewaysList,extregid);
 		}
+		for(auto it=gatewaysList.begin();it!=gatewaysList.end();++it)
+		{
+		    std::cout<<(it->first)<<" status of "<<((gatewayData)(it->second)).gatewayname<<" is "<<((gatewayData)(it->second)).status<<"\n";
+		}
+		for(auto it=statusMap.begin();it!=statusMap.end();++it)
+		{
+		    std::cout<<"statusMap "<<(it->first)<<"  "<<(it->second).stateString<<"\n";
+		}
 		for(auto it=statusMap.begin();it!=statusMap.end();++it)
 		{
 		
-		    gatewayData gateway = gatewaysList[it->first];
-		    if(!gateway.gatewayname.empty()&&(((gateway.status.compare("REGED")!=0)&&((it->second).stateString.compare("REGED")==0))||((gateway.status.compare("REGED")==0)&&((it->second).stateString.compare("REGED")!=0))))
+		    auto gtit = gatewaysList.find(it->first);
+		    if(gtit!=gatewaysList.end())
 		    {
-			(dynamic_cast<UtilDButils&>(DBWorker)).updateStaticProvs(gateway.userId,gateway.gatewayname,(it->second).stateString);
+		    
+			gatewayData gateway = gtit->second;
+			std::cout<<"Prepare update\n"<<"gateway = "<<gateway.gatewayname<<" now status = "<<gateway.status<<" was "<<(it->second).stateString<<"\n";
+		    
+			if(!gateway.gatewayname.empty()&&(((gateway.status.compare("REGED")!=0)&&((it->second).stateString.compare("REGED")==0))||((gateway.status.compare("REGED")==0)&&((it->second).stateString.compare("REGED")!=0))))
+			{
+			    (dynamic_cast<UtilDButils&>(DBWorker)).updateStaticProvs(gateway.userId,gateway.gatewayname,(it->second).stateString);
+			}
 		    }
 		}
 	    }

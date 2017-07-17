@@ -248,7 +248,7 @@ void CDRManager::putCDR(map<string,string> data)
     CDRData["callapiorder"] = data["callbackId"];
     CDRData["numbersInvolved"] = answeredNums;
     CDRData["label"] = data["label"];
-    CDRData["rating"] = data["raiting"];  
+    CDRData["rating"] = data["rating"];  
     CDRData["newstatus"] = data["newstatus"];    
     CDRData["hashtag"] = data["hashtag"];
     

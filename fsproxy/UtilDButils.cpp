@@ -33,7 +33,7 @@ boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::po
                                 cout<<"LOCK ACCEPTED\n";
                                 
     mysqlpp::Query query = conn->query();
-    query << "select login,type,userId,uid,status,buntime from static_provs where extservid="<<extregid<<" and type <> 'SipRedirect'";
+    query << "select login,type,userId,uid,status,buntime,id from static_provs where extservid="<<extregid<<" and type <> 'SipRedirect' order by login";
     std::cout<<query.str();
     if (mysqlpp::StoreQueryResult res = query.store())
     {
@@ -42,7 +42,7 @@ boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::po
     	
     	    mysqlpp::Row row = *it;
     	    std::cout<<"CDR DATA "<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
-    	    string gatewayname=row[0].data();
+    	    string gatewayname=row[6].data();
     	    gatewayname+=row[2].data();
     	    
     	    gatewayData gwd;
@@ -87,7 +87,7 @@ boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::po
 
    mysqlpp::Query query = conn->query(querystr);
 
-//    std::cout<<query.str()<<"\n";
+    std::cout<<query.str()<<"\n";
     
     try
     {	

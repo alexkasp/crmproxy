@@ -879,8 +879,8 @@ string Parser::parsedata(ParserData& data)
 				data["callanswer"]="0";
 				data["status"]="NOANSWER";
 				string formdst = data["uidcode"]+"001";
-				parse_cdrevent(data["callid"],formdst,"0","0",data["callstart"],data["time"],data["callbacktype"]);
-				data["dst"]=formdst;
+				parse_cdrevent(data["callid"],data["dst"],"0","0",data["callstart"],data["time"],data["callbacktype"]);
+				data["src"]=formdst;
 			    }
 			    else
 				skipfinish = 1;

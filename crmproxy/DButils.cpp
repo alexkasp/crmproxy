@@ -45,7 +45,7 @@ int DButils::getAuthParams(string filename)
 		db=value;
 //		std::cout<<"get db "<<db<<"\n";
 	    }
-	    else if(param == "ServerID")
+	    else if(param == "extregServerID")
 	    {	
 		std::cout<<"We found serverID\n";
 		serverid = value;
@@ -463,7 +463,7 @@ int DButils::getIncomeCallData(string uniqueid,string userId,string& operatorNum
     }*/
     cout<<"LOCK ACCEPTED\n";
     stringstream ss;
-    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 and and answernum in (select accountcode from sipclientstable where userid="<<userId<<" and isprov=0) order by time DESC";
+    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 and answernum in (select accountcode from sipclientstable where userid="<<userId<<" and isprov=0) order by time DESC";
     
     
     std::cout<<" getIncomeCallData "<<(ss.str())<<"\n";

@@ -63,7 +63,7 @@ fsproxytest:
 	export CXXFLAGS="$CXXFLAGS -O0 -fbuiltin -g"
 	
 	g++ -g ${FSPROXY}/*.o ${PROXYHEADERS}/*.o ${ICMSERVER}/*.o ${CDRMANAGER}/*.o ${LOGGER}/*.o ${RECALLHEADERS}/*.o ${BUILDHEADERS} ${MONITORHEADERS}/*.o fsmain.cpp -o fsmain iexecuter.cpp  -std=c++11 -L ./fsproxy/ -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
-	-Wl,-Bstatic -l esl -lhiredis -lboost_system -lboost_random -lboost_regex  -lboost_thread -lboost_date_time -lboost_log -lboost_log_setup -lboost_filesystem -Wl,-Bdynamic -lpthread -lmysqlpp -lm -lcurl -lrt -lmysqlclient
+	-Wl,-Bstatic -l esl -lhiredis -lboost_system -lboost_random -lboost_regex  -lboost_thread -lboost_date_time -lboost_log -lboost_log_setup -lboost_filesystem  -Wl,-Bdynamic -lpthread -lmysqlpp -lm -lcurl -lrt -lmysqlclient
 	
 wssmonitor:
 	export CFLAGS="$CFLAGS -O0 -fbuiltin -g"

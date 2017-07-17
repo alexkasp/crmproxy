@@ -39,7 +39,7 @@ int main()
     FSConnector connector;
     
     FSEventReader reader("127.0.0.1",8021,lm,connector);
-//    FSEventReader reader("212.193.100.206",8021,lm,connector);
+//    FSEventReader reader("212.193.100.96",8021,lm,connector);
     
     CRMUrlBuilder sender("sipuni.com","80",NULL,NULL,NULL);
     FSParser newParser("/api/ats/linefail",lm,DBWorker,connector,serverid);
