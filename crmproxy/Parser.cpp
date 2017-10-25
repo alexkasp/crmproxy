@@ -99,11 +99,11 @@ int CallRecord::removeNumber(string num)
     return involvedNumbers.size();
 }
 
-int CallRecord::setRecordFile(string filename)
+int CallRecord::setRecordFile(string filename,bool forced=false)
 {
     std::cout<<"current recordfile = "<<recordfile<<"\n";
     
-    if(!filename.empty()&&(recordfile.empty()))
+    if((forced)||(!filename.empty()&&(recordfile.empty())))
     {
 	std::cout<<"try set recordfile "<<filename<<" for "<<callid<<"\n";
 	recordfile = filename;
@@ -411,6 +411,23 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	request+=timestamp;
 	request+="&channel=";
 	request+=channel;
+	CallRecord call;
+	if(currentCalls.getCall(callid,call))
+	{
+	    std::cout<<"ADD pbxdstnum for callid\n";
+	    request+="&pbxdstnum=";
+	    request+=call.getdst();
+	}
+	
+	
+	
+	string realcallid = mergedCalls.getMergedCall(callid);
+	
+	if(currentCalls.getCall(realcallid,call))
+	{
+	    call.addNumber(dst);
+	}
+	
 	if(usecrm=="1")
 	{
 	    return request;
@@ -419,15 +436,6 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	{
 	    request="nocrm"+request;
 	}
-	
-	
-	string realcallid = mergedCalls.getMergedCall(callid);
-	CallRecord call;
-	if(currentCalls.getCall(realcallid,call))
-	{
-	    call.addNumber(dst);
-	}
-	
 	
 	return request;
 }
@@ -855,6 +863,13 @@ string Parser::parsedata(ParserData& data)
 			int skipfinish = 0;
 			if(data["callbacktype"].compare("CallBackTreeReverse")==0)
 			{
+			    CallRecord call;
+			    if(currentCalls.getCall(data["callid"],call))
+			    {
+				 call.setRecordFile(data["recordfile"],true);
+				 currentCalls.updateCall(data["callid"],call);
+				 
+			    }
 			    if(!(data["newexten"]).empty())
 			    {
 				if(data["dialstatus"].compare("CANCEL")==0)
@@ -949,6 +964,15 @@ string Parser::parsedata(ParserData& data)
 			str = parse_finishtransfer(data["src"], data["dst"], data["userid"], data["time"], data["callid"],data["uidcode"]);
 
 		}
+		if (data["UserEvent:"] == "PickupCall")
+		{
+		    std::string pickupcmd  = "/var/lib/asterisk/agi-bin/pbxpickupcall.php "+data["channel1"];
+		    pickupcmd += " "+data["channel2"];
+		    std::cout<<"TRY EXECUTE "<<pickupcmd<<"\n";
+		    system(pickupcmd.c_str());
+		    
+		     
+		}
 		if(data["UserEvent:"] == "mergecall")
 		{
 		    parse_mergecall(data["newcallid"],data["callid"]);
@@ -1007,7 +1031,7 @@ string Parser::parsedata(ParserData& data)
 	else
 	    return str;
 	
-	if((!str.empty())&&(data["UserEvent:"]!="finishcall")&&(data["UserEvent:"]!="gatewaycall")&&(data["Event:"]!="Cdr")&&(data["UserEvent:"]!="answercall")&&(data["Event:"]!="Hangup:"))
+	if((!str.empty())&&(data["UserEvent:"]!="finishcall")&&(data["UserEvent:"]!="PickupCall")&&(data["UserEvent:"]!="gatewaycall")&&(data["Event:"]!="Cdr")&&(data["UserEvent:"]!="answercall")&&(data["Event:"]!="Hangup:"))
 	{    
 		str += "&TreeId=";
 		str += data["TreeId"];

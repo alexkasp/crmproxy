@@ -463,7 +463,7 @@ int DButils::getIncomeCallData(string uniqueid,string userId,string& operatorNum
     }*/
     cout<<"LOCK ACCEPTED\n";
     stringstream ss;
-    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 and answernum in (select accountcode from sipclientstable where userid="<<userId<<" and isprov=0) order by time DESC";
+    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 and 100 in (select nodetype from callrun where uniqueid = '"<<uniqueid<<"') order by time DESC";
     
     
     std::cout<<" getIncomeCallData "<<(ss.str())<<"\n";

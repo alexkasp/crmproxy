@@ -33,6 +33,7 @@ EventReader::~EventReader(void)
 
 void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf,const boost::system::error_code& ec,std::size_t size)
 {
+    boost::mutex::scoped_lock Lock(handleReceiveLock);
     try{
 	
 	if (!ec)

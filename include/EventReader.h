@@ -7,16 +7,19 @@
 #include <boost/thread.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/thread/mutex.hpp>
 #elif __APPLE__
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/thread/mutex.hpp>
 #else
 #include <boost\asio.hpp>
 #include <boost\thread.hpp>
 #include <boost\algorithm\string\split.hpp>
 #include <boost\algorithm\string.hpp>
+#include <boost\thread\mutex.hpp>
 #endif
 
 #include <vector>
@@ -52,6 +55,8 @@ private:
 	ip::tcp::endpoint ep;
 	ip::tcp::socket _sock;
 	boost::thread_group tgroup;
+	boost::mutex handleReceiveLock;
+	
 	
 	void writeHandler(const boost::system::error_code& error, std::size_t bytes_transferred);
 	void readRequest();

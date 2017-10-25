@@ -38,7 +38,7 @@ public:
 	~CallRecord();
 	int addNumber(string);
 	int removeNumber(string);
-	int setRecordFile(string);
+	int setRecordFile(string,bool);
 	
 	const string& getdst() const;
 	const string& getuid() const;
