@@ -19,13 +19,21 @@
 #include <ICMServer.h>
 #include <DButils.h>
 #include <CDRManager.h>
+#include <regex>
+#include <string>
+using namespace std;
+
+
 
 using namespace std;
 
 int main()
 {
+
+
     //string webservaddr = "212.193.100.104";
     string webservaddr = "wss.sipuni.com";
+//    string webservaddr = "178.124.128.205";
     cout<<"CDR by NET version 4.4(DB lock withou exit)\n";
     
     LoggerModule lm;

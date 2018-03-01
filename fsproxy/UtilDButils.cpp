@@ -54,6 +54,7 @@ boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::po
     	    
     	    gwd.maxtrycount=3;
     	    gwd.buntime=row[5];
+    	    gwd.Id = row[6].data();
     	    
     	    if(strcmp(row[4].data(),"1")==0)
         	gwd.status = "REGED";

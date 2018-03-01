@@ -73,6 +73,9 @@ class CallRecords
 
 class Parser: public IParser
 {
+	string parse_qoscall(string uid,string timestamp,string callid,string rxjitter,string rxcount,string txjitter,string txcount,string rtt,string bridged_rxjitter,string bridged_rxcount,string bridged_txjitter,string bridged_txcount,string bridged_rtt);
+	string parse_onlinepbx(string src,string dst,string uid,string timestamp,string callid,string uidcode,string newname);
+	string parse_changetree(string uid,string callid,string newtree);
 	string parse_queuecall(std::string, std::string, std::string, std::string, std::string, std::string, std::string);
 	string parse_webphoneUUID(string src,string dst,string uid,string timestamp,string callid,string webphoneid);
 	string parse_hangupevent(string callid);
@@ -97,7 +100,7 @@ class Parser: public IParser
 	string clearStorage(map<string,string>& storage,string key);
 	void clearStorages();
 	int processTransfer(string callid,string linkedid,string record);
-	
+	std::string fieldNameConverter(std::string fieldname);
 //	boost::timed_mutex::scoped_lock&& getCDRLock();
 	
 	boost::mutex reportedCallstorageLock;

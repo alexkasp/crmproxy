@@ -436,7 +436,7 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
     	    }
     	    else
     	    {
-    		if(getIncomeCallData(row[1].data(),userId,operatorNum) > 0)
+    		if(getIncomeCallData(row[1].data(),userId,operatorNum))
     		{
     		    return 1;
     		}
@@ -463,7 +463,7 @@ int DButils::getIncomeCallData(string uniqueid,string userId,string& operatorNum
     }*/
     cout<<"LOCK ACCEPTED\n";
     stringstream ss;
-    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and nodetype=0 and 100 in (select nodetype from callrun where uniqueid = '"<<uniqueid<<"') order by time DESC";
+    ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and ( nodetype=0 and 100 in (select nodetype from callrun where uniqueid = '"<<uniqueid<<"') or nodetype=111) order by time DESC";
     
     
     std::cout<<" getIncomeCallData "<<(ss.str())<<"\n";
@@ -480,8 +480,11 @@ int DButils::getIncomeCallData(string uniqueid,string userId,string& operatorNum
     		return 1;
     	    }
         }
-         return -1;
+        std::cout<<"getIncomeCallData return "<<uniqueid<<" not found\n";
+         return 0;
      }
+     
+     std::cout<<"getIncomeCallData return "<<uniqueid<<" query error\n";
      return 0;
 
 

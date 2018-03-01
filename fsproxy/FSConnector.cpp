@@ -3,6 +3,11 @@
 #include <iostream>
 #include <curl/curl.h>
 
+FSConnector::FSConnector(std::string _servurl):servurl(_servurl)
+{
+
+}
+
 int FSConnector::connect(string servhost,int servport)
 {
     const char* server = servhost.c_str();
@@ -54,6 +59,7 @@ void FSConnector::disconnect()
 
 int FSConnector::sendRegRequest(string userId,string gateway,string method)
 {
+    return 0;
     CURL *curl;
     CURLcode res;
 
@@ -68,7 +74,7 @@ int FSConnector::sendRegRequest(string userId,string gateway,string method)
 	curl = curl_easy_init();
 	if(curl)
 	{
-	    string curlBaseUrl = "http://extreg04.sipuni.com/IaEQvJmntW/refreshAll.php?userId="+userId+"&lines={\""+gateway+"\":[\""+method+"\"]}";
+	    string curlBaseUrl = "http://"+servurl+"/IaEQvJmntW/refreshAll.php?userId="+userId+"&lines={\""+gateway+"\":[\""+method+"\"]}";
 	    std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
 	    curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
 	    res = curl_easy_perform(curl);

@@ -107,7 +107,7 @@ void CDRManager::addInvolvedNums(map<string,string>& data)
     string callid = data["call_id"];
     string answeredNum = data["dst_num"];
     
-    std::cout<<"Add involved num for "<<callid<<" "<<asnweredNum<<"\n";
+    std::cout<<"Add involved num for "<<callid<<" "<<answeredNum<<"\n";
 
     auto x = involvedNums.find(callid);
     if(x!=involvedNums.end())

@@ -7,6 +7,7 @@ void LoggerModule::init(std::string logname)
     logging::add_file_log
     (
 	keywords::auto_flush = true,
+	keywords::max_size = 1000 * 1024 * 1024,
         keywords::file_name = logname,                                        /*< file name pattern >*/
         keywords::rotation_size = 100 * 1024 * 1024,                                   /*< rotate files every 10 MiB... >*/
         keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0), /*< ...or at midnight >*/

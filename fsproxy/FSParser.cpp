@@ -29,8 +29,9 @@ string FSParser::unregEvent(string gateway)
     }
     */
     deletedList.insert(make_pair(gateway,gwd));
-    connector.unregLine(gwd.userId,gwd.login);
+    connector.unregLine(gwd.userId,gwd.Id);
 
+//    return "";
     
     request+="?status=UNREGED";
     request+= "&uid=";
@@ -53,7 +54,8 @@ string FSParser::regEvent(string gateway)
     if(!(gtit!=gatewaysList.end()))
 	return "";
     gwd = gtit->second;
-
+    
+//    return "";
     
     request+="?status=REGED";
     request+= "&uid=";
@@ -132,7 +134,7 @@ string FSParser::gateway_state_parser(ParserData& data)
 		    	else
 		    	{
 		    	//    std::cout<<"NOT REGISTERED STATUS\n";
-		    	    int maxtrycount = 3;
+		    	    int maxtrycount = 20;
 		    	    auto gwd = gatewaysList.find(gateway);
 		    	    if(gwd!=gatewaysList.end())
 		    		maxtrycount = (gwd->second).maxtrycount;
@@ -221,18 +223,21 @@ void FSParser::undelLine()
     try{
 	while(1)
 	{
-	    boost::this_thread::sleep( boost::posix_time::milliseconds(10000));
-	    //std::cout<<"UNDEL LINE CICLE\n";
+	    const int pause = 10;
+	    boost::this_thread::sleep( boost::posix_time::milliseconds(pause*1000));
+	    std::cout<<"UNDEL LINE CICLE\n";
 	    for(auto x = deletedList.begin();x!=deletedList.end();)
 	    {
 		gatewayData& gwd = x->second;
 		string gateway = x->first;
 		
-		//std::cout<<"undelLine "<<gwd.login<<" ("<<gwd.buntime<<")\n";
+		std::cout<<"undelLine "<<gwd.login<<" ("<<gwd.buntime<<")\n";
 		
-		if(--gwd.buntime==0)
+		gwd.buntime-=pause;
+		
+		if(gwd.buntime<=0)
 		{
-		    connector.regLine(gwd.userId,gwd.login);
+		    connector.regLine(gwd.userId,gwd.Id);
 		    registeredList.insert(make_pair(gateway,FSRegStatus::REGSTATUS));
 		    deletedList.erase(x++);
 		}
@@ -246,6 +251,7 @@ void FSParser::undelLine()
         {
         std::string errmsg = "Error in undelLine ";
         std::cout<<errmsg<<" "<<ec.what()<<"\n";
+        exit(0);
             }
 }
 

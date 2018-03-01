@@ -36,7 +36,8 @@ int main()
     
     
     string serverid =DBWorker.getServerId();
-    FSConnector connector;
+    std::string httpurl = "extreg0"+serverid+".sipuni.com";
+    FSConnector connector(httpurl);
     
     FSEventReader reader("127.0.0.1",8021,lm,connector);
 //    FSEventReader reader("212.193.100.96",8021,lm,connector);

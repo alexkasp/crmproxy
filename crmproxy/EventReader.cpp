@@ -34,6 +34,7 @@ EventReader::~EventReader(void)
 void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf,const boost::system::error_code& ec,std::size_t size)
 {
     boost::mutex::scoped_lock Lock(handleReceiveLock);
+    
     try{
 	
 	if (!ec)
@@ -45,13 +46,30 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 
 	    buf.consume(size);
 	    
+	    try
+    	    {
+		std::vector<std::string> lines;
+	//	boost::algorithm::split(lines, str, boost::is_any_of("\r\n\r\n"));
+		boost::iter_split(lines, str, boost::algorithm::first_finder("\r\n\r\n"));
+		for(auto x = lines.begin();x!=lines.end();++x)
+		{
+		    std::string value = *x;
+		    
+		    if(!value.empty())
+		    {
+			lm.makeLog(info,"AMI:\n ["+(*x)+"]");
+			boost::thread t(boost::bind(&EventReader::processevent,this,str));
+			tgroup.add_thread(&t);
+			t.detach();
+		    }	
+		}
+	    }
+	    catch(exception& e)
+	    {
+		string errmsg = "READHANDLER  EXCEPTION!!!";
+		lm.makeLog(boost::log::trivial::severity_level::error,errmsg+e.what());
+	    }
 	    
-	    lm.makeLog(info,"[Event AMI]:\n"+str);
-	    
-	    
-	    boost::thread t(boost::bind(&EventReader::processevent,this,str));
-	    tgroup.add_thread(&t);
-	    t.detach();
 	    //processevent(str,data);
 	}
 	else
@@ -68,7 +86,6 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 	string errmsg = "Error in read_handle ";
 	lm.makeLog(boost::log::trivial::severity_level::error,errmsg+ec.what());
     }
-    
     
 }
 

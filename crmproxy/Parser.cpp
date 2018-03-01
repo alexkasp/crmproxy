@@ -9,8 +9,10 @@
 #include <boost/thread.hpp>
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
-
+#include <boost/algorithm/string.hpp>
 #undef CALLMANUALCONTROL
+
+#define ASTER_VER 11
 
 std::string chars(
     "abcdefghijklmnopqrstuvwxyz"
@@ -596,6 +598,66 @@ string Parser::parse_transfercall(string src,string dst,string uid,string timest
 	return request;
 
 }
+//callqos,userid:18421,time:1519058430,callid:1519058428.32841,rxjitter:0,rxcount:0,txjitter:0,txcount:0,rtt:0,bridged_rxjitter:0,bridged_rxcount:0,bridged_txjitter:0,bridged_txcount:0,bridged_rtt:0
+string Parser::parse_qoscall(string uid,string timestamp,string callid,string rxjitter,string rxcount,string txjitter,string txcount,string rtt,string bridged_rxjitter,string bridged_rxcount,string bridged_txjitter,string bridged_txcount,string bridged_rtt)
+{
+    string request = request_str;
+    request+=uid;
+    request+="&event=9&call_id=";
+    request+=callid;
+    request+="&timestamp=";
+    request+=timestamp;
+    request+="&rxjitter=";
+    request+=rxjitter;
+    request+="&rxcount=";
+    request+=rxcount;
+    request+="&txjitter=";
+    request+=txjitter;
+    request+="&txcount=";
+    request+=txcount;
+    request+="&rtt=";
+    request+=rtt;
+    request+="&bridged_rxjitter=";
+    request+=bridged_rxjitter;
+    request+="&bridged_rxcount=";
+    request+=bridged_rxcount;
+    request+="&bridged_txjitter=";
+    request+=bridged_txjitter;
+    request+="&bridged_txcount=";
+    request+=bridged_txcount;
+    request+="&bridged_rtt=";
+    request+=bridged_rtt;
+    
+    return request;
+}
+
+string Parser::parse_onlinepbx(string src,string dst,string uid,string timestamp,string callid,string uidcode,string newname)
+{
+    boost::replace_all(newname,"u","\\u");
+    string request = request_str;
+    request+=uid;
+    request+="&event=7&call_id=";
+    request+=callid;
+    request+=format_srcdstnum(src,dst,uidcode);
+    request+="&timestamp=";
+    request+=timestamp;
+    request+="&newwebphonename=";
+    request+=newname;
+    return request;
+}
+
+
+
+string Parser::parse_changetree(string uid,string callid,string newtree)
+{
+    string request = request_str;
+    request+=uid;
+    request+="&call_id=";
+    request+=callid;
+    request+="&event=8&newtree=";
+    request+=newtree;
+    return request;
+}
 
 string Parser::parse_gatewaycall(string src,string dst,string callid)
 {
@@ -806,6 +868,25 @@ void Parser::parse_setcallbackId(string callid,string callbackId)
     callbackIdList[callid] = callbackId;
 }
 
+
+
+string Parser::fieldNameConverter(std::string fieldname)
+{
+    if(fieldname.find(":")!=std::string::npos)
+	return fieldname;
+	
+    if(ASTER_VER==13)
+    {
+//	if(fieldname=="callbackId")
+//	    return fieldname;
+//	if(fieldname=="webcallid")
+//	    return fieldname;
+	    
+	return fieldname+":";
+    }
+    return fieldname;
+}
+
 string Parser::parsedata(ParserData& data)
 {
 	lm.makeLog(boost::log::trivial::severity_level::info,"EVENT DATA "+data["Event:"]);
@@ -821,153 +902,153 @@ string Parser::parsedata(ParserData& data)
 	{
 		if(data["UserEvent:"]=="webphonecall")
 		{
-		    str = parse_webphoneUUID(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["webcallid"]);
+		    str = parse_webphoneUUID(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("webcallid")]);
 		}
 		if(data["UserEvent:"]=="incomecall")
 		{
-			 str = parse_incomecall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["srctype"],data["uidcode"]);
+			 str = parse_incomecall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("srctype")],data[fieldNameConverter("uidcode")]);
 			
 		}
 		if(data["UserEvent:"]=="queuecall")
 		{
-			 str = parse_queuecall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["srctype"],data["uidcode"]);
+			 str = parse_queuecall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("srctype")],data[fieldNameConverter("uidcode")]);
 			
 		}
 		if(data["UserEvent:"]=="outcall")
 		{
-			 str = parse_outcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["uidcode"]);
+			 str = parse_outcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("uidcode")]);
 			
 		}
 		if(data["UserEvent:"]=="answercall")
 		{
-			 str = parse_answercall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["calltype"],data["usecrm"],data["uidcode"],data["ChannelName"]);
+			 str = parse_answercall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("calltype")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("ChannelName")]);
 			
 		}
 		if(data["UserEvent:"]=="initcall")
-		{
-			if(!(data["callbackId"]).empty())
-			    callbackIdList[data["callid"]] = data["callbackId"];
+		{		
+			if(!(data[fieldNameConverter("callbackId")]).empty())
+			    callbackIdList[data[fieldNameConverter("callid")]] = data[fieldNameConverter("callbackId")];
 			    
-			std::cout<<"DEBUG initcall "<<data["src"]<<" "<<data["dst"]<<" "<<data["userid"]<<" "<<data["time"]<<" "<<data["callid"]<<" "<<data["recordfile"]<<" "<<data["usecrm"]<<" "<<data["uidcode"]<<"\n";
-			 str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],data["recordfile"],data["usecrm"],data["uidcode"],data["TreeId"],data["ChannelName"]);
+			std::cout<<"DEBUG initcall "<<data[fieldNameConverter("src")]<<" "<<data[fieldNameConverter("dst")]<<" "<<data[fieldNameConverter("userid")]<<" "<<data[fieldNameConverter("time")]<<" "<<data[fieldNameConverter("callid")]<<" "<<data[fieldNameConverter("recordfile")]<<" "<<data[fieldNameConverter("usecrm")]<<" "<<data[fieldNameConverter("uidcode")]<<"\n";
+			 str = parse_initcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],data[fieldNameConverter("ChannelName")]);
 			
 		}
 		if(data["UserEvent:"]=="transfercall")
 		{
-			processTransfer(data["Uniqueid:"],data["callid"],data["recordfile"]);
-			str = parse_initcall(data["src"],data["dst"],data["userid"],data["time"],data["callid"],"",data["usecrm"],data["uidcode"],data["TreeId"],data["ChannelName"]);
+			processTransfer(data[fieldNameConverter("Uniqueid:")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")]);
+			str = parse_initcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],"",data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],data[fieldNameConverter("ChannelName")]);
 			
 		}
 		if(data["UserEvent:"]=="finishcall")
 		{
 			int skipfinish = 0;
-			if(data["callbacktype"].compare("CallBackTreeReverse")==0)
+			if(data[fieldNameConverter("callbacktype")].compare("CallBackTreeReverse")==0)
 			{
 			    CallRecord call;
-			    if(currentCalls.getCall(data["callid"],call))
+			    if(currentCalls.getCall(data[fieldNameConverter("callid")],call))
 			    {
-				 call.setRecordFile(data["recordfile"],true);
-				 currentCalls.updateCall(data["callid"],call);
+				 call.setRecordFile(data[fieldNameConverter("recordfile")],true);
+				 currentCalls.updateCall(data[fieldNameConverter("callid")],call);
 				 
 			    }
-			    if(!(data["newexten"]).empty())
+			    if(!(data[fieldNameConverter("newexten")]).empty())
 			    {
-				if(data["dialstatus"].compare("CANCEL")==0)
+				if(data[fieldNameConverter("dialstatus")].compare("CANCEL")==0)
 				{
 				    
-				    data["callanswer"]="0";
-				    data["status"]="NOANSWER";
-				    parse_cdrevent(data["callid"],data["newexten"],"0","0",data["callstart"],data["time"],data["callbacktype"]);
+				    data[fieldNameConverter("callanswer")]="0";
+				    data[fieldNameConverter("status")]="NOANSWER";
+				    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("newexten")],"0","0",data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
 				    
 				}
 				else
 				{
 				    std::string duration = "0";
-				    if((!(data["time"]).empty())&&(!(data["callstart"]).empty()))
-					duration =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callstart"]));
-				    parse_cdrevent(data["callid"],data["newexten"],duration,duration,data["callstart"],data["time"],data["callbacktype"]);
+				    if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callstart")]).empty()))
+					duration =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callstart")]));
+				    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("newexten")],duration,duration,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
 				}
-				data["dst"] = data["newexten"];
+				data[fieldNameConverter("dst")] = data[fieldNameConverter("newexten")];
 			    }
-			    else if((data["status"].compare("NOANSWER")==0)||(data["status"].compare("CHANUNAVAIL")==0))
+			    else if((data[fieldNameConverter("status")].compare("NOANSWER")==0)||(data[fieldNameConverter("status")].compare("CHANUNAVAIL")==0))
 			    {
-				data["callanswer"]="0";
-				data["status"]="NOANSWER";
-				string formdst = data["uidcode"]+"001";
-				parse_cdrevent(data["callid"],data["dst"],"0","0",data["callstart"],data["time"],data["callbacktype"]);
-				data["src"]=formdst;
+				data[fieldNameConverter("callanswer")]="0";
+				data[fieldNameConverter("status")]="NOANSWER";
+				string formdst = data[fieldNameConverter("uidcode")]+"001";
+				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],"0","0",data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
+				data[fieldNameConverter("src")]=formdst;
 			    }
 			    else
 				skipfinish = 1;
 			}
-			else if(data["callbacktype"].compare("CallBackReverse")==0)
+			else if(data[fieldNameConverter("callbacktype")].compare("CallBackReverse")==0)
 			{
 			//    std::string prevcallid = data["callid"];
 			//    data["callid"] = mergedCalls.getParentCall(data["callid"]);
 			//    std::cout<<"PREV CALLID = "<<prevcallid<<" new callid "<<data["callid"]<<"\n";
 			}
-			else if(data["callbacktype"].compare("standart")==0)
+			else if(data[fieldNameConverter("callbacktype")].compare("standart")==0)
 			{
 			    std::string duration = "0";
 			    std::string billsec = "0";
 
-			    if(data["dialstatus"].compare("ANSWER")!=0)
+			    if(data[fieldNameConverter("dialstatus")].compare("ANSWER")!=0)
 			    {
-				string formdst = data["uidcode"]+"001";
-				parse_cdrevent(data["callid"],data["dst"],duration,billsec,data["callstart"],data["time"],data["callbacktype"]);
-				data["dst"]=formdst;
+				string formdst = data[fieldNameConverter("uidcode")]+"001";
+				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
+				data[fieldNameConverter("dst")]=formdst;
 			    }
 			    else
 			    {
-				if((!(data["time"]).empty())&&(!(data["callstart"]).empty()))
-    				    duration =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callstart"]));
-				if((!(data["time"]).empty())&&(!(data["callanswer"]).empty())&&(data["callanswer"].compare("0")!=0))
-				    billsec =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callanswer"]));
+				if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callstart")]).empty()))
+    				    duration =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callstart")]));
+				if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callanswer")]).empty())&&(data[fieldNameConverter("callanswer")].compare("0")!=0))
+				    billsec =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callanswer")]));
 				    
-				if((data["dst"]).empty())
-				    data["dst"] = data["src"];
+				if((data[fieldNameConverter("dst")]).empty())
+				    data[fieldNameConverter("dst")] = data[fieldNameConverter("src")];
 				
-				parse_cdrevent(data["callid"],data["dst"],duration,billsec,data["callstart"],data["time"],data["callbacktype"]);
+				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
 			    }
 			    
 			    
 			}
-			else if(data["callbacktype"].compare("recall")==0)
+			else if(data[fieldNameConverter("callbacktype")].compare("recall")==0)
 			{
-			    if(data["status"]=="CHANUNAVAIL")
+			    if(data[fieldNameConverter("status")]=="CHANUNAVAIL")
 			    {
-				parse_cdrevent(data["callid"],data["dst"],"0","0",data["callstart"],data["time"],data["callbacktype"]);
+				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],"0","0",data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
 			    }
 			}
-			else if(data["callbacktype"].compare("crmredirect")==0)
+			else if(data[fieldNameConverter("callbacktype")].compare("crmredirect")==0)
 			{
 			    std::string duration = "0";
 			    std::string billsec = "0";
-			    if((!(data["time"]).empty())&&(!(data["callstart"]).empty()))
-    				duration =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callstart"]));
-			    if((!(data["time"]).empty())&&(!(data["callanswer"]).empty())&&(data["callanswer"].compare("0")!=0))
-				billsec =  std::to_string(std::stoi(data["time"]) - std::stoi(data["callanswer"]));
-			    parse_cdrevent(data["callid"],data["dst"],duration,billsec,data["callstart"],data["time"],data["callbacktype"]);
+			    if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callstart")]).empty()))
+    				duration =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callstart")]));
+			    if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callanswer")]).empty())&&(data[fieldNameConverter("callanswer")].compare("0")!=0))
+				billsec =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callanswer")]));
+			    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
 			}
 			
 			
 			if(!skipfinish)    
-			    str = parse_finishcall(data["src"],data["dst"],data["userid"],data["time"],
-			    data["callid"],data["callstart"],data["callanswer"],data["status"],data["calltype"],data["callbackId"],data["TreeId"],
-			    data["ChannelName"],data["serverId"],data["recordfile"],data["label"],data["rating"],data["newstatus"],data["crmcall"],data["hashtag"],data["usecrm"],data["uidcode"]);
+			    str = parse_finishcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
+			    data[fieldNameConverter("callid")],data[fieldNameConverter("callstart")],data[fieldNameConverter("callanswer")],data[fieldNameConverter("status")],data[fieldNameConverter("calltype")],data[fieldNameConverter("callbackId")],data[fieldNameConverter("TreeId")],
+			    data[fieldNameConverter("ChannelName")],data[fieldNameConverter("serverId")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("label")],data[fieldNameConverter("rating")],data[fieldNameConverter("newstatus")],data[fieldNameConverter("crmcall")],data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")]);
 			else
 			    str = "";
 			
 		}
 		if (data["UserEvent:"] == "finish_transfer")
 		{
-			str = parse_finishtransfer(data["src"], data["dst"], data["userid"], data["time"], data["callid"],data["uidcode"]);
+			str = parse_finishtransfer(data[fieldNameConverter("src")], data[fieldNameConverter("dst")], data[fieldNameConverter("userid")], data[fieldNameConverter("time")], data[fieldNameConverter("callid")],data[fieldNameConverter("uidcode")]);
 
 		}
 		if (data["UserEvent:"] == "PickupCall")
 		{
-		    std::string pickupcmd  = "/var/lib/asterisk/agi-bin/pbxpickupcall.php "+data["channel1"];
-		    pickupcmd += " "+data["channel2"];
+		    std::string pickupcmd  = "/var/lib/asterisk/agi-bin/pbxpickupcall.php "+data[fieldNameConverter("channel1")];
+		    pickupcmd += " "+data[fieldNameConverter("channel2")];
 		    std::cout<<"TRY EXECUTE "<<pickupcmd<<"\n";
 		    system(pickupcmd.c_str());
 		    
@@ -975,25 +1056,39 @@ string Parser::parsedata(ParserData& data)
 		}
 		if(data["UserEvent:"] == "mergecall")
 		{
-		    parse_mergecall(data["newcallid"],data["callid"]);
+		    parse_mergecall(data[fieldNameConverter("newcallid")],data[fieldNameConverter("callid")]);
 		}
+		if(data["UserEvent:"] == "onlinepbx")
+		{
+		    str = parse_onlinepbx(data[fieldNameConverter("src")], data[fieldNameConverter("dst")], data[fieldNameConverter("userid")], data[fieldNameConverter("time")], data[fieldNameConverter("callid")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("newname")]);
+		}
+		if(data["UserEvent:"] == "callqos")
+		{
+		// callqos,userid:18421,time:1519058430,callid:1519058428.32841,rxjitter:0,rxcount:0,txjitter:0,txcount:0,rtt:0,bridged_rxjitter:0,bridged_rxcount:0,bridged_txjitter:0,bridged_txcount:0,bridged_rtt:0
+		    str = parse_qoscall(data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("rxjitter")],data[fieldNameConverter("rxcount")],data[fieldNameConverter("txjitter")],data[fieldNameConverter("txcount")],data[fieldNameConverter("rtt")],
+		    data[fieldNameConverter("bridged_rxjitter")],data[fieldNameConverter("bridged_rxcount")], data[fieldNameConverter("bridged_txjitter")],data[fieldNameConverter("bridged_txcount")],data[fieldNameConverter("bridged_rtt")]);
+		}
+		if(data["UserEvent:"] == "changetree")
+		{
+		    str = parse_changetree(data[fieldNameConverter("userid")],data[fieldNameConverter("callid")],data[fieldNameConverter("newtree")]);
+		}    
 		if(data["UserEvent:"] == "gatewaycall")
 		{
-		    str = parse_gatewaycall(data["src"],data["dst"],data["callid"]);
+		    str = parse_gatewaycall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("callid")]);
 		}
 		if((data["callbackId"]).empty())
 		{
-		    auto x = callbackIdList.find(data["callid"]);
+		    auto x = callbackIdList.find(data[fieldNameConverter("callid")]);
 		    if(x!=callbackIdList.end())
 		    {
-            		data["callbackId"] = (*x).second;
+            		data[fieldNameConverter("callbackId")] = (*x).second;
 		    }
 		}
 		
 		if(!str.empty())
 		{
 		    str+= "&callbackId=";
-		    str+= data["callbackId"];
+		    str+= data[fieldNameConverter("callbackId")];
 		}
 	}
 	else if(data["Event:"] == "AgentCalled")
@@ -1001,14 +1096,19 @@ string Parser::parsedata(ParserData& data)
 		std::cout<<"AGENT CALLED\n\n\n";
 	    	string request = request_str;
 		CallRecord call;
-		string callid = data["Uniqueid:"];
+		string callid = data[fieldNameConverter("Uniqueid:")];
 		if(currentCalls.getCall(callid,call))
 		{
 		    std::cout<<"FIND CALL\n";
-		    data["TreeId"] = call.getTreeId();
-		    data["ChannelName"] = call.getChannel();
+		    data[fieldNameConverter("TreeId")] = call.getTreeId();
+		    data[fieldNameConverter("ChannelName")] = call.getChannel();
 		    auto millis = std::time(0);
-		    str =  parse_incomecall(data["CallerIDNum:"],data["AgentName:"],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid());
+		    std::string dstnum="";
+		    if(ASTER_VER==13)
+			dstnum="DestCallerIDNum:";
+		    else
+			dstnum="AgentName:";
+		    str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid());
 		
 		}
 		else
@@ -1016,9 +1116,9 @@ string Parser::parsedata(ParserData& data)
 	}
 	else if(data["Event:"] == "Cdr")
 	{
-	    if(data["DestinationContext:"]=="vatscallbackreverse")
-	    data["UniqueID:"] = mergedCalls.getMergedCall(data["UniqueID:"]);
-		str = parse_cdrevent(data["UniqueID:"],data["Destination:"],data["Duration:"],data["BillableSeconds:"],data["StartTime:"],data["EndTime:"],data["DestinationContext:"]);
+	    if(data[fieldNameConverter("DestinationContext:")]=="vatscallbackreverse")
+	    data[fieldNameConverter("UniqueID:")] = mergedCalls.getMergedCall(data[fieldNameConverter("UniqueID:")]);
+		str = parse_cdrevent(data[fieldNameConverter("UniqueID:")],data[fieldNameConverter("Destination:")],data[fieldNameConverter("Duration:")],data[fieldNameConverter("BillableSeconds:")],data[fieldNameConverter("StartTime:")],data[fieldNameConverter("EndTime:")],data[fieldNameConverter("DestinationContext:")]);
 	}
 /*	else if(data["Event:"] == "Hangup")
 	{
@@ -1031,12 +1131,12 @@ string Parser::parsedata(ParserData& data)
 	else
 	    return str;
 	
-	if((!str.empty())&&(data["UserEvent:"]!="finishcall")&&(data["UserEvent:"]!="PickupCall")&&(data["UserEvent:"]!="gatewaycall")&&(data["Event:"]!="Cdr")&&(data["UserEvent:"]!="answercall")&&(data["Event:"]!="Hangup:"))
+	if((!str.empty())&&(data[fieldNameConverter("UserEvent:")]!="changetree")&&(data[fieldNameConverter("UserEvent:")]!="qoscall")&&(data[fieldNameConverter("UserEvent:")]!="finishcall")&&(data[fieldNameConverter("UserEvent:")]!="PickupCall")&&(data[fieldNameConverter("UserEvent:")]!="gatewaycall")&&(data[fieldNameConverter("Event:")]!="Cdr")&&(data[fieldNameConverter("UserEvent:")]!="answercall")&&(data[fieldNameConverter("Event:")]!="Hangup:"))
 	{    
 		str += "&TreeId=";
-		str += data["TreeId"];
+		str += data[fieldNameConverter("TreeId")];
 		str += "&Channel=";
-		str += data["ChannelName"];
+		str += data[fieldNameConverter("ChannelName")];
 		
 
 	}
