@@ -56,7 +56,7 @@ private:
 	ip::tcp::socket _sock;
 	boost::thread_group tgroup;
 	boost::mutex handleReceiveLock;
-	
+	std::string prevdata;
 	
 	void writeHandler(const boost::system::error_code& error, std::size_t bytes_transferred);
 	void readRequest();

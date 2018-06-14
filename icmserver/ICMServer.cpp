@@ -124,9 +124,16 @@ string ICMServer::convertNumber(string num)
 
 int ICMServer::putCDREvent(map<string,string> CDRData)
 {
-    if ((!CDRData.empty())&&(CDRData["status"]=="ANSWER")) {
+        	    for(auto x=CDRData.begin();x!=CDRData.end();++x)
+        	     std::cout<<(x->first)<<" : "<<(x->second)<<"\n";
+    
+    std::cout<<"ICMServer "<<CDRData["status"]<<" event = "<<CDRData["event"]<<"\n";
+    if ((!CDRData.empty())&&((CDRData["status"]=="ANSWER")||(CDRData["status"]=="ANSWERED"))) {
         	if(CDRData["event"]=="2")
         	{
+        	    for(auto x=CDRData.begin();x!=CDRData.end();++x)
+        	     std::cout<<(x->first)<<" : "<<(x->second)<<"\n";
+        	    
         	    string clientNum,operatorNum;
         	    if(CDRData["calltype"]=="out")
         	    {
@@ -136,9 +143,17 @@ int ICMServer::putCDREvent(map<string,string> CDRData)
         		CDRData["src_num"] = clientNum;
         	    }
         	    
+        	    std::cout<<"ICMServer start storeCDRdata\n";
+        	     
+        	     
         	    CDRData["src_num"] = convertNumber(CDRData["src_num"]);
+        	    clientNum = CDRData["dst_num"];
+        	    operatorNum = CDRData["src_num"];
+        	            
         	    if((!operatorNum.empty())&&(!clientNum.empty()))
             		storeCDRData(CDRData);
+            	    else
+            		std::cout<<"Problem with numbers - operatornum = "<<operatorNum<<" clientNum = "<<clientNum<<"\n";
         	}
         	else
         	    return 0;

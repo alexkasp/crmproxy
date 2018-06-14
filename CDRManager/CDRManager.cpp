@@ -13,7 +13,7 @@
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-
+#define LOCAL_NUMBER "2"
 
 std::string cdrchars(
         "abcdefghijklmnopqrstuvwxyz"
@@ -147,9 +147,17 @@ void CDRManager::putCDR(map<string,string> data)
 	else
 	    destinationcontext = "vatsout";
     }
+    else if(data["DestinationContext"] == "vatscallbackreverse")
+    {
+	dst = data["dst_num"];
+//	destinationcontext = "vatsout"
+    }
     else
     {
-	destinationcontext = data["DestinationContext"];
+	if((data["src_type"]==LOCAL_NUMBER)&&(data["dst_type"]==LOCAL_NUMBER))
+	    destinationcontext = "vatsl";
+	else
+	    destinationcontext = data["DestinationContext"];
  	dst = data["destination"];
     }
     string answernum = data["dst_num"];
@@ -161,7 +169,7 @@ void CDRManager::putCDR(map<string,string> data)
 	if((src.length()==10)&&(!uidcode.empty())&&(src.substr(0,uidcode.length()).compare(uidcode)!=0))
 	{
 	    
-	    src = "8"+src;
+	//    src = "8"+src;
 	}
 	else if((src.length()>11)&&(src.substr(0,3)=="100"))
 	{

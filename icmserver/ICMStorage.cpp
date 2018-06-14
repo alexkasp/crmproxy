@@ -88,6 +88,7 @@ int ICMStorage::putCDRData(string calldate,string userId,string aNum,string oper
 
 int ICMStorage::putCDRData(map<string,string> rawData)
 {
+    std::cout<<"putCDRData(map<string,string> rawData)\n";
     for(auto x=rawData.begin();x!=rawData.end();++x)
 	std::cout<<(x->first)<<" : "<<(x->second)<<"\n";
     return putCDRData(rawData["call_start_timestamp"],rawData["userId"],rawData["src_num"],rawData["dst_num"],rawData["UniqueID"]);

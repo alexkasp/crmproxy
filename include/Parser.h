@@ -23,22 +23,25 @@ class CallRecord
 	string src;
 	string uid;
 	string srctype;
+	string dsttype;
 	string userid;
 	string callid;
 	string timestamp;
 	string recordfile;
 	string treeid;
+	string currenttreeid;
 	string channel;
 	
 	set<string> involvedNumbers;
 	
 public:
 	CallRecord();
-	CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string userid,string uid,string srctype,string treeid,string channel);
+	CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string userid,string uid,string srctype,string dsttype,string treeid,string channel);
 	~CallRecord();
 	int addNumber(string);
 	int removeNumber(string);
 	int setRecordFile(string,bool);
+	void setCurrentTreeId(string treeid);
 	
 	const string& getdst() const;
 	const string& getuid() const;
@@ -47,7 +50,10 @@ public:
 	const string& getrecordfile() const;
 	const string& getuserid() const;
 	const string& getsrctype() const;
+	const string& getdsttype() const;
 	const string& getTreeId() const;
+	const string& getCurrentTreeId() const;
+
 	const string& getChannel() const;
 };
 
@@ -62,7 +68,7 @@ class CallRecords
 	int size();
 	CallRecords();
 	void updateCall(string callid,CallRecord cr);
-	void addCall(string callid,string src,string dst,string timestamp,string recordfile,string uid,string uidcode,string srctype,string treeid,string channel);
+	void addCall(string callid,string src,string dst,string timestamp,string recordfile,string uid,string uidcode,string srctype,string dsttype,string treeid,string channel);
 	void removeCall(string callid);
 	int getCall(string callid,CallRecord& cr);
 	boost::mutex& getLock();
@@ -95,7 +101,7 @@ class Parser: public IParser
 	void parse_mergecall(string newcallid,string callid);
 	void parse_setcallbackId(string callid,string callbackId);
 	void clearCallEnviroment(string callid);
-	string format_srcdstnum(string src,string dst,string uidcode);
+	string format_srcdstnum(string src,string dst,string uidcode,string srctype,string dsttype);
 	template<typename T>void  clearStorageAlg(T& storage,string key); 
 	string clearStorage(map<string,string>& storage,string key);
 	void clearStorages();

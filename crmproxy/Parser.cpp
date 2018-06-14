@@ -12,7 +12,7 @@
 #include <boost/algorithm/string.hpp>
 #undef CALLMANUALCONTROL
 
-#define ASTER_VER 11
+#define ASTER_VER 13
 
 std::string chars(
     "abcdefghijklmnopqrstuvwxyz"
@@ -30,6 +30,15 @@ const string& CallRecord::getdst() const
 	return dst;
 }
 
+void CallRecord::setCurrentTreeId(string newtreeid)
+{
+    currenttreeid = newtreeid;
+}
+
+const string& CallRecord::getCurrentTreeId() const
+{
+    return currenttreeid;
+}
 const string& CallRecord::getuid() const
 {
 	return uid;
@@ -60,6 +69,11 @@ const string& CallRecord::getsrctype() const
     return srctype;
 }
 
+const string& CallRecord::getdsttype() const
+{
+    return dsttype;
+}
+
 const string& CallRecord::getTreeId() const
 {
     return treeid;
@@ -76,8 +90,8 @@ CallRecord::~CallRecord(void)
 	cout<<"CallRecords delete for "<<dst<<endl;
 }
 
-CallRecord::CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string _uid,string _userid,string _srctype,string _treeid,string _channel):
-	dst(_dst),src(_dst),timestamp(_timestamp),recordfile(_recordfile),uid(_uid),userid(_userid),srctype(_srctype),treeid(_treeid),channel(_channel)
+CallRecord::CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string _uid,string _userid,string _srctype,string _dsttype,string _treeid,string _channel):
+	dst(_dst),src(_dst),timestamp(_timestamp),recordfile(_recordfile),uid(_uid),userid(_userid),srctype(_srctype),dsttype(_dsttype),treeid(_treeid),channel(_channel)
 {
 	cout<<"Create Call"<<dst<<endl;
 }
@@ -135,7 +149,7 @@ int CallRecords::size()
     return callList.size();
 }
 
-void CallRecords::addCall(string callid,string src,string dst,string timestamp,string recordfile,string uid,string uidcode,string srctype,string treeid,string channel)
+void CallRecords::addCall(string callid,string src,string dst,string timestamp,string recordfile,string uid,string uidcode,string srctype,string dsttype,string treeid,string channel)
 {
     boost::mutex::scoped_lock lock(CallLock);
     
@@ -144,7 +158,7 @@ void CallRecords::addCall(string callid,string src,string dst,string timestamp,s
     if(it!=callList.end())
 	return;
 	
-    CallRecord cr(src,dst,timestamp,recordfile,uidcode,uid,srctype,treeid,channel);
+    CallRecord cr(src,dst,timestamp,recordfile,uidcode,uid,srctype,dsttype,treeid,channel);
     
     std::cout<<"ADD CALL with "<<callid<<" src="<<src<<" dst="<<dst<<" time="<<timestamp<<"\n";
     
@@ -294,16 +308,24 @@ string Parser::parse_numtype(string num,string uidcode)
 	
 	return boost::lexical_cast<std::string>(num_type);
 }
-string Parser::format_srcdstnum(string src,string dst,string uidcode)
+string Parser::format_srcdstnum(string src,string dst,string uidcode,string src_type="",string dst_type="")
 {
 	string result = "&src_num=";
 	result+=src;
 	result+="&src_type=";
-	result+=parse_numtype(src,uidcode);
+	if(src_type.empty())
+	    result+=parse_numtype(src,uidcode);
+	else
+	    result+=src_type;
+	    
 	result+="&dst_num=";
 	result+=dst;
 	result+="&dst_type=";
-	result+=parse_numtype(dst,uidcode);
+	if(dst_type.empty())
+	    result+=parse_numtype(dst,uidcode);
+	else
+	    result+=dst_type;
+	    
 	return result;
 }
 string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,string channel)
@@ -322,7 +344,8 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 	CallRecord call;
 	if(!currentCalls.getCall(callid,call))
 	{
-	    currentCalls.addCall(callid,src,dst,timestamp,recordfile,uid,uidcode,parse_numtype(src,uidcode),treeid,channel);
+	    currentCalls.addCall(callid,src,dst,timestamp,recordfile,uid,uidcode,parse_numtype(src,uidcode),parse_numtype(dst,uidcode),treeid,channel);
+	    
 	}
 	else
 	{
@@ -408,18 +431,21 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	request+=uid;
 	request+="&event=3&call_id=";
 	request+=callid;
-	request+=format_srcdstnum(src,dst,uidcode);
-	request+="&timestamp=";
-	request+=timestamp;
-	request+="&channel=";
-	request+=channel;
 	CallRecord call;
 	if(currentCalls.getCall(callid,call))
 	{
 	    std::cout<<"ADD pbxdstnum for callid\n";
 	    request+="&pbxdstnum=";
 	    request+=call.getdst();
+	    request+=format_srcdstnum(src,dst,uidcode,call.getsrctype(),call.getdsttype());
 	}
+	else
+	    request+=format_srcdstnum(src,dst,uidcode);
+	request+="&timestamp=";
+	request+=timestamp;
+	request+="&channel=";
+	request+=channel;
+	
 	
 	
 	
@@ -428,6 +454,8 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	if(currentCalls.getCall(realcallid,call))
 	{
 	    call.addNumber(dst);
+	    //currentCalls.updateCall(callid,call);
+	    
 	}
 	
 	if(usecrm=="1")
@@ -465,7 +493,8 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	string event2store;
 	
 	string request = request_str;
-	
+	string src_type = "";
+	string dst_type = "";
 	CallRecord call;
 	if(currentCalls.getCall(callid,call))
 	{
@@ -473,6 +502,8 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	    callstart = call.gettimestamp();
 	    //if(recordfile.empty())
 	    recordfile = call.getrecordfile();
+	    src_type = call.getsrctype();
+	    dst_type = call.getdsttype();
 	}
 	else
 	{
@@ -486,7 +517,7 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	request+=uidcode;
 	request+="&call_id=";
 	request+=callid;
-	request+=format_srcdstnum(src,dst,uidcode);
+	request+=format_srcdstnum(src,dst,uidcode,src_type,dst_type);
 	request+="&call_start_timestamp=";
 	request+=callstart;
 	request+="&call_answer_timestamp=";
@@ -650,6 +681,15 @@ string Parser::parse_onlinepbx(string src,string dst,string uid,string timestamp
 
 string Parser::parse_changetree(string uid,string callid,string newtree)
 {
+    CallRecord call;
+    if(currentCalls.getCall(callid,call))
+    {
+	std::cout<<"SetCurrentTreeID\n";
+	call.setCurrentTreeId(newtree);
+	currentCalls.updateCall(callid,call);
+	
+    }
+    
     string request = request_str;
     request+=uid;
     request+="&call_id=";
@@ -1100,12 +1140,28 @@ string Parser::parsedata(ParserData& data)
 		if(currentCalls.getCall(callid,call))
 		{
 		    std::cout<<"FIND CALL\n";
-		    data[fieldNameConverter("TreeId")] = call.getTreeId();
+		    string treeid = call.getCurrentTreeId();
+		    if(treeid.empty())
+		    {
+			lm.makeLog(boost::log::trivial::severity_level::info,"new tree empty");
+			std::cout<<"newtree EMPTY\n";
+			treeid=call.getTreeId();
+		    }
+		    data[fieldNameConverter("TreeId")] = treeid;
 		    data[fieldNameConverter("ChannelName")] = call.getChannel();
 		    auto millis = std::time(0);
 		    std::string dstnum="";
 		    if(ASTER_VER==13)
-			dstnum="DestCallerIDNum:";
+		    {
+			dstnum="MemberName:";
+			lm.makeLog(boost::log::trivial::severity_level::info,data["Interface:"].substr(0,5));
+			if(data["Interface:"].substr(0,5)=="PJSIP")
+			{
+			    lm.makeLog(boost::log::trivial::severity_level::info,"MODIFY dstnum");
+			    data[dstnum]=data["Interface:"].substr(13);
+			}
+			
+		    }
 		    else
 			dstnum="AgentName:";
 		    str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid());
