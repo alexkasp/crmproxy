@@ -8,10 +8,31 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& annou
 	
 	if(data["UserEvent:"] == "Recall")
 	{
+    	    from = data["operator:"];
+    	    to = data["recallnum:"];
+    	    announce = data["announce:"];
+    	    std::cout<<"Start recall "<<from<<" ->"<<to<<" with "<<announce<<endl;
+    	    return 1;
+	}
+    }
+    return 0;
+}
+
+int RecallParser::parsedatacheckanswer(ParamMap& data,string& from,string& to,string& channel,string& dialstr,string& dialtime,string& dialargs)
+{
+    if(data["Event:"] == "UserEvent")
+    {
+	
+	if(data["UserEvent:"] == "CheckAnswer")
+	{
     	    from = data["operator"];
     	    to = data["recallnum"];
-    	    announce = data["announce"];
-    	    std::cout<<"Start recall "<<from<<" ->"<<to<<" with "<<announce<<endl;
+    	    channel = data["channel"];
+    	    dialstr = data["dialstr"];
+    	    dialtime = data["dialtime"];
+    	    dialargs = data["dialargs"];
+    	    
+    	    std::cout<<"Start checkanswer "<<from<<" ->"<<to<<" with "<<channel<<endl;
     	    return 1;
 	}
     }

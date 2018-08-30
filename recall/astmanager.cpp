@@ -191,6 +191,39 @@ int AsteriskManager::callWithAnnounce(std::string from,std::string to,std::strin
 		  }
 }
 
+int AsteriskManager::callCheckAnswer(std::string from,std::string to,std::string channel,std::string dialstr,std::string dialtime,std::string dialargs)
+{
+	try
+	{
+	    softinit();
+	    std::string command = "Action: Originate\r\nChannel: Local/"+to+"@vats\r\nApplication: musiconhold\r\nCallerID: "+from+"\r\nVariable: CHECKANSWERFUNK=1,CALLBACKCHANNEL="+channel+",CHECKANSWERDIALSTR="+dialstr+",CHECKANSWERDIALTIME="+dialtime+",CHECKANSWERDIALARGS="+dialargs+"\r\nActionID: 2\r\n\r\n";
+    	    std::cout<<command<<"\n";
+	    boost::system::error_code ec;
+	    
+	    boost::asio::streambuf response;
+	    _sock->write_some(buffer(command,command.size()),ec);
+	    
+	    if(!ec)
+	    {
+		boost::asio::read_until(*_sock, response, "\r\n");
+	    }
+	    else
+	    {
+		while(!init())
+		{
+		    boost::this_thread::sleep_for(boost::chrono::milliseconds(10000));
+		}
+		
+		    _sock->write_some(buffer(command,command.size()),ec);
+	    }
+	    
+	}
+	catch (std::exception& e)
+		  {
+			std::cout<<"CATCH EXCEPTION!!! AsteriskManager::call(std::string from,std::string to)" << e.what() << '\n';
+		  }
+}
+
 
 int AsteriskManager::onewaycall(std::string testerschema,std::string testedschema,std::string testid)
 {

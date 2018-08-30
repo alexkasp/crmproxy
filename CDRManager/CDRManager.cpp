@@ -164,7 +164,7 @@ void CDRManager::putCDR(map<string,string> data)
     
     string uidcode = data["uidcode"];
     
-    if((data["serverId"]!="101")&&(data["serverId"]!="102"))
+    if((data["serverId"]!="101")&&(data["serverId"]!="102")&&(data["serverId"]!="105"))
     {
 	if((src.length()==10)&&(!uidcode.empty())&&(src.substr(0,uidcode.length()).compare(uidcode)!=0))
 	{

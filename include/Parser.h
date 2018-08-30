@@ -93,7 +93,7 @@ class Parser: public IParser
 	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype,string callbackId,string TreeID,
 	string ChannelName,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode);
 	string parse_transfercall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
-	string parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,string channel);
+	string parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,string channel,string roistat,string roistatphone,string roistatmarket,string xcallerid);
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 	string parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid,string uidcode);
 	string parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string DestinationContext);

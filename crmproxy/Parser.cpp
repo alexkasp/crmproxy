@@ -301,6 +301,12 @@ void Parser::cleanCalls()
 string Parser::parse_numtype(string num,string uidcode)
 {
 	int num_type= 0 ;
+	if(!uidcode.empty())
+	{
+	    if((num.substr(0,6)==uidcode)||(num.substr(1,6)==uidcode))
+	    return "2";
+	}
+		
 	if(!uidcode.empty()&&(num.length()>(uidcode.length()+1)))
 	    num_type = ((num.length()<10)&&((num.substr(0,uidcode.length()).compare(uidcode)==0)||((num.substr(1,uidcode.length()).compare(uidcode)==0))))+1;
 	else
@@ -328,7 +334,7 @@ string Parser::format_srcdstnum(string src,string dst,string uidcode,string src_
 	    
 	return result;
 }
-string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,string channel)
+string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,string channel,string roistat,string roistatphone,string roistatmarket,string xcallerid)
 {
 
 	string request = request_str;
@@ -338,6 +344,14 @@ string Parser::parse_initcall(string src,string dst,string uid,string timestamp,
 	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&timestamp=";
 	request+=timestamp;
+	request+="&roistat=";
+	request+=roistat;
+	request+="&roistatphone=";
+	request+=roistatphone;
+	request+="&roistatmarket=";
+	request+=roistatmarket;
+	request+="&xcallerid=";
+	request+=xcallerid;
 	
 	useridToCallId[callid]=uid;
 	
@@ -970,13 +984,19 @@ string Parser::parsedata(ParserData& data)
 			    callbackIdList[data[fieldNameConverter("callid")]] = data[fieldNameConverter("callbackId")];
 			    
 			std::cout<<"DEBUG initcall "<<data[fieldNameConverter("src")]<<" "<<data[fieldNameConverter("dst")]<<" "<<data[fieldNameConverter("userid")]<<" "<<data[fieldNameConverter("time")]<<" "<<data[fieldNameConverter("callid")]<<" "<<data[fieldNameConverter("recordfile")]<<" "<<data[fieldNameConverter("usecrm")]<<" "<<data[fieldNameConverter("uidcode")]<<"\n";
-			 str = parse_initcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],data[fieldNameConverter("ChannelName")]);
+			 str = parse_initcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],
+			 data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")],
+			 data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],
+			 data[fieldNameConverter("ChannelName")],data[fieldNameConverter("roistat")],data[fieldNameConverter("x-roistat-phone")],data[fieldNameConverter("x-roistat-marker")],data[fieldNameConverter("x-callerid")]);
 			
 		}
 		if(data["UserEvent:"]=="transfercall")
 		{
 			processTransfer(data[fieldNameConverter("Uniqueid:")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")]);
-			str = parse_initcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],"",data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],data[fieldNameConverter("ChannelName")]);
+			str = parse_initcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
+			data[fieldNameConverter("callid")],"",data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],
+			data[fieldNameConverter("TreeId")],data[fieldNameConverter("ChannelName")],data[fieldNameConverter("roistat")],data[fieldNameConverter("x-roistat-phone")],data[fieldNameConverter("x-roistat-marker")],
+			data[fieldNameConverter("x-callerid")]);
 			
 		}
 		if(data["UserEvent:"]=="finishcall")
@@ -984,6 +1004,8 @@ string Parser::parsedata(ParserData& data)
 			int skipfinish = 0;
 			if(data[fieldNameConverter("callbacktype")].compare("CallBackTreeReverse")==0)
 			{
+			    std::cout<<"CALLBACKTREEREVERSE\n";
+			    
 			    CallRecord call;
 			    if(currentCalls.getCall(data[fieldNameConverter("callid")],call))
 			    {
@@ -993,6 +1015,8 @@ string Parser::parsedata(ParserData& data)
 			    }
 			    if(!(data[fieldNameConverter("newexten")]).empty())
 			    {
+				
+				
 				if(data[fieldNameConverter("dialstatus")].compare("CANCEL")==0)
 				{
 				    
@@ -1010,7 +1034,7 @@ string Parser::parsedata(ParserData& data)
 				}
 				data[fieldNameConverter("dst")] = data[fieldNameConverter("newexten")];
 			    }
-			    else if((data[fieldNameConverter("status")].compare("NOANSWER")==0)||(data[fieldNameConverter("status")].compare("CHANUNAVAIL")==0))
+			    else if((data[fieldNameConverter("status")].compare("ANSWERED")!=0)||(data[fieldNameConverter("status")].compare("ANSWER")!=0))
 			    {
 				data[fieldNameConverter("callanswer")]="0";
 				data[fieldNameConverter("status")]="NOANSWER";
@@ -1136,7 +1160,7 @@ string Parser::parsedata(ParserData& data)
 		std::cout<<"AGENT CALLED\n\n\n";
 	    	string request = request_str;
 		CallRecord call;
-		string callid = data[fieldNameConverter("Uniqueid:")];
+		string callid = data[fieldNameConverter("Linkedid:")];
 		if(currentCalls.getCall(callid,call))
 		{
 		    std::cout<<"FIND CALL\n";

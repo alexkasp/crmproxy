@@ -32,8 +32,8 @@ int main()
 
 
     //string webservaddr = "212.193.100.104";
-    string webservaddr = "wss.sipuni.com";
-//    string webservaddr = "178.124.128.205";
+//    string webservaddr = "wss.sipuni.com";
+    string webservaddr = "178.124.128.205";
     cout<<"CDR by NET version 4.4(DB lock withou exit)\n";
     
     LoggerModule lm;
@@ -56,6 +56,8 @@ int main()
 	icm.startProcessing();
 	std::cout<<"ICM SERVER OK\n";
     }
+    
+    std::cout<<"webservaddr="<<webservaddr<<"\n";
     
     CDRManager cdr(lm,webservaddr,"80","http://"+webservaddr+":9104","/ext/keepalive",DBWorker);
 //    CDRManager cdr(lm,"127.0.0.1","80","/IaEQvJmntW/autocall.php","/ext/keepalive");
