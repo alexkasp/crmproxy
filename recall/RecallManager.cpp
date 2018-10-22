@@ -15,6 +15,7 @@ int RecallManager::makeAction(ParamMap data,IParser* iparser)
     string dialstr;
     string dialtime;
     string dialargs;
+    string callernum;
     
     RecallParser* parser = dynamic_cast<RecallParser*>(iparser);
     
@@ -24,11 +25,11 @@ int RecallManager::makeAction(ParamMap data,IParser* iparser)
 	
         boost::thread(boost::bind(&RecallManager::callWithPause,this,from,to,announce));
     }
-    else if(parser->parsedatacheckanswer(data,from,to,channel,dialstr,dialtime,dialargs))
+    else if(parser->parsedatacheckanswer(data,from,to,channel,callernum,dialstr,dialtime,dialargs))
     {
 	std::cout<<"START CHECKASNWER "<<from<<" "<<to<<" "<<announce<<std::endl;
 	
-        boost::thread(boost::bind(&RecallManager::callCheckAnswer,this,from,to,channel,dialstr,dialtime,dialargs));
+        boost::thread(boost::bind(&RecallManager::callCheckAnswer,this,from,to,channel,callernum,dialstr,dialtime,dialargs));
     }
     
 }
@@ -39,7 +40,7 @@ void RecallManager::callWithPause(string from,string to,string announce)
     ast.callWithAnnounce(from,to,announce);
 }
 
-void RecallManager::callCheckAnswer(string from,string to,string channel,string dialstr,string dialtime,string dialargs)
+void RecallManager::callCheckAnswer(string from,string to,string channel,string callernum,string dialstr,string dialtime,string dialargs)
 {
-    ast.callCheckAnswer(from,to,channel,dialstr,dialtime,dialargs);
+    ast.callCheckAnswer(from,to,channel,callernum,dialstr,dialtime,dialargs);
 }

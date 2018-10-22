@@ -1210,6 +1210,9 @@ string Parser::parsedata(ParserData& data)
 	}*/
 	else
 	    return str;
+	    
+	str += "&EventIndex=";
+		str += data[fieldNameConverter("counter:")];    
 	
 	if((!str.empty())&&(data[fieldNameConverter("UserEvent:")]!="changetree")&&(data[fieldNameConverter("UserEvent:")]!="qoscall")&&(data[fieldNameConverter("UserEvent:")]!="finishcall")&&(data[fieldNameConverter("UserEvent:")]!="PickupCall")&&(data[fieldNameConverter("UserEvent:")]!="gatewaycall")&&(data[fieldNameConverter("Event:")]!="Cdr")&&(data[fieldNameConverter("UserEvent:")]!="answercall")&&(data[fieldNameConverter("Event:")]!="Hangup:"))
 	{    

@@ -18,19 +18,20 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& annou
     return 0;
 }
 
-int RecallParser::parsedatacheckanswer(ParamMap& data,string& from,string& to,string& channel,string& dialstr,string& dialtime,string& dialargs)
+int RecallParser::parsedatacheckanswer(ParamMap& data,string& from,string& to,string& channel,string& callernum,string& dialstr,string& dialtime,string& dialargs)
 {
     if(data["Event:"] == "UserEvent")
     {
 	
 	if(data["UserEvent:"] == "CheckAnswer")
 	{
-    	    from = data["operator"];
-    	    to = data["recallnum"];
-    	    channel = data["channel"];
-    	    dialstr = data["dialstr"];
-    	    dialtime = data["dialtime"];
-    	    dialargs = data["dialargs"];
+    	    from = data["operator:"];
+    	    to = data["recallnum:"];
+    	    channel = data["channel:"];
+    	    dialstr = data["dialstr:"];
+    	    dialtime = data["dialtime:"];
+    	    dialargs = data["dialargs:"];
+    	    callernum = data["callernum:"];
     	    
     	    std::cout<<"Start checkanswer "<<from<<" ->"<<to<<" with "<<channel<<endl;
     	    return 1;
