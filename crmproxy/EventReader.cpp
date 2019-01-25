@@ -34,7 +34,7 @@ EventReader::~EventReader(void)
 void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf,const boost::system::error_code& ec,std::size_t size)
 {
     boost::mutex::scoped_lock Lock(handleReceiveLock);
-    
+    string prev;
     try{
 	
 	if (!ec)
@@ -54,11 +54,20 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 		for(auto x = lines.begin();x!=lines.end();++x)
 		{
 		    std::string value = *x;
-		    
+		    std::size_t found = value.find(getMark());
+		       if(found==std::string::npos)
+		       {
+		    	    value=prev+"\n"+value;
+		    	    lm.makeLog(info,"CORRECTING ...:\n ["+(value)+"]");
+		       }
+		       else
+		       {
+		    	    prev = value;
+		       }
 		    if(!value.empty())
 		    {
 			lm.makeLog(info,"AMI:\n ["+(*x)+"]");
-			boost::thread t(boost::bind(&EventReader::processevent,this,str));
+			boost::thread t(boost::bind(&EventReader::processevent,this,value));
 			tgroup.add_thread(&t);
 			t.detach();
 		    }	

@@ -18,7 +18,7 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& annou
     return 0;
 }
 
-int RecallParser::parsedatacheckanswer(ParamMap& data,string& from,string& to,string& channel,string& callernum,string& dialstr,string& dialtime,string& dialargs)
+int RecallParser::parsedatacheckanswer(ParamMap& data,string& from,string& to,string& channel,string& callernum,string& callid,string& dialtime,string& dialargs)
 {
     if(data["Event:"] == "UserEvent")
     {
@@ -28,7 +28,7 @@ int RecallParser::parsedatacheckanswer(ParamMap& data,string& from,string& to,st
     	    from = data["operator:"];
     	    to = data["recallnum:"];
     	    channel = data["channel:"];
-    	    dialstr = data["dialstr:"];
+    	    callid = data["callid:"];
     	    dialtime = data["dialtime:"];
     	    dialargs = data["dialargs:"];
     	    callernum = data["callernum:"];

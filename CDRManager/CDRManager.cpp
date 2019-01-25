@@ -202,14 +202,17 @@ void CDRManager::putCDR(map<string,string> data)
     {
 	//std::cout<<"start calculate answerednums\n";
 	vector<string>& nums = x->second;
-	
+	string tmpanswernum = "";
 	for(auto num=nums.begin();num!=nums.end();++num)
 	{
 	    answeredNums+=(*num);
 	    answeredNums+=",";
 	    std::cout<<answeredNums<<"\n";
-	    answernum = (*num);
+	    if(tmpanswernum.empty())
+		tmpanswernum = (*num);
 	}
+	if(!tmpanswernum.empty())
+	    answernum=tmpanswernum;
 	
 	boost::trim_right_if(answeredNums,boost::is_any_of(","));
 	involvedNums.erase(x);
@@ -268,6 +271,7 @@ void CDRManager::putCDR(map<string,string> data)
     {
 	lm.makeLog(info,"FIND TRANSFERED CALL "+(it->second));
 	CDRData["uniqueid"]=it->second;
+	CDRData["to2"]=data["dst_num"];
     }
     
     it = data.find("transferrecord");

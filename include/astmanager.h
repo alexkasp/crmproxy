@@ -18,7 +18,9 @@ class AsteriskManager
 	protected:
 		boost::shared_ptr<ip::tcp::endpoint> ep;
 		boost::shared_ptr<ip::tcp::socket> _sock;
+		int initConnection(boost::shared_ptr<ip::tcp::socket>& _sock);
 		int init();
+		int makelogin(const boost::shared_ptr<ip::tcp::socket>& _sock);
 		int deinit();
 		int softinit();
 	public:

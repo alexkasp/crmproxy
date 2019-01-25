@@ -4,6 +4,8 @@
 
 class RecallManager: public ExecuterInterface
 {
+	boost::thread_group tgroup;
+	
         RecallParser* parser;
         AsteriskManager ast;
         const int WaitForSeconds = 10;

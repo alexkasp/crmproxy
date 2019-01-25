@@ -22,24 +22,39 @@ void keepAliveActivate(boost::asio::ip::tcp::socket* tcpsocket)
 }
 
 
+int AsteriskManager::makelogin(const boost::shared_ptr<ip::tcp::socket>& _sock)
+{
+    
+    boost::asio::streambuf response;
+    boost::asio::read_until(*_sock, response, "\r\n");
+    boost::asio::read_until(*_sock, response, "\r\n");
+  std::string command = "Action: login\r\nUsername: myasterisk\r\nSecret: mycode\r\nActionID: 1\r\n\r\n";
+    _sock->write_some(buffer(command,command.size()));
+        
+    boost::asio::read_until(*_sock, response, "\r\n");
+    return 1;
+}
+
+
 int AsteriskManager::init()
+{
+    return initConnection(_sock);
+}
+
+int AsteriskManager::initConnection(boost::shared_ptr<ip::tcp::socket>& _tmpsock)
 {
     try{
         ep.reset(new ip::tcp::endpoint( ip::address::from_string(asthost), astport));
-         _sock.reset(new ip::tcp::socket(service));
+         _tmpsock.reset(new ip::tcp::socket(service));
          
-         keepAliveActivate(_sock.get());
+         if(!_sock)
+            std::cout<<"INIT CONNECTION SOCK EMTY\n";
+    	 if(!_tmpsock)
+    	    std::cout<<"INIT CONNECTION TMPSOCK EMTY\n";
          
-        _sock->connect(*ep);
-         boost::asio::streambuf response;
-        boost::asio::read_until(*_sock, response, "\r\n");
-        boost::asio::read_until(*_sock, response, "\r\n");
-
-        std::string command = "Action: login\r\nUsername: myasterisk\r\nSecret: mycode\r\nActionID: 1\r\n\r\n";
-        _sock->write_some(buffer(command,command.size()));
-        
-        boost::asio::read_until(*_sock, response, "\r\n");
-        return 1;	
+        // keepAliveActivate(_sock.get());
+        _tmpsock->connect(*ep); 
+        return makelogin(_tmpsock);
     }
     catch(std::exception &e)
     {
@@ -87,6 +102,8 @@ AsteriskManager::AsteriskManager()
 	asthost = "127.0.0.1";
 
 	init();
+	if(!_sock)
+	    std::cout<<"SOCKET EMPTY\n";
 	
 }
 
@@ -191,12 +208,17 @@ int AsteriskManager::callWithAnnounce(std::string from,std::string to,std::strin
 		  }
 }
 
-int AsteriskManager::callCheckAnswer(std::string from,std::string to,std::string channel,std::string callernum,std::string dialstr,std::string dialtime,std::string dialargs)
+int AsteriskManager::callCheckAnswer(std::string from,std::string to,std::string channel,std::string callernum,std::string callid,std::string dialtime,std::string dialargs)
 {
 	try
 	{
-	    softinit();
-	    std::string command = "Action: Originate\r\nChannel: Local/"+to+"@vats\r\nApplication: musiconhold\r\nCallerID: "+from+"\r\nVariable: CHECKANSWERFUNK=1,CHECKANSWERCALLER="+callernum+",CALLBACKCHANNEL="+channel+",CHECKANSWERDIALSTR="+dialstr+",CHECKANSWERDIALTIME="+dialtime+",CHECKANSWERDIALARGS="+dialargs+"\r\nActionID: 2\r\n\r\n";
+	    
+	    std::cout<<"START callCheckAnswer\n";
+	    boost::shared_ptr<ip::tcp::socket> _sock;
+	    initConnection(_sock);
+	    std::cout<<"INITATING callwithcheckanswer...\n";
+	    
+	    std::string command = "Action: Originate\r\nChannel: Local/"+to+"@callcheckanswer\r\nApplication: musiconhold\r\nCallerID: "+from+"\r\nVariable: CHECKANSWERFUNK=1,CHECKANSWERCALLER="+callernum+",CALLBACKCHANNEL="+channel+",CHECKANSWERCALLID="+callid+",CHECKANSWERDIALTIME="+dialtime+",CHECKANSWERDIALARGS="+dialargs+"\r\nActionID: "+to+"\r\n\r\n";
     	    std::cout<<command<<"\n";
 	    boost::system::error_code ec;
 	    
@@ -242,6 +264,7 @@ int AsteriskManager::onewaycall(std::string testerschema,std::string testedschem
 
 int AsteriskManager::call(std::string from,std::string to,std::string schema)
 {
+	
 	try
 	{
 		init();

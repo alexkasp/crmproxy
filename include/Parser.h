@@ -15,6 +15,7 @@ class TransferData
     public:
     string callid;
     string recordname;
+    string destination;
 };
 
 class CallRecord
@@ -31,12 +32,12 @@ class CallRecord
 	string treeid;
 	string currenttreeid;
 	string channel;
-	
+	string calltype;
 	set<string> involvedNumbers;
 	
 public:
 	CallRecord();
-	CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string userid,string uid,string srctype,string dsttype,string treeid,string channel);
+	CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string userid,string uid,string srctype,string dsttype,string treeid,string channel,string calltype);
 	~CallRecord();
 	int addNumber(string);
 	int removeNumber(string);
@@ -53,6 +54,7 @@ public:
 	const string& getdsttype() const;
 	const string& getTreeId() const;
 	const string& getCurrentTreeId() const;
+	const string& getCallType() const;
 
 	const string& getChannel() const;
 };
@@ -68,7 +70,7 @@ class CallRecords
 	int size();
 	CallRecords();
 	void updateCall(string callid,CallRecord cr);
-	void addCall(string callid,string src,string dst,string timestamp,string recordfile,string uid,string uidcode,string srctype,string dsttype,string treeid,string channel);
+	void addCall(string callid,string src,string dst,string timestamp,string recordfile,string uid,string uidcode,string srctype,string dsttype,string treeid,string channel,string calltype);
 	void removeCall(string callid);
 	int getCall(string callid,CallRecord& cr);
 	boost::mutex& getLock();
@@ -93,7 +95,8 @@ class Parser: public IParser
 	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype,string callbackId,string TreeID,
 	string ChannelName,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode);
 	string parse_transfercall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
-	string parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,string channel,string roistat,string roistatphone,string roistatmarket,string xcallerid);
+	string parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,
+	    string uidcode,string treeid,string channel,string roistat,string roistatphone,string roistatmarket,string xcallerid,string calltype);
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 	string parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid,string uidcode);
 	string parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string DestinationContext);
@@ -105,7 +108,7 @@ class Parser: public IParser
 	template<typename T>void  clearStorageAlg(T& storage,string key); 
 	string clearStorage(map<string,string>& storage,string key);
 	void clearStorages();
-	int processTransfer(string callid,string linkedid,string record);
+	int processTransfer(string callid,string linkedid,string record,string destination);
 	std::string fieldNameConverter(std::string fieldname);
 //	boost::timed_mutex::scoped_lock&& getCDRLock();
 	
