@@ -45,7 +45,7 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 	    string str(boost::asio::buffers_begin(buf.data()), boost::asio::buffers_begin(buf.data()) + buf.size());
 
 	    buf.consume(size);
-	    
+	    lm.makeLog(info,"GET BUFFER, START PARSE\n");
 	    try
     	    {
 		std::vector<std::string> lines;
@@ -55,7 +55,7 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 		{
 		    std::string value = *x;
 		    std::size_t found = value.find(getMark());
-		       if(found==std::string::npos)
+		       if((found==std::string::npos)&&(found==0))
 		       {
 		    	    value=prev+"\n"+value;
 		    	    lm.makeLog(info,"CORRECTING ...:\n ["+(value)+"]");
@@ -64,7 +64,7 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 		       {
 		    	    prev = value;
 		       }
-		    if(!value.empty())
+		    if(!(*x).empty())
 		    {
 			lm.makeLog(info,"AMI:\n ["+(*x)+"]");
 			boost::thread t(boost::bind(&EventReader::processevent,this,value));
@@ -142,12 +142,11 @@ string EventReader::getMark()
 int EventReader::parseline(string line,int& state,int& event,ParamMap& structdata)
 {
 	string startEventMark = getMark();
-	
 	if(line.find(startEventMark)==0)
 	{
 		state = 1;	
 	}
-	else if((line.size()<2)&&(state==2))
+	else if((line.size()==0)&&(state==2))
 	{
 		state = 3;
 	}
@@ -193,6 +192,7 @@ int EventReader::processevent(const std::string data)
 		    {
 			parseline(*x,state,currentevent,structdata);
 		    }
+		    parseline("",state,currentevent,structdata);
 		}
 		catch(exception& e)
 		{

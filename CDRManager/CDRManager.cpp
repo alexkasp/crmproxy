@@ -147,10 +147,10 @@ void CDRManager::putCDR(map<string,string> data)
 	else
 	    destinationcontext = "vatsout";
     }
-    else if(data["DestinationContext"] == "vatscallbackreverse")
+    else if((data["DestinationContext"] == "vatscallbackreverse")||(data["DestinationContext"] == "crmcallback"))
     {
 	dst = data["dst_num"];
-//	destinationcontext = "vatsout"
+	destinationcontext = "vatsout";
     }
     else
     {
@@ -265,6 +265,7 @@ void CDRManager::putCDR(map<string,string> data)
     CDRData["rating"] = data["rating"];  
     CDRData["newstatus"] = data["newstatus"];    
     CDRData["hashtag"] = data["hashtag"];
+    CDRData["serverId"] = data["serverId"];
     
     auto it = data.find("transfercallid");
     if(it!=data.end())

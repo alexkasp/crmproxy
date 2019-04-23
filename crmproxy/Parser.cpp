@@ -340,7 +340,7 @@ string Parser::format_srcdstnum(string src,string dst,string uidcode,string src_
 	return result;
 }
 string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,
-string channel,string roistat,string roistatphone,string roistatmarket,string xcallerid,string calltype)
+string channel,string roistat,string roistatphone,string roistatmarket,string roistatsource,string xcallerid,string calltype)
 {
 
 	string request = request_str;
@@ -356,6 +356,8 @@ string channel,string roistat,string roistatphone,string roistatmarket,string xc
 	request+=roistatphone;
 	request+="&roistatmarket=";
 	request+=roistatmarket;
+	request+="&roistatsource=";
+	request+=roistatsource;
 	request+="&xcallerid=";
 	request+=xcallerid;
 	
@@ -513,15 +515,17 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	string event2store;
 	
 	string request = request_str;
+	request+=uid;
+	
 	string src_type = "";
 	string dst_type = "";
 	CallRecord call;
 	if(currentCalls.getCall(callid,call))
 	{
-	    std::cout<<"find call "<<call.getcallid()<<" with time "<<call.gettimestamp()<<"\n";
+	    std::cout<<"find call "<<call.getcallid()<<" with time "<<call.gettimestamp()<<"\nand record: "<<call.getrecordfile()<<"\nWas Record file: "<<recordfile<<"\n";
 	    callstart = call.gettimestamp();
-	    //if(recordfile.empty())
-	    recordfile = call.getrecordfile();
+	    if(!(call.getrecordfile()).empty())
+		recordfile = call.getrecordfile();
 	    src_type = call.getsrctype();
 	    dst_type = call.getdsttype();
 	}
@@ -531,8 +535,24 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	    return "";
 	}
 	
+	boost::mutex::scoped_lock lockTransferStorage(transferstorageLock);
+	lm.makeLog(boost::log::trivial::severity_level::info,"Check Transfer Entry for "+callid);
+	auto transfercall = transferstorage.find(callid);
+	if(transfercall!=transferstorage.end())
+	{
+	    TransferData tmp = transfercall->second;
+	    string transferedCallId = tmp.callid;
+	    string transferrecord = tmp.recordname;
+	    transferstorage.erase(transfercall);
+	    
+	    lm.makeLog(boost::log::trivial::severity_level::info,"TRANSFERED CALLID "+callid+" "+transferedCallId);
+	    request+="&transfercallid="+callid;
+	    request+="&transferrecord="+transferrecord;
+	    //callid=transferedCallId;
+	}
+	lockTransferStorage.unlock();
 	
-	request+=uid;
+	
 	request+="&uidcode=";
 	request+=uidcode;
 	request+="&call_id=";
@@ -565,6 +585,8 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	
 	event2store+="&callbackId=";
 	event2store+=callbackId;
+	
+	std::cout<<"PREPARED EVENT\n"<<event2store<<"\n";
 	
 //	boost::timed_mutex::scoped_lock& lockEvent2CDRStorage  = getCDRLock();
 	
@@ -600,6 +622,7 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	        event2store+="&parsertask=finish";
 	        std::cout<<"FINISH CALL: ADD REPORTED CALL "<<callid<<"\n";
 	        reportedCall[callid]=request;
+	        
 	        return event2store;
 	    }
 	    else
@@ -616,7 +639,7 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 		event2storage[callid]=event2store;
 		std::cout<<"PRINT EVENT2STORAGE\n";
 		for(auto a = event2storage.begin();a!=event2storage.end();++a)
-		    std::cout<<"storage "<<(a->first)<<"\n";
+		    std::cout<<"storage "<<(a->first)<<"\n"<<(a->second)<<"\n";
 		return request;
 	    }
 	    else
@@ -774,10 +797,12 @@ int Parser::processTransfer(string callid,string linkedid,string record,string d
     tmp.recordname=record;
     transferstorage[callid]=tmp;
     */
+    
     tmp.callid=callid;
     tmp.recordname=record;
     tmp.destination=dst;
     transferstorage[linkedid]=tmp;
+    lm.makeLog(boost::log::trivial::severity_level::info,"Make Transfer Entry for "+linkedid+" for "+callid);
 }
 
 string Parser::parse_cdrevent(string origcallid,string destination,string duration,string billableseconds,string starttime,string endtime,string Destinationcontext)
@@ -787,15 +812,15 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	string callid = mergedCalls.getMergedCall(origcallid);
 	
 	boost::mutex::scoped_lock lockTransferStorage(transferstorageLock);
-	auto x = transferstorage.find(callid);
-	if(x!=transferstorage.end())
+	auto transfercall = transferstorage.find(callid);
+	if(transfercall!=transferstorage.end())
 	{
-	    TransferData tmp = x->second;
+	    TransferData tmp = transfercall->second;
 	    transferedCallId = tmp.callid;
 	    string transferrecord = tmp.recordname;
+	    transferstorage.erase(transfercall);
 	    
-	    std::cout<<"TRANSFERED CALLID "<<callid<<"   "<<transferedCallId<<"  "<<origcallid<<"\n";
-	    transferstorage.erase(x);
+	    lm.makeLog(boost::log::trivial::severity_level::info,"TRANSFER CALLID for "+callid);
 	    request+="&transfercallid="+callid;
 	    request+="&transferrecord="+transferrecord;
 	    destination= tmp.destination;
@@ -809,7 +834,7 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	clearStorage(useridToCallId,callid);
 	
 	std::cout<<"parse cdr event\n";
-	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(20000));
 	if(!lockEvent2CDRStorage)
 	{
 	    cout<<"ERROR GET CDR LOCK\n";
@@ -822,12 +847,6 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	
 	
 	auto it = event2storage.find(callid);
-/*	if((!transferedCallId.empty())&&(!(it!=event2storage.end())))
-	{
-		std::cout<<"TRY SET TRANSFERED CALLID \n";
-	        it = event2storage.find(transferedCallId);
-	}
-*/
 	request+="&destination="+destination;
 	request+="&duration="+duration;
 	request+="&billableseconds="+billableseconds;
@@ -835,8 +854,7 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	request+="&endtime="+endtime;
 	request+="&DestinationContext="+Destinationcontext;
 	
-	std::cout<<"REQUEST prepared = "<<request<<"\n";
-	
+	lm.makeLog(boost::log::trivial::severity_level::info,"REQUEST prepared = "+request);
 	if(it!=event2storage.end())
 	{
 	    boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
@@ -852,19 +870,25 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	    request+="&parsetask=cdrevent";
 	    std::cout<<"ADD REPORTED CALL "<<callid<<"\n";
 	    reportedCall[callid]=request;
-	    
+	    lockReportedCallsStorage.unlock();
 	}
 	else
 	{
-	    std::cout<<"CDR for callid "<<callid<<" not found\n";
-	    std::cout<<"Prepare request and store it\n";
-	    //std::cout<<request<<"For callid="<<callid<"\n";
-	    std::cout<<"For callid="<<callid<<"\n";
-	    event2CDRstorage[callid]=request;
+	    auto CDR = event2CDRstorage.find(callid);
+	    if(CDR!=event2CDRstorage.end())
+	    {
+		
+		lm.makeLog(boost::log::trivial::severity_level::info,"Request was stored early "+callid);
+	    }
+	    else
+	    {
+		lm.makeLog(boost::log::trivial::severity_level::info,"Prepare request and store to event2CDRstorage = "+callid);
+		event2CDRstorage[callid]=request;
+	    }	
 	    request="";
 	}
 	
-	
+	std::cout<<"exir cdr event\n";
 	return request;
 	
 }
@@ -998,7 +1022,7 @@ string Parser::parsedata(ParserData& data)
 			 data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")],
 			 data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],
 			 data[fieldNameConverter("ChannelName")],data[fieldNameConverter("roistat")],data[fieldNameConverter("x-roistat-phone")],
-			 data[fieldNameConverter("x-roistat-marker")],data[fieldNameConverter("x-callerid")],data[fieldNameConverter("callbacktype")]);
+			 data[fieldNameConverter("x-roistat-marker")],data[fieldNameConverter("x-roistat-source")],data[fieldNameConverter("x-callerid")],data[fieldNameConverter("callbacktype")]);
 			
 		}
 		if(data["UserEvent:"]=="transfercall")
@@ -1007,7 +1031,7 @@ string Parser::parsedata(ParserData& data)
 			str = parse_initcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
 			data[fieldNameConverter("callid")],"",data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],
 			data[fieldNameConverter("TreeId")],data[fieldNameConverter("ChannelName")],data[fieldNameConverter("roistat")],data[fieldNameConverter("x-roistat-phone")],data[fieldNameConverter("x-roistat-marker")],
-			data[fieldNameConverter("x-callerid")],data[fieldNameConverter("callbacktype")]);
+			data[fieldNameConverter("x-roistat-source")],data[fieldNameConverter("x-callerid")],data[fieldNameConverter("callbacktype")]);
 			
 		}
 		if(data["UserEvent:"]=="finishcall")
@@ -1106,7 +1130,17 @@ string Parser::parsedata(ParserData& data)
 				billsec =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callanswer")]));
 			    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
 			}
-			
+			else if((data[fieldNameConverter("callbacktype")].compare("CRMCallback")==0)&&(ASTER_VER==11))
+			{
+			    std::string duration = "0";
+			    std::string billsec = "0";
+
+			    if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callstart")]).empty()))
+    				    duration =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callstart")]));
+				if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callanswer")]).empty())&&(data[fieldNameConverter("callanswer")].compare("0")!=0))
+				    billsec =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callanswer")]));
+			    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],"crmcallback");
+			}
 			
 			if(!skipfinish)    
 			    str = parse_finishcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
@@ -1228,8 +1262,14 @@ string Parser::parsedata(ParserData& data)
 	    
 	str += "&EventIndex=";
 		str += data[fieldNameConverter("counter:")];    
+	if(!data[fieldNameConverter("serverId:")].empty())
+	{
+	    str += "&serverId=";
+	    str+= data[fieldNameConverter("serverId:")];
+	}    
 	
-	if((!str.empty())&&(data[fieldNameConverter("UserEvent:")]!="changetree")&&(data[fieldNameConverter("UserEvent:")]!="qoscall")&&(data[fieldNameConverter("UserEvent:")]!="finishcall")&&(data[fieldNameConverter("UserEvent:")]!="PickupCall")&&(data[fieldNameConverter("UserEvent:")]!="gatewaycall")&&(data[fieldNameConverter("Event:")]!="Cdr")&&(data[fieldNameConverter("UserEvent:")]!="answercall")&&(data[fieldNameConverter("Event:")]!="Hangup:"))
+	if((!str.empty())&&(data[fieldNameConverter("UserEvent:")]!="changetree")&&(data[fieldNameConverter("UserEvent:")]!="qoscall")&&(data[fieldNameConverter("UserEvent:")]!="finishcall")&&
+	(data[fieldNameConverter("UserEvent:")]!="PickupCall")&&(data[fieldNameConverter("UserEvent:")]!="gatewaycall")&&(data[fieldNameConverter("Event:")]!="Cdr")&&(data[fieldNameConverter("Event:")]!="Hangup:"))
 	{    
 		str += "&TreeId=";
 		str += data[fieldNameConverter("TreeId")];
