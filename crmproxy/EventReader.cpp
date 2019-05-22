@@ -39,13 +39,13 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 	
 	if (!ec)
 	{
-	    readRequest();
+	    
 	    boost::asio::streambuf& buf = *databuf;
 	    
 	    string str(boost::asio::buffers_begin(buf.data()), boost::asio::buffers_begin(buf.data()) + buf.size());
 
 	    buf.consume(size);
-	    lm.makeLog(info,"GET BUFFER, START PARSE\n");
+	    lm.makeLog(info,"GET BUFFER, START PARSE\n["+str+"]\n");
 	    try
     	    {
 		std::vector<std::string> lines;
@@ -66,7 +66,7 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 		       }
 		    if(!(*x).empty())
 		    {
-			lm.makeLog(info,"AMI:\n ["+(*x)+"]");
+			lm.makeLog(info,"AMI:\n ["+(value)+"]");
 			boost::thread t(boost::bind(&EventReader::processevent,this,value));
 			tgroup.add_thread(&t);
 			t.detach();
@@ -80,6 +80,7 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 	    }
 	    
 	    //processevent(str,data);
+	    readRequest();
 	}
 	else
 	{

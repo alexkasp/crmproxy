@@ -509,7 +509,7 @@ string Parser::parse_agentcalled(string src,string dst,string callid)
 }
 
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, 
-string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode)
+string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forcedRecord = "")
 {
 	std::cout<<"START FINISHCALL\n";
 	string event2store;
@@ -524,7 +524,7 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	{
 	    std::cout<<"find call "<<call.getcallid()<<" with time "<<call.gettimestamp()<<"\nand record: "<<call.getrecordfile()<<"\nWas Record file: "<<recordfile<<"\n";
 	    callstart = call.gettimestamp();
-	    if(!(call.getrecordfile()).empty())
+	    if((!(call.getrecordfile()).empty())&&(forcedRecord.empty()))
 		recordfile = call.getrecordfile();
 	    src_type = call.getsrctype();
 	    dst_type = call.getdsttype();
@@ -535,6 +535,10 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	    return "";
 	}
 	
+	if(!forcedRecord.empty())
+	    recordfile = forcedRecord;
+	    
+	    
 	boost::mutex::scoped_lock lockTransferStorage(transferstorageLock);
 	lm.makeLog(boost::log::trivial::severity_level::info,"Check Transfer Entry for "+callid);
 	auto transfercall = transferstorage.find(callid);
@@ -1145,7 +1149,8 @@ string Parser::parsedata(ParserData& data)
 			if(!skipfinish)    
 			    str = parse_finishcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
 			    data[fieldNameConverter("callid")],data[fieldNameConverter("callstart")],data[fieldNameConverter("callanswer")],data[fieldNameConverter("status")],data[fieldNameConverter("calltype")],data[fieldNameConverter("callbackId")],data[fieldNameConverter("TreeId")],
-			    data[fieldNameConverter("ChannelName")],data[fieldNameConverter("serverId")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("label")],data[fieldNameConverter("rating")],data[fieldNameConverter("newstatus")],data[fieldNameConverter("crmcall")],data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")]);
+			    data[fieldNameConverter("ChannelName")],data[fieldNameConverter("serverId")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("label")],data[fieldNameConverter("rating")],data[fieldNameConverter("newstatus")],data[fieldNameConverter("crmcall")],
+			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcerecord")]);
 			else
 			    str = "";
 			
@@ -1245,6 +1250,8 @@ string Parser::parsedata(ParserData& data)
 	}
 	else if(data["Event:"] == "Cdr")
 	{
+	    data[fieldNameConverter("counter:")] = 1001;
+	    
 	    if(data[fieldNameConverter("DestinationContext:")]=="vatscallbackreverse")
 	    data[fieldNameConverter("UniqueID:")] = mergedCalls.getMergedCall(data[fieldNameConverter("UniqueID:")]);
 		str = parse_cdrevent(data[fieldNameConverter("UniqueID:")],data[fieldNameConverter("Destination:")],data[fieldNameConverter("Duration:")],data[fieldNameConverter("BillableSeconds:")],data[fieldNameConverter("StartTime:")],data[fieldNameConverter("EndTime:")],data[fieldNameConverter("DestinationContext:")]);

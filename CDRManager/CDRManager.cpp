@@ -158,7 +158,8 @@ void CDRManager::putCDR(map<string,string> data)
 	    destinationcontext = "vatsl";
 	else
 	    destinationcontext = data["DestinationContext"];
- 	dst = data["destination"];
+// 	dst = data["destination"];
+	dst = data["dst_num"];
     }
     string answernum = data["dst_num"];
     
@@ -207,8 +208,9 @@ void CDRManager::putCDR(map<string,string> data)
 	{
 	    answeredNums+=(*num);
 	    answeredNums+=",";
+	    lm.makeLog(info,"PREPARE ANSWERED NUMS"+answeredNums);
 	    std::cout<<answeredNums<<"\n";
-	    if(tmpanswernum.empty())
+	//    if(tmpanswernum.empty())
 		tmpanswernum = (*num);
 	}
 	if(!tmpanswernum.empty())
@@ -272,7 +274,7 @@ void CDRManager::putCDR(map<string,string> data)
     {
 	lm.makeLog(info,"FIND TRANSFERED CALL "+(it->second));
 	CDRData["uniqueid"]=it->second;
-	CDRData["to2"]=data["dst_num"];
+	//CDRData["to2"]=data["dst_num"];
     }
     
     it = data.find("transferrecord");
