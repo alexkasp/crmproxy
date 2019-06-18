@@ -18,7 +18,7 @@ default:
 	echo ${MAKE} -C ${ICMSERVER}
 	echo ${MAKE} -C ${CDRMANAGER}
 	g++ -g ${PROXYHEADERS}/*.o ${ICMSERVER}/*.o ${CDRMANAGER}/*.o ${LOGGER}/*.o ${RECALLHEADERS}/*.o ${BUILDHEADERS} ${MONITORHEADERS}/*.o  main.cpp -o main iexecuter.cpp  -std=c++11 -L /usr/local/boost/lib/ -L /usr/lib64/ -L /usr/lib64/mysql/ \
-	-Wl,-Bstatic -lhiredis -lboost_system -lboost_random -lboost_regex  -lboost_thread -lboost_date_time -lboost_log -lboost_log_setup -lboost_filesystem -Wl,-Bdynamic -lpthread -lm -lcurl -lrt -lmysqlpp -lmysqlclient
+	-Wl,-Bstatic -lhiredis -lboost_system -lboost_random -lboost_regex  -lboost_thread -lboost_date_time -lboost_log -lboost_log_setup -lboost_filesystem -lboost_timer -lboost_chrono -Wl,-Bdynamic -lpthread -lm -lcurl -lrt -lmysqlpp -lmysqlclient
 test:
 	g++ test.cpp corefunc.cpp sipheader.cpp sipmanager.cpp callbox.cpp -o test  -I ../include -I /usr/local/boost/include/ -L /usr/local/boost/lib/ -Wl,-Bstatic  -lboost_system -lboost_regex -Wl,-Bdynamic -lm
 	

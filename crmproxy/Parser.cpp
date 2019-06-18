@@ -311,7 +311,9 @@ string Parser::parse_numtype(string num,string uidcode)
 	    if((num.substr(0,6)==uidcode)||(num.substr(1,6)==uidcode))
 	    return "2";
 	}
-		
+	if(num == "Sipuni")
+	    return "1";
+	    	
 	if(!uidcode.empty()&&(num.length()>(uidcode.length()+1)))
 	    num_type = ((num.length()<10)&&((num.substr(0,uidcode.length()).compare(uidcode)==0)||((num.substr(1,uidcode.length()).compare(uidcode)==0))))+1;
 	else
@@ -1250,7 +1252,7 @@ string Parser::parsedata(ParserData& data)
 	}
 	else if(data["Event:"] == "Cdr")
 	{
-	    data[fieldNameConverter("counter:")] = 1001;
+	    data[fieldNameConverter("counter:")] = "1001";
 	    
 	    if(data[fieldNameConverter("DestinationContext:")]=="vatscallbackreverse")
 	    data[fieldNameConverter("UniqueID:")] = mergedCalls.getMergedCall(data[fieldNameConverter("UniqueID:")]);

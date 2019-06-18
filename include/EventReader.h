@@ -4,6 +4,7 @@
 
 #ifdef __linux__
 #include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
 #include <boost/thread.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
@@ -43,7 +44,7 @@ protected:
 	
 	string servhost;
 	int servport;
-	
+	int startProcessing(std::string str,std::string& prev);
 	virtual string getMark();
 	
 	int processevent(const std::string data);

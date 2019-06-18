@@ -1,4 +1,5 @@
 #include "astmanager.h"
+#include <iostream>
 
 void keepAliveActivate(boost::asio::ip::tcp::socket* tcpsocket)
 {
@@ -16,8 +17,8 @@ void keepAliveActivate(boost::asio::ip::tcp::socket* tcpsocket)
   struct timeval tv;
   tv.tv_sec  = timeout_milli / 1000;
   tv.tv_usec = timeout_milli % 1000;
-  setsockopt(tcpsocket->native(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-  setsockopt(tcpsocket->native(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+//  setsockopt(tcpsocket->native(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+//  setsockopt(tcpsocket->native(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 #endif
 }
 
