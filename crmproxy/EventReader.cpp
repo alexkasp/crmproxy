@@ -55,9 +55,10 @@ int EventReader::startProcessing(std::string str,std::string& prev)
 		if(!(*x).empty())
 		{
 		    lm.makeLog(info,"AMI:\n ["+(value)+"]");
-		    boost::thread t(boost::bind(&EventReader::processevent,this,value));
-		    tgroup.add_thread(&t);
-		    t.detach();
+		    processevent(value);
+		//    boost::thread t(boost::bind(&EventReader::processevent,this,value));
+		//    tgroup.add_thread(&t);
+		//    t.detach();
 		}	
 	    }
 	}
@@ -92,7 +93,7 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 	else
 	{
 	    
-	    std::cout<<ec.category().name() << ':' << ec.value();
+	    //std::cout<<ec.category().name() << ':' << ec.value();
 	    
 	    string errmsg = ec.category().name() + ec.value();
 	    lm.makeLog(boost::log::trivial::severity_level::error,"NetWork ERROR: "+errmsg);
@@ -116,9 +117,11 @@ void EventReader::readRequest()
 	std::string data;
 	size_t n = boost::asio::read_until(_sock,boost::asio::dynamic_buffer(data), "\r\n\r\n");
 	std::string line = data.substr(0, n);
-	if(!startProcessing(line,prev))
-	    return;
-	    
+//	if(!startProcessing(line,prev))
+//	    return;
+	boost::thread t(boost::bind(&EventReader::startProcessing,this,line,prev));    
+	tgroup.add_thread(&t);
+	t.detach();
 	data.erase(0, n);
     }
 }

@@ -128,10 +128,13 @@ void CDRManager::addInvolvedNums(map<string,string>& data)
 void CDRManager::putCDR(map<string,string> data)
 {
     string callid = data["call_id"];
-    string treeId = data["TreeId"];
+    string treeId = data["firsttree"];
     if(treeId.empty())
-	treeId="0";
-    
+    {
+	treeId = data["TreeId"];
+	if(treeId.empty())
+	    treeId="0";
+    }
     string src = data["src_num"];
     //if(data["calltype"]=="out")
 //	src = data["dst_num"];
