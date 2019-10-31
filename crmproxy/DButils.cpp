@@ -8,6 +8,38 @@ string DButils::getServerId()
     return serverid;
 }
 
+int DButils::registerNode(string callid,string time, string treeid, string answernum)
+{
+  boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+  if(!Lock)
+  {
+      cout<<"ERROR GET DB LOCK in dbutils PutRegisterevent\n";
+      return 0;
+  }
+  cout<<"LOCK ACCEPTED\n";
+  mysqlpp::Query query = conn->query("insert into CallRun(nodeid,nodetype,uniqueid,time,treeid,answernum) values(0,100,'%0',UNIX_TIMESTAMP(Now())-'%1',%2,'%3')");
+  query.parse();
+ 
+  mysqlpp::SQLQueryParms params;
+  params.push_back( mysqlpp::sql_varchar(callid) );
+  params.push_back( mysqlpp::sql_varchar(time) );
+  params.push_back( mysqlpp::sql_varchar( treeid ) );
+  params.push_back( mysqlpp::sql_varchar(answernum) );
+
+  if(!query.execute( params ))
+  {
+     cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+  }
+  else
+       cout <<"PUTREGISTER EVENT"<<endl;
+                                                                                 
+}
+
+string DButils::getPBXServerId()
+{
+    return pbxServerid;
+}
+
 int DButils::getAuthParams(string filename)
 {
     ifstream system_variables(filename);
@@ -49,6 +81,11 @@ int DButils::getAuthParams(string filename)
 	    {	
 		std::cout<<"We found serverID\n";
 		serverid = value;
+	    }
+	    else if(param == "ServerID")
+	    {	
+		std::cout<<"We found ATS serverId\n";
+		pbxServerid = value;
 	    }
 	    
 	}
@@ -744,8 +781,11 @@ int DButils::parseParam(string msg,string& param,string& value)
         if((parse(param,vardelimiter, tmpparam,param))/*&&(value.length()>3)*/)
         {
     	    std::cout<<"VALUE prepare "<<value<<"\n";
-    	    value = value.substr(VALUEPREFIXLENGTH,value.length()-VALUEPOSTFIXLENGTH);
-            std::cout<<"VALUE post "<<value<<"\n";
+    	    if(value[0] == '\'')
+    		value = value.substr(VALUEPREFIXLENGTH,value.length()-VALUEPOSTFIXLENGTH);
+    	    else
+    		value = value.substr(0,value.length()-INTVALUEPOSTFIXLENGTH);	
+            std::cout<<"VALUE post ["<<value<<"]\n";
             return 1;
         }
     }

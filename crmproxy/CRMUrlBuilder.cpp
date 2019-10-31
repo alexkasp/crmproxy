@@ -88,8 +88,9 @@ int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
 	    if(processURL(request,data))
 	    {
 		
+		int UtillEvent = ((data["event"]).compare("s1")==0);
 		
-		if(request.compare(0,httpsign.length(),httpsign)!=0)
+		if((request.compare(0,httpsign.length(),httpsign)!=0) && !UtillEvent)
     		{
     		    if(db!=NULL)
     			db->addSendEventReportEntry(data["call_id"],data["requestId"],data["serverId"],data["userId"],"2",request);

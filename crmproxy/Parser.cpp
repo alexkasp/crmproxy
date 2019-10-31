@@ -12,7 +12,7 @@
 #include <boost/algorithm/string.hpp>
 #undef CALLMANUALCONTROL
 
-#define ASTER_VER 13
+#define ASTER_VER asterVersion
 
 std::string chars(
     "abcdefghijklmnopqrstuvwxyz"
@@ -21,6 +21,16 @@ std::string chars(
 
 boost::random::random_device rng;
 boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
+
+void Parser::setAsterVer(int ver)
+{
+    asterVersion = ver;
+}
+
+void Parser::addDBWorker(DButils* _DBWorker)
+{
+    DBWorker = _DBWorker;
+}
 
 CallRecord::CallRecord()
 {}
@@ -503,6 +513,17 @@ string Parser::parse_queuecall(string src,string dst,string uid,string timestamp
     return "";
 }
 
+string Parser::parse_attendedTransfer(string callid,string num,string uid)
+{
+    string request = request_str;
+    CallRecord call;
+    if(currentCalls.getCall(callid,call))
+    {
+	
+    }
+    return request;
+}
+
 string Parser::parse_agentcalled(string src,string dst,string callid)
 {
 	string request = request_str;
@@ -515,7 +536,7 @@ string Parser::parse_agentcalled(string src,string dst,string callid)
 }
 
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, 
-string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree)
+string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree,string lastCalled)
 {
 	//std::cout<<"START FINISHCALL\n";
 	string event2store;
@@ -588,6 +609,7 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	request+="&hashtag="+hashtag;
 	request+="&newstatus="+newstatus;
 	request+="&firsttree="+firstTree;
+	request+="&lastCalled="+lastCalled;
 	
 	event2store=request;
 	event2store+="&event=2";
@@ -1020,7 +1042,8 @@ string Parser::parsedata(ParserData& data)
 		}
 		if(data["UserEvent:"]=="answercall")
 		{
-			 str = parse_answercall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("calltype")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("ChannelName")]);
+			 str = parse_answercall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
+			 data[fieldNameConverter("callid")],data[fieldNameConverter("calltype")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("ChannelName")]);
 			
 		}
 		if(data["UserEvent:"]=="initcall")
@@ -1048,7 +1071,7 @@ string Parser::parsedata(ParserData& data)
 		if(data["UserEvent:"]=="finishcall")
 		{
 			int skipfinish = 0;
-			if(data[fieldNameConverter("callbacktype")].compare("CallBackTreeReverse")==0)
+			if((0)&&(data[fieldNameConverter("callbacktype")].compare("CallBackTreeReverse")==0))
 			{
 			    //std::cout<<"CALLBACKTREEREVERSE\n";
 			    
@@ -1080,7 +1103,7 @@ string Parser::parsedata(ParserData& data)
 				}
 				data[fieldNameConverter("dst")] = data[fieldNameConverter("newexten")];
 			    }
-			    else if((data[fieldNameConverter("status")].compare("ANSWERED")!=0)||(data[fieldNameConverter("status")].compare("ANSWER")!=0))
+			    else if((data[fieldNameConverter("status")].compare("ANSWERED")!=0)&&(data[fieldNameConverter("status")].compare("ANSWER")!=0))
 			    {
 				data[fieldNameConverter("callanswer")]="0";
 				data[fieldNameConverter("status")]="NOANSWER";
@@ -1157,7 +1180,7 @@ string Parser::parsedata(ParserData& data)
 			    str = parse_finishcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
 			    data[fieldNameConverter("callid")],data[fieldNameConverter("callstart")],data[fieldNameConverter("callanswer")],data[fieldNameConverter("status")],data[fieldNameConverter("calltype")],data[fieldNameConverter("callbackId")],data[fieldNameConverter("TreeId")],
 			    data[fieldNameConverter("ChannelName")],data[fieldNameConverter("serverId")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("label")],data[fieldNameConverter("rating")],data[fieldNameConverter("newstatus")],data[fieldNameConverter("crmcall")],
-			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcerecord")],data[fieldNameConverter("firstTree")]);
+			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcedrecord")],data[fieldNameConverter("firstTree")],data[fieldNameConverter("lastCalled")]);
 			else
 			    str = "";
 			
@@ -1212,6 +1235,56 @@ string Parser::parsedata(ParserData& data)
 		    str+= "&callbackId=";
 		    str+= data[fieldNameConverter("callbackId")];
 		}
+	}
+	else if(data["Event:"] == "AttendedTransfer")
+	{
+	    if(data[fieldNameConverter("Result:")] == "Success")
+	    {
+		CallRecord call;
+		string callid = "";
+		string answernum = "";
+		
+		if(data[fieldNameConverter("SecondTransfererContext")] == "vatsout")
+		{
+		    answernum = data[fieldNameConverter("TransfereeCallerIDNum")];
+		    callid = data[fieldNameConverter("TransferTargetLinkedid")];
+		}    
+		else
+		{
+		    answernum = data[fieldNameConverter("SecondTransfererConnectedLineNum")];
+		    callid = data[fieldNameConverter("TransfereeLinkedid")];
+		}    
+		if((answernum != "<unknown>")&&(currentCalls.getCall(callid,call)))
+		{
+		    string tmpTime = "";
+		    
+		    if(data[fieldNameConverter("SecondTransfererContext")] == "vatsout")
+			tmpTime = data[fieldNameConverter("TransfereeUniqueid")];
+		    else
+		    {
+			if(!data[fieldNameConverter("LocalOneUniqueid")].empty())
+			    tmpTime = data[fieldNameConverter("LocalOneUniqueid")];
+			else
+			    tmpTime = data[fieldNameConverter("TransferTargetUniqueid")];
+		    }	
+		    std::vector<std::string> lines;
+		    boost::iter_split(lines, tmpTime, boost::algorithm::first_finder("."));
+		    string time = *(lines.begin());
+		 
+		//str = parse_attendedTransfer(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("TransfereeCallerIDNum:")],data[fieldNameConverter("TransferTargetAccountCode:")]);
+		/*    str = parse_answercall(data[fieldNameConverter("SecondTransfererCallerIDNum")],data[fieldNameConverter("TransfereeCallerIDNum")],data[fieldNameConverter("TransferTargetAccountCode")],time,
+			 callid,data[fieldNameConverter("calltype")],"1",data[fieldNameConverter("SecondTransfererConnectedLineNum")],data[fieldNameConverter("TransferTargetChannel")]);
+			 
+		    data[fieldNameConverter("counter:")] = "1001";
+		    data[fieldNameConverter("TreeId")] = call.getTreeId();
+		    data[fieldNameConverter("ChannelName")] = call.getChannel();
+		*/
+		//if(data[fieldNameConverter("TransferTargetContext")] == "vats")
+		    {
+			DBWorker->registerNode(callid,time,call.getTreeId(),answernum);
+		    }    
+		}
+	    }
 	}
 	else if(data["Event:"] == "AgentCalled")
 	{

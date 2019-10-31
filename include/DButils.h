@@ -46,8 +46,9 @@ class DButils
 	
 	const int VALUEPREFIXLENGTH = 1;
 	const int VALUEPOSTFIXLENGTH = 3;
+	const int INTVALUEPOSTFIXLENGTH = 1;
 	
-	string host,pass,login,db,serverid;
+	string host,pass,login,db,serverid,pbxServerid;
 	
 	
 	int parse(string msg,string delimiter,string& param,string& value);
@@ -70,11 +71,13 @@ class DButils
 	DButils();
 	~DButils();
 	string getServerId();
+	string getPBXServerId();
+	
 	int getTestResult(string testid,string callid,vector<TestResult>& result,vector<TestTemplate>& etalon);
 	int getTestById(string testid,string& from,string& to);
 	void addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData);
 	void completeEventReportEntry(string callid,string responce,string answerData);
-	
+	int registerNode(string callid,string time, string treeid, string answernum);
 	void getCDR(string callid,map<string,string>& data);
 	void putCDR(map<string,string>& data);
 	int getCallData(string userId,string clientNum,string& operatorNum);

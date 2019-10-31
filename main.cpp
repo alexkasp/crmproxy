@@ -50,6 +50,23 @@ int main()
 	std::cout<<"ERROR CREATE DButils object\n";
     
     
+    if(DBWorker.getPBXServerId() == "29")
+    {
+	std::cout<<"We set test WSS\n";
+	webservaddr = "wss2test.sipuni.com";
+    }
+    else
+	std::cout<<"We set PROD WSS\n";
+    
+    int asterVersion = 13;
+    
+/*    if(DBWorker.getPBXServerId() == "2")
+    {
+	asterVersion = 11;
+    }
+*/    
+    std::cout<<"We set ASTER version = "<<asterVersion<<"\n";
+    
     ICMServer icm(lm,DBWorker);
     if(!icm.init(7722))
 	std::cout<<"ERROR START ICM SERVER!!!!!\n";
@@ -70,6 +87,9 @@ int main()
     CRMUrlBuilder sender(webservaddr,"9102",&DBWorker,&icm,&cdr/*NULL*/);
     //Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
     Parser newParser("/?userId=",lm);
+    newParser.addDBWorker(&DBWorker);
+    newParser.setAsterVer(asterVersion);
+    
     sender.AddParser(&newParser);
     
     RegisterParser rparser("not need",lm);

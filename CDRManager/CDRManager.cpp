@@ -93,7 +93,7 @@ void CDRManager::processCDR(map<string,string> data)
 	lm.makeLog(info,"process CDR");
 	putCDR(data);
     }
-    else if(data["event"]=="3")
+    else if(data["event"]=="3" || data["event"]=="s1" )
     {
 	addInvolvedNums(data);
     }
@@ -155,10 +155,19 @@ void CDRManager::putCDR(map<string,string> data)
 	dst = data["dst_num"];
 	destinationcontext = "vatsout";
     }
+    else if(data["DestinationContext"] == "CallBackTreeReverse")
+    {
+	destinationcontext = "vatsout";
+    }
     else
     {
 	if((data["src_type"]==LOCAL_NUMBER)&&(data["dst_type"]==LOCAL_NUMBER))
-	    destinationcontext = "vatsl";
+	{
+	    if(data["calltype"] == "INCOME")
+		destinationcontext = "vatsout";
+	    else
+		destinationcontext = "vatsl";
+	}
 	else
 	    destinationcontext = data["DestinationContext"];
 // 	dst = data["destination"];
