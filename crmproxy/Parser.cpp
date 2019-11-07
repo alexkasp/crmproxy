@@ -535,6 +535,19 @@ string Parser::parse_agentcalled(string src,string dst,string callid)
 	
 }
 
+string Parser::parse_hangup(string callid, string peername, string uid)
+{
+	string request = request_str;
+	request+=uid;
+	request+="&call_id=";
+	request+=callid;
+	request+="&peername=";
+	request+=cpeername;
+
+	return request;
+
+}
+
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, 
 string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree,string lastCalled)
 {
@@ -1018,6 +1031,10 @@ string Parser::parsedata(ParserData& data)
 	string str = "";
 	if(data["Event:"]=="UserEvent")
 	{
+		if(data["UserEvent:"]=="hangupevent")
+		{
+		    str = parse_hangup(data[fieldNameConverter("callid")],data[fieldNameConverter("peername")],"0");
+		}
 		if(data["UserEvent:"]=="webphonecall")
 		{
 		    str = parse_webphoneUUID(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("webcallid")]);
@@ -1259,27 +1276,20 @@ string Parser::parsedata(ParserData& data)
 		    string tmpTime = "";
 		    
 		    if(data[fieldNameConverter("SecondTransfererContext")] == "vatsout")
-			tmpTime = data[fieldNameConverter("TransfereeUniqueid")];
+				tmpTime = data[fieldNameConverter("TransfereeUniqueid")];
 		    else
 		    {
-			if(!data[fieldNameConverter("LocalOneUniqueid")].empty())
-			    tmpTime = data[fieldNameConverter("LocalOneUniqueid")];
-			else
-			    tmpTime = data[fieldNameConverter("TransferTargetUniqueid")];
+				if(!data[fieldNameConverter("LocalOneUniqueid")].empty())
+					tmpTime = data[fieldNameConverter("LocalOneUniqueid")];
+				else
+					tmpTime = data[fieldNameConverter("TransferTargetUniqueid")];
 		    }	
 		    std::vector<std::string> lines;
 		    boost::iter_split(lines, tmpTime, boost::algorithm::first_finder("."));
 		    string time = *(lines.begin());
 		 
-		//str = parse_attendedTransfer(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("TransfereeCallerIDNum:")],data[fieldNameConverter("TransferTargetAccountCode:")]);
-		/*    str = parse_answercall(data[fieldNameConverter("SecondTransfererCallerIDNum")],data[fieldNameConverter("TransfereeCallerIDNum")],data[fieldNameConverter("TransferTargetAccountCode")],time,
-			 callid,data[fieldNameConverter("calltype")],"1",data[fieldNameConverter("SecondTransfererConnectedLineNum")],data[fieldNameConverter("TransferTargetChannel")]);
-			 
-		    data[fieldNameConverter("counter:")] = "1001";
-		    data[fieldNameConverter("TreeId")] = call.getTreeId();
-		    data[fieldNameConverter("ChannelName")] = call.getChannel();
-		*/
-		//if(data[fieldNameConverter("TransferTargetContext")] == "vats")
+			str = parse_attendedTransfer(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("TransfereeCallerIDNum:")],data[fieldNameConverter("TransferTargetAccountCode:")]);
+		
 		    {
 			DBWorker->registerNode(callid,time,call.getTreeId(),answernum);
 		    }    
@@ -1336,14 +1346,6 @@ string Parser::parsedata(ParserData& data)
 	    data[fieldNameConverter("UniqueID:")] = mergedCalls.getMergedCall(data[fieldNameConverter("UniqueID:")]);
 		str = parse_cdrevent(data[fieldNameConverter("UniqueID:")],data[fieldNameConverter("Destination:")],data[fieldNameConverter("Duration:")],data[fieldNameConverter("BillableSeconds:")],data[fieldNameConverter("StartTime:")],data[fieldNameConverter("EndTime:")],data[fieldNameConverter("DestinationContext:")]);
 	}
-/*	else if(data["Event:"] == "Hangup")
-	{
-		str = parse_hangupevent(data["Uniqueid:"]);
-	}*/
-/*	else if(data["Event:"] == "AgentCalled")
-	{
-		str = parse_agentcalled(data["Uniqueid:"],data["AgentName:"],data["Queue:"]);
-	}*/
 	else
 	    return str;
 	    
@@ -1377,6 +1379,6 @@ string Parser::parsedata(ParserData& data)
 		
 	
 	debugParseString(str);
-//	std::cout<<"END PROCESS DATA>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+
 	return str;
 }
