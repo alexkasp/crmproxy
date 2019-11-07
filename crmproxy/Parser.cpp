@@ -539,7 +539,7 @@ string Parser::parse_hangup(string callid, string peername, string uid)
 {
 	string request = request_str;
 	request+=uid;
-	request+="&call_id=";
+	request+="&event=10&call_id=";
 	request+=callid;
 	request+="&peername=";
 	request+=peername;
