@@ -535,10 +535,10 @@ string Parser::parse_agentcalled(string src,string dst,string callid)
 	
 }
 
-string Parser::parse_hangup(string callid, string peername, string uid)
+string Parser::parse_hangup(string callid, string peername, string uidcode)
 {
 	string request = request_str;
-	request+=uid;
+	request+=uidcode;
 	request+="&event=10&call_id=";
 	request+=callid;
 	request+="&peername=";
@@ -1033,7 +1033,7 @@ string Parser::parsedata(ParserData& data)
 	{
 		if(data["UserEvent:"]=="hangupevent")
 		{
-		    str = parse_hangup(data[fieldNameConverter("callid")],data[fieldNameConverter("peername")],"0");
+		    str = parse_hangup(data[fieldNameConverter("callid")],data[fieldNameConverter("peername")],data[fieldNameConverter("userid")]);
 		}
 		if(data["UserEvent:"]=="webphonecall")
 		{
