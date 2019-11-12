@@ -1343,6 +1343,10 @@ string Parser::parsedata(ParserData& data)
 		}
 	    }
 	}
+	else if(data["Event:"] == "Pickup")
+	{
+		str = parse_pickup(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("Uniqueid:")],data[fieldNameConverter("TargetAccountCode:")],data[fieldNameConverter("AccountCode:")]);
+	}
 	else if(data["Event:"] == "AgentCalled")
 	{
 		//std::cout<<"AGENT CALLED\n\n\n";
