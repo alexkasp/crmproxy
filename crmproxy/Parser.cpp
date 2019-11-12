@@ -481,6 +481,16 @@ string Parser::parse_pickup(string callid, string pickupcallid, string callednum
 
 
 	CallRecord call;
+	std::cout<<"Try find call "<<callid<<"\n";
+
+	map<string,CallRecord>& data = currentCalls.getData();
+
+	for(auto it=data.begin();it!=data.end();++it)
+	{
+	   
+	    std::cout<<"DATA ["<<(it->first)<<"]  ["<<(it->second)<<"]\n";
+	}
+
 	if(currentCalls.getCall(callid,call))
 	{
 	  	call.setPickupNum(answernum);
