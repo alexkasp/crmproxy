@@ -477,7 +477,7 @@ string Parser::parse_incomecall(string src,string dst,string uid,string timestam
 
 string Parser::parse_pickup(string callid, string pickupcallid, string callednum, string answernum)
 {
-	string request = ""
+	string request = "";
 
 
 	CallRecord call;
