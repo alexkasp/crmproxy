@@ -35,6 +35,7 @@ class CallRecord
 	string channel;
 	string calltype;
 	set<string> involvedNumbers;
+	string pickupnum;
 	
 public:
 	CallRecord();
@@ -44,7 +45,9 @@ public:
 	int removeNumber(string);
 	int setRecordFile(string,bool);
 	void setCurrentTreeId(string treeid);
-	
+	void setPickupNum(string num);
+	void clearPickupNum();
+
 	const string& getdst() const;
 	const string& getuid() const;
 	const string& getcallid() const;
@@ -56,7 +59,8 @@ public:
 	const string& getTreeId() const;
 	const string& getCurrentTreeId() const;
 	const string& getCallType() const;
-
+	const string& getPickupNum() const;
+	
 	const string& getChannel() const;
 };
 
@@ -82,6 +86,7 @@ class CallRecords
 
 class Parser: public IParser
 {
+	string parse_pickup(string callid, string pickupcallid, string callednum, string answernum);
 	string parse_hangup(string callid, string peername, string uidcode);
 	string parse_qoscall(string uid,string timestamp,string callid,string rxjitter,string rxcount,string txjitter,string txcount,string rtt,string bridged_rxjitter,string bridged_rxcount,string bridged_txjitter,string bridged_txcount,string bridged_rtt);
 	string parse_onlinepbx(string src,string dst,string uid,string timestamp,string callid,string uidcode,string newname);

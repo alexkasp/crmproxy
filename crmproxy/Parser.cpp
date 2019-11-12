@@ -99,6 +99,21 @@ const string& CallRecord::getCallType() const
     return calltype;
 }
 
+const string& CallRecord::getPickupNum() const
+{
+    return pickup;
+}
+
+void CallRecord::clearPickupNum()
+{
+    pickup = "";
+}
+
+void CallRecord::setPickupNum(string num)
+{
+	pickupnum = num;
+}
+
 
 CallRecord::~CallRecord(void)
 {
@@ -460,6 +475,35 @@ string Parser::parse_incomecall(string src,string dst,string uid,string timestam
 	return request;
 }
 
+string Parser::parse_pickup(string callid, string pickupcallid, string callednum, string answernum)
+{
+	string request = ""
+
+
+	CallRecord call;
+	if(currentCalls.getCall(callid,call))
+	{
+	  	call.setPickupNum(answernum);
+		string request = request_str;
+		request+=call.getuserid();
+		request+="&event=11&call_id=";
+		request+=callid;
+		request+="&from_call_id=";
+		request+=pickupcallid;
+		request+="&callednum=";
+		request+=callednum;
+		request+="&answernum=";
+		request+=answernum;
+
+	}
+
+	
+
+	
+
+	return request;
+}
+
 string Parser::parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode,string channel)
 {
 	//int src_type = (src.length()<10)+1;
@@ -475,6 +519,9 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	    //std::cout<<"ADD pbxdstnum for callid\n";
 	    request+="&pbxdstnum=";
 	    request+=call.getdst();
+		string pickupnum = call.getPickupNum();
+		if(!pickupnum.empty())
+			dst = pickupnum;
 	    request+=format_srcdstnum(src,dst,uidcode,call.getsrctype(),call.getdsttype());
 	}
 	else
