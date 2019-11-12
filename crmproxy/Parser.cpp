@@ -101,12 +101,12 @@ const string& CallRecord::getCallType() const
 
 const string& CallRecord::getPickupNum() const
 {
-    return pickup;
+    return pickupnum;
 }
 
 void CallRecord::clearPickupNum()
 {
-    pickup = "";
+    pickupnum = "";
 }
 
 void CallRecord::setPickupNum(string num)
