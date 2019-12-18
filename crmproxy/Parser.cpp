@@ -479,11 +479,11 @@ string Parser::parse_pickup(string callid, string pickupcallid, string callednum
 {
 	string request = "";
 
-
 	CallRecord call;
 	if(currentCalls.getCall(callid,call))
 	{
 	  	call.setPickupNum(answernum);
+	  	currentCalls.updateCall(callid,call);
 		string request = request_str;
 		request+=call.getuserid();
 		request+="&event=11&call_id=";
@@ -504,7 +504,7 @@ string Parser::parse_pickup(string callid, string pickupcallid, string callednum
 	return request;
 }
 
-string Parser::parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode,string channel)
+string Parser::parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode,string channel,string curnode="")
 {
 	//int src_type = (src.length()<10)+1;
 	//int dst_type = (dst.length()<10)+1;
@@ -519,9 +519,17 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	    //std::cout<<"ADD pbxdstnum for callid\n";
 	    request+="&pbxdstnum=";
 	    request+=call.getdst();
+	    
 		string pickupnum = call.getPickupNum();
 		if(!pickupnum.empty())
+		{
 			dst = pickupnum;
+			if(!curnode.empty())
+			{
+			    DBWorker->updateNode(callid,curnode,dst);
+			}
+		}
+		
 	    request+=format_srcdstnum(src,dst,uidcode,call.getsrctype(),call.getdsttype());
 	}
 	else
@@ -1071,7 +1079,7 @@ string Parser::parsedata(ParserData& data)
 	for(auto it=data.begin();it!=data.end();++it)
 	{
 	    lm.makeLog(boost::log::trivial::severity_level::info,"DATA "+(it->first)+"  "+(it->second));
-	    ////std::cout<<"DATA ["<<(it->first)<<"]  ["<<(it->second)<<"]\n";
+	    std::cout<<"DATA ["<<(it->first)<<"]  ["<<(it->second)<<"]\n";
 	}
 	//std::cout<<"\n\n";
 	
@@ -1107,7 +1115,8 @@ string Parser::parsedata(ParserData& data)
 		if(data["UserEvent:"]=="answercall")
 		{
 			 str = parse_answercall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
-			 data[fieldNameConverter("callid")],data[fieldNameConverter("calltype")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("ChannelName")]);
+			 data[fieldNameConverter("callid")],data[fieldNameConverter("calltype")],data[fieldNameConverter("usecrm")],
+			 data[fieldNameConverter("uidcode")],data[fieldNameConverter("ChannelName")],data[fieldNameConverter("curnode")]);
 			
 		}
 		if(data["UserEvent:"]=="initcall")
@@ -1345,7 +1354,7 @@ string Parser::parsedata(ParserData& data)
 	}
 	else if(data["Event:"] == "Pickup")
 	{
-		str = parse_pickup(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("Uniqueid:")],data[fieldNameConverter("TargetAccountCode:")],data[fieldNameConverter("AccountCode:")]);
+		str = parse_pickup(data[fieldNameConverter("TargetLinkedid")],data[fieldNameConverter("Uniqueid")],data[fieldNameConverter("TargetAccountCode")],data[fieldNameConverter("AccountCode")]);
 	}
 	else if(data["Event:"] == "AgentCalled")
 	{

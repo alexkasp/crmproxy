@@ -35,6 +35,32 @@ int DButils::registerNode(string callid,string time, string treeid, string answe
                                                                                  
 }
 
+int DButils::updateNode(string callid,string curnode,string answernum)
+{
+  boost::timed_mutex::scoped_lock Lock(dblock,boost::get_system_time() + boost::posix_time::milliseconds(10000));
+  if(!Lock)
+  {
+      cout<<"ERROR GET DB LOCK in dbutils PutRegisterevent\n";
+      return 0;
+  }
+  cout<<"LOCK ACCEPTED\n";
+  mysqlpp::Query query = conn->query("update CallRun set answernum = '%0' where uniqueid = '%1' and nodeid = %2 and nodetype = 100 order by id DESC limit 1;");
+  query.parse();
+ 
+  mysqlpp::SQLQueryParms params;
+  params.push_back( mysqlpp::sql_varchar(answernum) );
+  params.push_back( mysqlpp::sql_varchar(callid) );
+  params.push_back( mysqlpp::sql_varchar(curnode) );
+
+  if(!query.execute( params ))
+  {
+     cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
+  }
+  else
+       cout <<"UPDATE EVENT"<<endl;
+                                                                                 
+}
+
 string DButils::getPBXServerId()
 {
     return pbxServerid;

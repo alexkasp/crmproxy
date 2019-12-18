@@ -78,6 +78,7 @@ class DButils
 	void addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData);
 	void completeEventReportEntry(string callid,string responce,string answerData);
 	int registerNode(string callid,string time, string treeid, string answernum);
+	int updateNode(string callid,string curnode,string answernum);
 	void getCDR(string callid,map<string,string>& data);
 	void putCDR(map<string,string>& data);
 	int getCallData(string userId,string clientNum,string& operatorNum);
