@@ -112,14 +112,16 @@ void EventReader::readRequest()
 //    boost::shared_ptr<boost::asio::streambuf> buf = boost::shared_ptr<boost::asio::streambuf>(new boost::asio::streambuf());
 //    boost::asio::async_read_until(_sock,*buf,"\r\n\r\n",boost::bind(&EventReader::read_handler,this,buf,_1,_2));
     string prev = "";
+    string tmp = "";
     while(1)
     {
 	std::string data;
 	size_t n = boost::asio::read_until(_sock,boost::asio::dynamic_buffer(data), "\r\n\r\n");
 	std::string line = data.substr(0, n);
-//	if(!startProcessing(line,prev))
-//	    return;
-	boost::thread t(boost::bind(&EventReader::startProcessing,this,line,prev));    
+	line = prev+line;
+	
+	prev = data.substr(n,string::npos);
+	boost::thread t(boost::bind(&EventReader::startProcessing,this,line,tmp));    
 	tgroup.add_thread(&t);
 	t.detach();
 	data.erase(0, n);

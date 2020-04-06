@@ -55,16 +55,22 @@ int main()
 	std::cout<<"We set test WSS\n";
 	webservaddr = "wss2test.sipuni.com";
     }
+    else if(DBWorker.getPBXServerId() == "122" || DBWorker.getPBXServerId() == "243")
+    {
+	std::cout<<"We set test WSS\n";
+	webservaddr = "wss3.sipuni.com";
+    
+    }
     else
 	std::cout<<"We set PROD WSS\n";
     
     int asterVersion = 13;
     
-/*    if(DBWorker.getPBXServerId() == "2")
+    if((DBWorker.getPBXServerId() == "24") || (DBWorker.getPBXServerId() == "25")|| (DBWorker.getPBXServerId() == "26"))
     {
 	asterVersion = 11;
     }
-*/    
+    
     std::cout<<"We set ASTER version = "<<asterVersion<<"\n";
     
     ICMServer icm(lm,DBWorker);

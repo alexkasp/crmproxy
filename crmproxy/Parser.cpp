@@ -10,6 +10,7 @@
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #undef CALLMANUALCONTROL
 
 #define ASTER_VER asterVersion
@@ -480,15 +481,6 @@ string Parser::parse_pickup(string callid, string pickupcallid, string callednum
 	string request = "";
 
 	CallRecord call;
-	std::cout<<"Try find call "<<callid<<"\n";
-
-	map<string,CallRecord>& data = currentCalls.getData();
-
-	for(auto it=data.begin();it!=data.end();++it)
-	{
-	   
-	    std::cout<<"DATA ["<<(it->first)<<"]  ["<<(it->second)<<"]\n";
-	}
 
 	if(currentCalls.getCall(callid,call))
 	{
@@ -688,6 +680,17 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	request+="&newstatus="+newstatus;
 	request+="&firsttree="+firstTree;
 	request+="&lastCalled="+lastCalled;
+	
+	int DurationInt = boost::lexical_cast<int>(timestamp) - boost::lexical_cast<int>(callstart);
+	int billsec = 0;
+	if(callanswer != "0")
+	{
+	    billsec = boost::lexical_cast<int>(timestamp) - boost::lexical_cast<int>(callanswer);
+	}    
+	request+="&duration="+boost::lexical_cast<string>(DurationInt);
+	request+="&billableseconds="+boost::lexical_cast<string>(billsec);;
+	request+="&starttime="+callstart;
+	request+="&endtime="+timestamp;
 	
 	event2store=request;
 	event2store+="&event=2";
@@ -959,10 +962,10 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	
 	auto it = event2storage.find(callid);
 	request+="&destination="+destination;
-	request+="&duration="+duration;
-	request+="&billableseconds="+billableseconds;
-	request+="&starttime="+starttime;
-	request+="&endtime="+endtime;
+//	request+="&duration="+duration;
+//	request+="&billableseconds="+billableseconds;
+//	request+="&starttime="+starttime;
+//	request+="&endtime="+endtime;
 	request+="&DestinationContext="+Destinationcontext;
 	
 	lm.makeLog(boost::log::trivial::severity_level::info,"REQUEST prepared = "+request);
@@ -1354,12 +1357,42 @@ string Parser::parsedata(ParserData& data)
 		    boost::iter_split(lines, tmpTime, boost::algorithm::first_finder("."));
 		    string time = *(lines.begin());
 		 
-			str = parse_attendedTransfer(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("TransfereeCallerIDNum:")],data[fieldNameConverter("TransferTargetAccountCode:")]);
+		    str = parse_attendedTransfer(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("TransfereeCallerIDNum:")],data[fieldNameConverter("TransferTargetAccountCode:")]);
 		
 		    {
 			DBWorker->registerNode(callid,time,call.getTreeId(),answernum);
 		    }    
 		}
+	    }
+	}
+	else if(data["Event:"] == "BlindTransfer")
+	{
+	    std::cout<<"Blind TRansfer Processing...\n";
+	    if(data[fieldNameConverter("Result:")] == "Success")
+	    {
+		std::cout<<"Success result go...\n";
+		CallRecord call;
+		string callid = data[fieldNameConverter("TransfereeLinkedid")];
+		string caller = data[fieldNameConverter("TransfereeConnectedLineNum")];
+		string answernum = data[fieldNameConverter("Extension")];
+		string userId = data[fieldNameConverter("TransfereeAccountCode")];
+		string tmpTime = callid;
+		
+		
+		std::cout<<"Data for send callid = "<<callid<<" caller = "<<" userId = "<<userId<<"\n";
+		str = parse_attendedTransfer(callid,caller,userId);
+		
+		if((answernum != "<unknown>")&&(currentCalls.getCall(callid,call)))
+		{
+		 
+		    std::vector<std::string> lines;
+		    boost::iter_split(lines, tmpTime, boost::algorithm::first_finder("."));
+		    string time = *(lines.begin());
+		    
+		
+		    DBWorker->registerNode(callid,time,call.getTreeId(),answernum);
+		}
+
 	    }
 	}
 	else if(data["Event:"] == "Pickup")
