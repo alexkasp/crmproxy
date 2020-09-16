@@ -31,36 +31,13 @@ EventReader::~EventReader(void)
 
 
 
-int EventReader::startProcessing(std::string str,std::string& prev)
+int EventReader::startProcessing(std::string str)
 {
     lm.makeLog(info,"GET BUFFER, START PARSE\n["+str+"]\n");
     try
         {
-	    std::vector<std::string> lines;
-	    //boost::algorithm::split(lines, str, boost::is_any_of("\r\n\r\n"));
-	    boost::iter_split(lines, str, boost::algorithm::first_finder("\r\n\r\n"));
-	    for(auto x = lines.begin();x!=lines.end();++x)
-	    {
-	        std::string value = *x;
-	        std::size_t found = value.find(getMark());
-	        if((found==std::string::npos)&&(found==0))
-	        {
-		    value=prev+"\n"+value;
-		    lm.makeLog(info,"CORRECTING ...:\n ["+(value)+"]");
-		}
-		else
-		{
-		    prev = value;
-		}
-		if(!(*x).empty())
-		{
-		    lm.makeLog(info,"AMI:\n ["+(value)+"]");
-		    processevent(value);
-		//    boost::thread t(boost::bind(&EventReader::processevent,this,value));
-		//    tgroup.add_thread(&t);
-		//    t.detach();
-		}	
-	    }
+	    lm.makeLog(info,"AMI:\n ["+(str)+"]");
+	    processevent(str);
 	}
 	catch(exception& e)
 	{
@@ -113,15 +90,16 @@ void EventReader::readRequest()
 //    boost::asio::async_read_until(_sock,*buf,"\r\n\r\n",boost::bind(&EventReader::read_handler,this,buf,_1,_2));
     string prev = "";
     string tmp = "";
+    const int DELIMITER_LENGTH = 4;
     while(1)
     {
 	std::string data;
 	size_t n = boost::asio::read_until(_sock,boost::asio::dynamic_buffer(data), "\r\n\r\n");
-	std::string line = data.substr(0, n);
+	std::string line = data.substr(0, n-DELIMITER_LENGTH);
 	line = prev+line;
 	
 	prev = data.substr(n,string::npos);
-	boost::thread t(boost::bind(&EventReader::startProcessing,this,line,tmp));    
+	boost::thread t(boost::bind(&EventReader::startProcessing,this,line));    
 	tgroup.add_thread(&t);
 	t.detach();
 	data.erase(0, n);

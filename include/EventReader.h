@@ -44,7 +44,7 @@ protected:
 	
 	string servhost;
 	int servport;
-	int startProcessing(std::string str,std::string& prev);
+	int startProcessing(std::string str);
 	virtual string getMark();
 	
 	int processevent(const std::string data);

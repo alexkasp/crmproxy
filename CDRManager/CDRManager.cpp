@@ -184,12 +184,12 @@ void CDRManager::putCDR(map<string,string> data)
 	    
 	//    src = "8"+src;
 	}
-	else if((src.length()>11)&&(src.substr(0,3)=="100"))
+	else if((src.length()>11) && (src.substr(0,3)=="100"))
 	{
 	    src = src.substr(3, string::npos);
 	    src = "8"+dst;
 	}
-    if((dst.length()>11)&&(dst.substr(0,3)=="100"))
+    if((dst.length()>11)&&(dst.substr(0,3)=="100") && dst.find("_id") == std::string::npos)
 	{
 	    dst = dst.substr(3, string::npos);
 	    dst = "8"+dst;

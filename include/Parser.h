@@ -104,7 +104,7 @@ class Parser: public IParser
 	string ChannelName,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forceRecord,string firstTree,string lastCalled);
 	string parse_transfercall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 	string parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,
-	    string uidcode,string treeid,string channel,string roistat,string roistatphone,string roistatmarket,string roistatsource,string xcallerid,string calltype,string transfer);
+	    string uidcode,string treeid,string channel,string roistat,string roistatphone,string roistatmarket,string roistatsource,string xcallerid,string calltype,string transfer,string from_number);
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 	string parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid,string uidcode);
 	string parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string DestinationContext);
@@ -117,8 +117,6 @@ class Parser: public IParser
 	string clearStorage(map<string,string>& storage,string key);
 	void clearStorages();
 	int processTransfer(string callid,string linkedid,string record,string destination);
-	std::string fieldNameConverter(std::string fieldname);
-//	boost::timed_mutex::scoped_lock&& getCDRLock();
 	
 	boost::mutex reportedCallstorageLock;
 	boost::mutex transferstorageLock;
@@ -134,7 +132,6 @@ class Parser: public IParser
 	 map<string,string> callbackIdList;
 	 map<string,string> reportedCall;
 	 
-	 int asterVersion;
 	 MergedCalls mergedCalls;
 	 DButils* DBWorker;
 public:
@@ -144,6 +141,5 @@ public:
 	void addDBWorker(DButils* DBWorker);
 	void cleanCalls();
 	const CallRecords& getCallRecords() const;
-	void setAsterVer(int ver);
 };
 

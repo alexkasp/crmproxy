@@ -13,7 +13,6 @@
 #include <boost/lexical_cast.hpp>
 #undef CALLMANUALCONTROL
 
-#define ASTER_VER asterVersion
 
 std::string chars(
     "abcdefghijklmnopqrstuvwxyz"
@@ -22,11 +21,6 @@ std::string chars(
 
 boost::random::random_device rng;
 boost::random::uniform_int_distribution<> index_dist(0, chars.size() - 1);
-
-void Parser::setAsterVer(int ver)
-{
-    asterVersion = ver;
-}
 
 void Parser::addDBWorker(DButils* _DBWorker)
 {
@@ -368,7 +362,7 @@ string Parser::format_srcdstnum(string src,string dst,string uidcode,string src_
 	return result;
 }
 string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,
-string channel,string roistat,string roistatphone,string roistatmarket,string roistatsource,string xcallerid,string calltype,string transferstart="")
+string channel,string roistat,string roistatphone,string roistatmarket,string roistatsource,string xcallerid,string calltype,string transferstart="",string from_number = "")
 {
 
 	string request = request_str;
@@ -388,6 +382,9 @@ string channel,string roistat,string roistatphone,string roistatmarket,string ro
 	request+=roistatsource;
 	request+="&xcallerid=";
 	request+=xcallerid;
+	request+="&from_number=";
+	request+=from_number;
+	
 	if(!transferstart.empty())
 	{
 	    request+="&transferstart=";
@@ -1067,25 +1064,6 @@ void Parser::parse_setcallbackId(string callid,string callbackId)
     callbackIdList[callid] = callbackId;
 }
 
-
-
-string Parser::fieldNameConverter(std::string fieldname)
-{
-    if(fieldname.find(":")!=std::string::npos)
-	return fieldname;
-	
-    if(ASTER_VER==13)
-    {
-//	if(fieldname=="callbackId")
-//	    return fieldname;
-//	if(fieldname=="webcallid")
-//	    return fieldname;
-	    
-	return fieldname+":";
-    }
-    return fieldname;
-}
-
 string Parser::parsedata(ParserData& data)
 {
 	lm.makeLog(boost::log::trivial::severity_level::info,"EVENT DATA "+data["Event:"]);
@@ -1142,7 +1120,7 @@ string Parser::parsedata(ParserData& data)
 			 data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")],
 			 data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],
 			 data[fieldNameConverter("ChannelName")],data[fieldNameConverter("roistat")],data[fieldNameConverter("x-roistat-phone")],
-			 data[fieldNameConverter("x-roistat-marker")],data[fieldNameConverter("x-roistat-source")],data[fieldNameConverter("x-callerid")],data[fieldNameConverter("callbacktype")]);
+			 data[fieldNameConverter("x-roistat-marker")],data[fieldNameConverter("x-roistat-source")],data[fieldNameConverter("x-callerid")],data[fieldNameConverter("callbacktype")],"",data[fieldNameConverter("from_number")]);
 			
 		}
 		if(data["UserEvent:"]=="transfercall")

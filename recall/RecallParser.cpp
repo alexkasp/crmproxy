@@ -8,9 +8,9 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& annou
 	
 	if(data["UserEvent:"] == "Recall")
 	{
-    	    from = data["operator:"];
-    	    to = data["recallnum:"];
-    	    announce = data["announce:"];
+    	    from = data[fieldNameConverter("operator")];
+    	    to = data[fieldNameConverter("recallnum")];
+    	    announce = data[fieldNameConverter("announce")];
     	    std::cout<<"Start recall "<<from<<" ->"<<to<<" with "<<announce<<endl;
     	    return 1;
 	}
@@ -25,13 +25,13 @@ int RecallParser::parsedatacheckanswer(ParamMap& data,string& from,string& to,st
 	
 	if(data["UserEvent:"] == "CheckAnswer")
 	{
-    	    from = data["operator:"];
-    	    to = data["recallnum:"];
-    	    channel = data["channel:"];
-    	    callid = data["callid:"];
-    	    dialtime = data["dialtime:"];
-    	    dialargs = data["dialargs:"];
-    	    callernum = data["callernum:"];
+    	    from = data[fieldNameConverter("operator")];
+    	    to = data[fieldNameConverter("recallnum")];
+    	    channel = data[fieldNameConverter("channel")];
+    	    callid = data[fieldNameConverter("callid")];
+    	    dialtime = data[fieldNameConverter("dialtime")];
+    	    dialargs = data[fieldNameConverter("dialargs")];
+    	    callernum = data[fieldNameConverter("callernum")];
     	    
     	    std::cout<<"Start checkanswer "<<from<<" ->"<<to<<" with "<<channel<<endl;
     	    return 1;
@@ -47,6 +47,7 @@ string RecallParser::parsedata(ParamMap& data)
     {
 	if(data["UserEvent:"] == "Recall")
 	{
+	    lm.makeLog(boost::log::trivial::severity_level::info,"RECALL DATA ["+data["operator"]+"] ["+data["operator:"]+"] ["+data["recallnum"]+"] ["+data["recallnum:"]+"]");
     	    request = parse_recallrequest(data["operator"],data["recallnum"]);
 	}
     }

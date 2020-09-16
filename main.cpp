@@ -50,26 +50,25 @@ int main()
 	std::cout<<"ERROR CREATE DButils object\n";
     
     
-    if(DBWorker.getPBXServerId() == "29")
-    {
-	std::cout<<"We set test WSS\n";
-	webservaddr = "wss2test.sipuni.com";
-    }
-    else if(DBWorker.getPBXServerId() == "122" || DBWorker.getPBXServerId() == "243")
+    std::cout<<"Server ID = "<<std::stoi(DBWorker.getPBXServerId())<<"\n";
+    int serverInInt = std::stoi(DBWorker.getPBXServerId());
+//    if( serverInInt >= 122 || serverInInt < 30)
     {
 	std::cout<<"We set test WSS\n";
 	webservaddr = "wss3.sipuni.com";
+    }
+    
+    if(DBWorker.getPBXServerId() == "29")    
+    {
+	std::cout<<"We set test WSS\n";
+	webservaddr = "wss2test.sipuni.com";
     
     }
-    else
-	std::cout<<"We set PROD WSS\n";
     
     int asterVersion = 13;
-    
-    if((DBWorker.getPBXServerId() == "24") || (DBWorker.getPBXServerId() == "25")|| (DBWorker.getPBXServerId() == "26"))
-    {
+    if(DBWorker.getPBXServerId() == "81")
 	asterVersion = 11;
-    }
+    
     
     std::cout<<"We set ASTER version = "<<asterVersion<<"\n";
     
@@ -104,6 +103,7 @@ int main()
     
     RecallManager recallManager;
     RecallParser recall("/IaEQvJmntW/callbackcrm.php?",lm);
+    recall.setAsterVer(asterVersion);
     recallManager.AddParser(&recall);
     
 //    MonitorParser monitorServiceParser("/api/testing/record?callId=",lm);
