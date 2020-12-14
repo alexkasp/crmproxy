@@ -112,13 +112,11 @@ void CallRecord::setPickupNum(string num)
 
 CallRecord::~CallRecord(void)
 {
-	cout<<"CallRecords delete for "<<dst<<endl;
 }
 
 CallRecord::CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string _uid,string _userid,string _srctype,string _dsttype,string _treeid,string _channel,string _calltype):
 	dst(_dst),src(_dst),timestamp(_timestamp),recordfile(_recordfile),uid(_uid),userid(_userid),srctype(_srctype),dsttype(_dsttype),treeid(_treeid),channel(_channel),calltype(_calltype)
 {
-	cout<<"Create Call"<<dst<<endl;
 }
 
 
@@ -135,18 +133,14 @@ int CallRecord::removeNumber(string num)
     if(it!=involvedNumbers.end())
 	involvedNumbers.erase(it);
 
-    //for(it=involvedNumbers.begin();it!=involvedNumbers.end();++it)
-//	std::cout<<"INVOLVED NUMBERS "<<(*it)<<"\n";
     return involvedNumbers.size();
 }
 
 int CallRecord::setRecordFile(string filename,bool forced=false)
 {
-    //std::cout<<"current recordfile = "<<recordfile<<"\n";
     
     if((forced)||(!filename.empty()&&(recordfile.empty())))
     {
-	//std::cout<<"try set recordfile "<<filename<<" for "<<callid<<"\n";
 	recordfile = filename;
 	return 1;
     }
@@ -160,12 +154,6 @@ CallRecords::CallRecords()
 
 void CallRecords::print()
 {
-    boost::mutex::scoped_lock lock(CallLock);
-    for(auto it = callList.begin();it!=callList.end();++it)
-    {
-	//std::cout<<"Current Calls\n";
-	//std::cout<<"callid="<<(it->first)<<"\n";
-    }
 
 }
 
@@ -185,7 +173,6 @@ void CallRecords::addCall(string callid,string src,string dst,string timestamp,s
 	
     CallRecord cr(src,dst,timestamp,recordfile,uidcode,uid,srctype,dsttype,treeid,channel,calltype);
     
-    //std::cout<<"ADD CALL with "<<callid<<" src="<<src<<" dst="<<dst<<" time="<<timestamp<<"\n";
     
     callList[callid] = cr;
 }
@@ -247,9 +234,7 @@ template <typename T>  void Parser::clearStorageAlg(T& storage,string timestamp)
 	    string timestampData = it->first;
 	    if(timestampData<timestamp)
 	    {
-		//std::cout<<"erase "<<(it->first)<<"\n";
 	    	storage.erase(it++);
-	    	//std::cout<<"erase complete\n";
 	    	
 	    }
 	    else
@@ -274,19 +259,16 @@ void Parser::clearStorages()
 	string timestamp;
 	os>>timestamp;
     
-	//std::cout<<"TIMESTAMP="<<timestamp<<"\n";
 	
 	
 	boost::mutex::scoped_lock lock(currentCalls.getLock());
 	clearStorageAlg(currentCalls.getData(),timestamp);
 	lock.unlock();
 	
-	//std::cout<<"get lock clearStorages\n";
 	boost::mutex::scoped_lock lockEvent2Storage(event2storageLock);
 	clearStorageAlg(event2storage,timestamp);
 	//clearStorageAlg(useridToCallId,timestamp);
 	lockEvent2Storage.unlock();
-	//std::cout<<"release lock clearStorages\n";
 	
 //	boost::timed_mutex::scoped_lock& lockEvent2CDRStorage  = getCDRLock();
 	
@@ -299,7 +281,6 @@ void Parser::clearStorages()
 	clearStorageAlg(event2CDRstorage,timestamp);
 	//clearStorageAlg(useridToCallId,timestamp);
 	lockEvent2CDRStorage.unlock();
-	//std::cout<<"release lock clearCDRStorages\n";
 	
 	
 	boost::mutex::scoped_lock lockMergedCalls(mergedCalls.getLock());
@@ -400,7 +381,6 @@ string channel,string roistat,string roistatphone,string roistatmarket,string ro
 	}
 	else
 	{
-	    //std::cout<<"SET RECORDFILE = "<<recordfile<<"instead of "<<call.getrecordfile()<<endl;
 	    call.setRecordFile(recordfile);
 	    
 	    currentCalls.updateCall(callid,call);
@@ -454,7 +434,6 @@ string Parser::parse_webphoneUUID(string src,string dst,string uid,string timest
     request+="&timestamp=";
     request+=timestamp;
     
-    //std::cout<<request<<"\n";
     
     return request;
 
@@ -515,7 +494,6 @@ string Parser::parse_answercall(string src,string dst,string uid,string timestam
 	CallRecord call;
 	if(currentCalls.getCall(callid,call))
 	{
-	    //std::cout<<"ADD pbxdstnum for callid\n";
 	    request+="&pbxdstnum=";
 	    request+=call.getdst();
 	    
@@ -605,7 +583,6 @@ string Parser::parse_hangup(string callid, string peername, string uidcode)
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, 
 string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree,string lastCalled)
 {
-	//std::cout<<"START FINISHCALL\n";
 	string event2store;
 	
 	string request = request_str;
@@ -616,7 +593,6 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	CallRecord call;
 	if(currentCalls.getCall(callid,call))
 	{
-	    //std::cout<<"find call "<<call.getcallid()<<" with time "<<call.gettimestamp()<<"\nand record: "<<call.getrecordfile()<<"\nWas Record file: "<<recordfile<<"\n";
 	    callstart = call.gettimestamp();
 	    if((!(call.getrecordfile()).empty())&&(forcedRecord.empty()))
 		recordfile = call.getrecordfile();
@@ -625,7 +601,6 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	}
 	else
 	{
-	    //std::cout<<"CALLRECORDS NOT FOUND FOR "<<callid<<" EXIT\n";
 	    return "";
 	}
 	
@@ -697,7 +672,6 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	event2store+="&callbackId=";
 	event2store+=callbackId;
 	
-	//std::cout<<"PREPARED EVENT\n"<<event2store<<"\n";
 	
 //	boost::timed_mutex::scoped_lock& lockEvent2CDRStorage  = getCDRLock();
 	
@@ -708,14 +682,11 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	    exit(-1);
 	}
 	
-	//std::cout<<"finishcall process get event2storageLock\n";
 	
 	auto cdrdata = event2CDRstorage.find(callid);
 	
 	boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
 	auto report = reportedCall.find(callid);
-	//if(report!=reportedCall.end())
-	//    std::cout<<"REPORT for "<<callid<<" was sent early\n";
 	    
 	if((cdrdata!=event2CDRstorage.end())&&(!(report!=reportedCall.end())))
 	{
@@ -724,21 +695,18 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	    int involvedNums = call.removeNumber(dst);
 	    if(involvedNums==0)
 	    {
-		//std::cout<<"PREPARED REQUEST=\n"<<(cdrdata->second)<<"\n";
 	        event2store+=cdrdata->second;
 	    
 		
 	        //clearCallEnviroment(callid);
 	        event2CDRstorage.erase(cdrdata);
 	        event2store+="&parsertask=finish";
-	        //std::cout<<"FINISH CALL: ADD REPORTED CALL "<<callid<<"\n";
 	        reportedCall[callid]=request;
 	        
 	        return event2store;
 	    }
 	    else
 	    {
-	        //std::cout<<"finish call, but not last num ("<<involvedNums<<")\n";
 	    }
 	}
 	else
@@ -748,24 +716,16 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	    {
 		//boost::mutex::scoped_lock lockEvent2Storage(event2storageLock);
 		event2storage[callid]=event2store;
-		//std::cout<<"PRINT EVENT2STORAGE\n";
-		//for(auto a = event2storage.begin();a!=event2storage.end();++a)
-		//    std::cout<<"storage "<<(a->first)<<"\n"<<(a->second)<<"\n";
 		return request;
 	    }
 	    else
 	    {
 		//boost::mutex::scoped_lock lockEvent2Storage(event2storageLock);
-		//std::cout<<"finish call no crm for "<<callid<<endl;
 		
 		event2store="nocrm"+event2store;
 		
 		event2storage[callid]=event2store;
 		
-		//std::cout<<"PRINT EVENT2STORAGE\n";
-		//for(auto a = event2storage.begin();a!=event2storage.end();++a)
-		//    std::cout<<"storage "<<(a->first)<<"\n";
-		//std::cout<<"end finishcall no crm for "<<callid<<endl;
 	    }
 	}
 	return "";
@@ -838,7 +798,6 @@ string Parser::parse_changetree(string uid,string callid,string newtree)
     CallRecord call;
     if(currentCalls.getCall(callid,call))
     {
-	//std::cout<<"SetCurrentTreeID\n";
 	call.setCurrentTreeId(newtree);
 	currentCalls.updateCall(callid,call);
 	
@@ -878,24 +837,6 @@ string  Parser::clearStorage(map<string,string>& storage,string key)
 
 void Parser::clearCallEnviroment(string callid)
 {
-/*
-    mergedCalls.eraseMergedCall(callid);
-    
-    clearStorage(event2storage,callid);
-    
-    clearStorage(callbackIdList,callid);
-    
-    currentCalls.removeCall(callid);
-	
-    	
-    //std::cout<<"EVENT2STORAGE SIZE="<<event2storage.size()<<"\n";
-    for(auto it=event2storage.begin();it!=event2storage.end();++it)
-	std::cout<<"even2storage "<<(it->first)<<"\n";
-    std::cout<<"MERGED CALLS SIZE="<<mergedCalls.getSize()<<"\n";
-    mergedCalls.print();
-    std::cout<<"CurrentCalls SIZE="<<currentCalls.size()<<"\n";
-    currentCalls.print();
-*/
 }
 
 int Parser::processTransfer(string callid,string linkedid,string record,string dst)
@@ -944,7 +885,6 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	
 	clearStorage(useridToCallId,callid);
 	
-	//std::cout<<"parse cdr event\n";
 	boost::timed_mutex::scoped_lock lockEvent2CDRStorage(event2CDRstorageLock,boost::get_system_time() + boost::posix_time::milliseconds(20000));
 	if(!lockEvent2CDRStorage)
 	{
@@ -952,9 +892,6 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	    exit(-1);
 	}
 	
-	//std::cout<<"lock accepted\n";
-	//for(auto a = event2storage.begin();a!=event2storage.end();++a)
-	//std::cout<<"storage "<<(a->first)<<"\n";
 	
 	
 	auto it = event2storage.find(callid);
@@ -977,9 +914,7 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	    
 	    event2storage.erase(it);
 	
-	    //std::cout<<"cdr event "<<request<<"\n";
 	    request+="&parsetask=cdrevent";
-	    //std::cout<<"ADD REPORTED CALL "<<callid<<"\n";
 	    reportedCall[callid]=request;
 	    lockReportedCallsStorage.unlock();
 	}
@@ -999,7 +934,6 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	    request="";
 	}
 	
-	//std::cout<<"exir cdr event\n";
 	return request;
 	
 }
@@ -1048,14 +982,11 @@ boost::timed_mutex::scoped_lock&& Parser::getCDRLock()
 */
 string Parser::parse_hangupevent(string callid)
 {
-    //std::cout<<"CLEAR FOR HANGUP["<<callid<<"]\n";
-    //clearCallEnviroment(callid);
     return "";
 }
 
 void Parser::parse_mergecall(string newcallid,string callid)
 {
-    //std::cout<<"merged calls\n";
     mergedCalls.addMergedCall(newcallid,callid);
 }
 
@@ -1070,9 +1001,7 @@ string Parser::parsedata(ParserData& data)
 	for(auto it=data.begin();it!=data.end();++it)
 	{
 	    lm.makeLog(boost::log::trivial::severity_level::info,"DATA "+(it->first)+"  "+(it->second));
-	    std::cout<<"DATA ["<<(it->first)<<"]  ["<<(it->second)<<"]\n";
 	}
-	//std::cout<<"\n\n";
 	
 	string str = "";
 	if(data["Event:"]=="UserEvent")
@@ -1115,7 +1044,6 @@ string Parser::parsedata(ParserData& data)
 			if(!(data[fieldNameConverter("callbackId")]).empty())
 			    callbackIdList[data[fieldNameConverter("callid")]] = data[fieldNameConverter("callbackId")];
 			    
-			//std::cout<<"DEBUG initcall "<<data[fieldNameConverter("src")]<<" "<<data[fieldNameConverter("dst")]<<" "<<data[fieldNameConverter("userid")]<<" "<<data[fieldNameConverter("time")]<<" "<<data[fieldNameConverter("callid")]<<" "<<data[fieldNameConverter("recordfile")]<<" "<<data[fieldNameConverter("usecrm")]<<" "<<data[fieldNameConverter("uidcode")]<<"\n";
 			 str = parse_initcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],
 			 data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")],
 			 data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],
@@ -1137,7 +1065,6 @@ string Parser::parsedata(ParserData& data)
 			int skipfinish = 0;
 			if((0)&&(data[fieldNameConverter("callbacktype")].compare("CallBackTreeReverse")==0))
 			{
-			    //std::cout<<"CALLBACKTREEREVERSE\n";
 			    
 			    CallRecord call;
 			    if(currentCalls.getCall(data[fieldNameConverter("callid")],call))
@@ -1181,9 +1108,6 @@ string Parser::parsedata(ParserData& data)
 			}
 			else if(data[fieldNameConverter("callbacktype")].compare("CallBackReverse")==0)
 			{
-			//    std::string prevcallid = data["callid"];
-			//    data["callid"] = mergedCalls.getParentCall(data["callid"]);
-			//    std::cout<<"PREV CALLID = "<<prevcallid<<" new callid "<<data["callid"]<<"\n";
 			}
 			else if(data[fieldNameConverter("callbacktype")].compare("standart")==0)
 			{
@@ -1258,7 +1182,6 @@ string Parser::parsedata(ParserData& data)
 		{
 		    std::string pickupcmd  = "/var/lib/asterisk/agi-bin/pbxpickupcall.php "+data[fieldNameConverter("channel1")];
 		    pickupcmd += " "+data[fieldNameConverter("channel2")];
-		    //std::cout<<"TRY EXECUTE "<<pickupcmd<<"\n";
 		    system(pickupcmd.c_str());
 		    
 		     
@@ -1322,33 +1245,44 @@ string Parser::parsedata(ParserData& data)
 		{
 		    string tmpTime = "";
 		    
+		    
+		    
 		    if(data[fieldNameConverter("SecondTransfererContext")] == "vatsout")
-				tmpTime = data[fieldNameConverter("TransfereeUniqueid")];
+			tmpTime = data[fieldNameConverter("TransfereeUniqueid")];
+		    else if(data[fieldNameConverter("SecondTransfererContext")] == "channel_hangup")
+		    {
+			tmpTime = data[fieldNameConverter("SecondTransfererLinkedid")];
+		    }
 		    else
 		    {
-				if(!data[fieldNameConverter("LocalOneUniqueid")].empty())
-					tmpTime = data[fieldNameConverter("LocalOneUniqueid")];
-				else
-					tmpTime = data[fieldNameConverter("TransferTargetUniqueid")];
+			if(!data[fieldNameConverter("LocalOneUniqueid")].empty())
+				tmpTime = data[fieldNameConverter("LocalOneUniqueid")];
+			else if(!data[fieldNameConverter("TransferTargetUniqueid")].empty())
+				tmpTime = data[fieldNameConverter("TransferTargetUniqueid")];
+			else if(!data[fieldNameConverter("SecondTransfererLinkedid")].empty())
+				tmpTime = data[fieldNameConverter("SecondTransfererLinkedid")];
 		    }	
-		    std::vector<std::string> lines;
-		    boost::iter_split(lines, tmpTime, boost::algorithm::first_finder("."));
-		    string time = *(lines.begin());
-		 
-		    str = parse_attendedTransfer(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("TransfereeCallerIDNum:")],data[fieldNameConverter("TransferTargetAccountCode:")]);
-		
+		    if(!tmpTime.empty())
 		    {
-			DBWorker->registerNode(callid,time,call.getTreeId(),answernum);
-		    }    
+			std::vector<std::string> lines;
+			boost::iter_split(lines, tmpTime, boost::algorithm::first_finder("."));
+			string time = *(lines.begin());
+		
+			str = parse_attendedTransfer(data[fieldNameConverter("TransferTargetLinkedid:")],data[fieldNameConverter("TransfereeCallerIDNum:")],data[fieldNameConverter("TransferTargetAccountCode:")]);
+		
+			{
+			    DBWorker->registerNode(callid,time,call.getTreeId(),answernum);
+			}
+		    }
+		    
+		        
 		}
 	    }
 	}
 	else if(data["Event:"] == "BlindTransfer")
 	{
-	    std::cout<<"Blind TRansfer Processing...\n";
 	    if(data[fieldNameConverter("Result:")] == "Success")
 	    {
-		std::cout<<"Success result go...\n";
 		CallRecord call;
 		string callid = data[fieldNameConverter("TransfereeLinkedid")];
 		string caller = data[fieldNameConverter("TransfereeConnectedLineNum")];
@@ -1357,7 +1291,6 @@ string Parser::parsedata(ParserData& data)
 		string tmpTime = callid;
 		
 		
-		std::cout<<"Data for send callid = "<<callid<<" caller = "<<" userId = "<<userId<<"\n";
 		str = parse_attendedTransfer(callid,caller,userId);
 		
 		if((answernum != "<unknown>")&&(currentCalls.getCall(callid,call)))
@@ -1379,18 +1312,15 @@ string Parser::parsedata(ParserData& data)
 	}
 	else if(data["Event:"] == "AgentCalled")
 	{
-		//std::cout<<"AGENT CALLED\n\n\n";
 	    	string request = request_str;
 		CallRecord call;
 		string callid = data[fieldNameConverter("Linkedid:")];
 		if(currentCalls.getCall(callid,call))
 		{
-		    //std::cout<<"FIND CALL\n";
 		    string treeid = call.getCurrentTreeId();
 		    if(treeid.empty())
 		    {
 			lm.makeLog(boost::log::trivial::severity_level::info,"new tree empty");
-			//std::cout<<"newtree EMPTY\n";
 			treeid=call.getTreeId();
 		    }
 		    data[fieldNameConverter("TreeId")] = treeid;
@@ -1416,8 +1346,6 @@ string Parser::parsedata(ParserData& data)
 			str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid());
 		
 		}
-		//else
-		//    std::cout<<"NO CALL FOUND\n";
 	}
 	else if(data["Event:"] == "Cdr")
 	{

@@ -36,7 +36,6 @@ void WSSMonitor::Check()
     while(1)
     {
 	boost::this_thread::sleep( boost::posix_time::milliseconds(10000));
-	std::cout<<"Make check\n";
 	
 	vector<CDRReport> reports;
 	db.getCDRReports(reports,"1");
@@ -44,7 +43,6 @@ void WSSMonitor::Check()
 	for(auto x=reports.begin();x!=reports.end();++x)
 	{
 	    CDRReport tmp = (*x);
-	    std::cout<<"["<<tmp.origcallid<<"] ["<<tmp.callid<<"]  ["<<tmp.request<<"] ["<<tmp.responce<<"] ["<<tmp.uniqueid<<"] ["<<tmp.type<<"]\n";
 	//we do not have crmreport for all pbx
 	    //if((tmp.request=="NULL")&&(tmp.callid!="NULL"))
 	//	WeHaveCDRButNotSendEvent(tmp.origcallid,tmp.callid);

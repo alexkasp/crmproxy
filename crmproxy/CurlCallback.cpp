@@ -2,6 +2,7 @@
 
 size_t CurlCallback::callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
+
   int answerSize = size*nmemb;
     callbackParam *cbp = (callbackParam*)userdata;
     DButils* db = (DButils*)(cbp)->db;
@@ -9,7 +10,7 @@ size_t CurlCallback::callback(char *ptr, size_t size, size_t nmemb, void *userda
     string callid = (cbp)->callid;
     string requestId = (cbp)->requestId;
     delete cbp;
-
+std::cout<<"Callback start\n";
     if(db==NULL)
         return answerSize;
 
@@ -44,7 +45,10 @@ size_t CurlCallback::callback(char *ptr, size_t size, size_t nmemb, void *userda
         }
 
         if(lm!=NULL)
+        {
             lm->makeLog(info,"ANSWER DATA "+answerData);
+            }
+            
         db->completeEventReportEntry(requestId,responceId,answerData);
     }
     else

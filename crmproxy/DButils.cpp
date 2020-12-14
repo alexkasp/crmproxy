@@ -16,7 +16,6 @@ int DButils::registerNode(string callid,string time, string treeid, string answe
       cout<<"ERROR GET DB LOCK in dbutils PutRegisterevent\n";
       return 0;
   }
-  cout<<"LOCK ACCEPTED\n";
   mysqlpp::Query query = conn->query("insert into CallRun(nodeid,nodetype,uniqueid,time,treeid,answernum) values(0,100,'%0',UNIX_TIMESTAMP(Now())-'%1',%2,'%3')");
   query.parse();
  
@@ -30,8 +29,6 @@ int DButils::registerNode(string callid,string time, string treeid, string answe
   {
      cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
   }
-  else
-       cout <<"PUTREGISTER EVENT"<<endl;
                                                                                  
 }
 
@@ -43,7 +40,6 @@ int DButils::updateNode(string callid,string curnode,string answernum)
       cout<<"ERROR GET DB LOCK in dbutils PutRegisterevent\n";
       return 0;
   }
-  cout<<"LOCK ACCEPTED\n";
   mysqlpp::Query query = conn->query("update CallRun set answernum = '%0' where uniqueid = '%1' and nodeid = %2 and nodetype = 100 order by id DESC limit 1;");
   query.parse();
  
@@ -56,8 +52,6 @@ int DButils::updateNode(string callid,string curnode,string answernum)
   {
      cout << "DB connection failed: " << conn->error()<< query.str() << "\n" << endl;
   }
-  else
-       cout <<"UPDATE EVENT"<<endl;
                                                                                  
 }
 
@@ -86,22 +80,18 @@ int DButils::getAuthParams(string filename)
 	    if(param == getHostParamName())
 	    {
 		host = value;
-//		std::cout<<"get host "<<host<<"\n";
 	    }
 	    else if(param == getPassParamName())
 	    {
 		pass = value;
-//		std::cout<<"get pass "<<pass<<"\n";
 	    }
 	    else if(param == getUserParamName())
 	    {
 		login = value;
-//		std::cout<<"get login "<<login<<"\n";
 	    }
 	    else if(param == getDBParamName())
 	    {
 		db=value;
-//		std::cout<<"get db "<<db<<"\n";
 	    }
 	    else if(param == "extregServerID")
 	    {	
@@ -185,7 +175,6 @@ int DButils::getUidList(map<string,string>& uidToUserId)
         cout<<"ERROR GET DB LOCK in dbutils getUidList\n";
         return 0;
     }
-    cout<<"LOCK ACCEPTED\n";
     
     mysqlpp::Query query = conn->query("select id,uid from UserConfig");
         
@@ -209,9 +198,6 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
         cout<<"ERROR GET DB LOCK in dbutils addSendEventReportEntry\n";
         return;
     }
-    cout<<"LOCK ACCEPTED\n";
-    std::cout<<"START addSendEventReportEntry\n";
-    std::cout<<"addSendEventReportEntry\n";
     
     if(callid.empty())
 	callid="empty";
@@ -256,7 +242,6 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
            std::cout << "callid = " << callid << " request = "<< request << " ats = " << ats << " userid = " << userid << " type = "<<type<<"\n send data \n"<<sendData<<"\n";
              }
     
-    cout<<"END "<<callid<<"  addSendEventReportEntry\n";         
     return;
 }
 
@@ -269,13 +254,11 @@ void DButils::completeEventReportEntry(string callid,string responce,string answ
         cout<<"ERROR GET DB LOCK in dbutils completeEventReportEntry\n";
         return;
     }
-    cout<<"LOCK ACCEPTED\n";
      if(responce.empty())
         responce="empty";
     if(answerData.empty())
 	answerData = "empty";
 
-     std::cout<<"completeEventReportEntry\n";
      
     try
     { 
@@ -304,7 +287,6 @@ void DButils::getCDRReports(vector<CDRReport>& reports,string period)
         cout<<"ERROR GET DB LOCK in dbutils getCDRReport\n";
         return;
     }
-    cout<<"LOCK ACCEPTED\n";
 
     try{
 	         
@@ -366,7 +348,6 @@ void DButils::getCDR(string uniqueid,map<string,string>& data)
         cout<<"ERROR GET DB LOCK in dbutils getCDR\n";
         return;
     }
-    cout<<"LOCK ACCEPTED\n";    
     mysqlpp::Query query = conn->query();
     
 //    query << "select label,raiting,newstatus,crmcall from additionaldata where uniqueid='"<<uniqueid<<"'";
@@ -389,7 +370,6 @@ void DButils::getCDR(string uniqueid,map<string,string>& data)
 	}	 
 */     
         query << "select isblock from records where callid='"<<uniqueid<<"'";
-	std::cout<<query.str();
     
 	if (mysqlpp::StoreQueryResult res = query.store()) 
         {
@@ -415,9 +395,7 @@ void DButils::putCDR(map<string,string>& data)
         cout<<"ERROR GET DB LOCK in dbutils putCDR\n";
         return;
     }
-    cout<<"LOCK ACCEPTED\n";
     
-    std::cout<<"make query\n";
     mysqlpp::Query query = conn->query();
     
     string treeId = data["TreeId"];
@@ -427,7 +405,6 @@ void DButils::putCDR(map<string,string>& data)
     string dst = data["dst_num"];
     if(dst.empty())
     {
-	std::cout<<"dst empty\n";
     	dst = data["destination"];
     }
     
@@ -440,12 +417,10 @@ void DButils::putCDR(map<string,string>& data)
     query<<"insert into callstat(calldate,src,dst,duration,billsec,disposition,uniqueid,numrecords,recordName,numnodes,answertime,treeId,from2,to2,userId,directProcess) values(Now(),"<<
     "'"<<data["src_num"]<<"','"<<dst<<"',"<<data["duration"]<<","<<data["billableseconds"]<<",'"<<status<<"','"<<data["call_id"]<<"',"<<numRecords<<",'"<<data["recordname"]<<"',6"<<",0,"<<treeId<<",'"<<data["src_num"]<<"','"<<dst<<"',"<<data["userId"]<<",1)";
     
-    std::cout<<query.str()<<"\n";
     
     query.execute();
      if (mysqlpp::StoreQueryResult res = query.store()) 
          {
-              std::cout<<"success query\n";
                   }
                   
                       else 
@@ -463,7 +438,6 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
         cout<<"ERROR GET DB LOCK in dbutils getCallDAta\n";
         return 0;
     }
-    cout<<"LOCK ACCEPTED\n";    
     map<string,map<string,string>> callsWithDate;
     
 
@@ -480,7 +454,6 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
     
     string queryStringPrepared = queryStr.str();
     
-    std::cout<<"getCallData v 1.1 "<<queryStringPrepared<<"\n";
     
     mysqlpp::Query query = conn->query(queryStringPrepared);
         
@@ -491,7 +464,6 @@ int DButils::getCallData(string userId,string clientNum,string& operatorNum)
     	    
     	    mysqlpp::Row row = *it;
     	    
-    	    std::cout<<row[0].data()<<"//"<<row[1].data()<<"//"<<row[2].data()<<"\n";
     	    if(strcmp(row[2].data(),"out")==0)
     	    {
     		operatorNum = row[0].data();
@@ -524,12 +496,10 @@ int DButils::getIncomeCallData(string uniqueid,string userId,string& operatorNum
         cout<<"ERROR GET DB LOCK in dbutils getIncomeCalldata\n";
         exit(-1);
     }*/
-    cout<<"LOCK ACCEPTED\n";
     stringstream ss;
     ss<<"select answernum from CallRun where uniqueid='"<<uniqueid<<"' and ( nodetype=0 and 100 in (select nodetype from callrun where uniqueid = '"<<uniqueid<<"') or nodetype=111) order by time DESC";
     
     
-    std::cout<<" getIncomeCallData "<<(ss.str())<<"\n";
     mysqlpp::Query query = conn->query(ss.str());
         
      if (mysqlpp::StoreQueryResult res = query.store()) 
@@ -543,11 +513,9 @@ int DButils::getIncomeCallData(string uniqueid,string userId,string& operatorNum
     		return 1;
     	    }
         }
-        std::cout<<"getIncomeCallData return "<<uniqueid<<" not found\n";
          return 0;
      }
      
-     std::cout<<"getIncomeCallData return "<<uniqueid<<" query error\n";
      return 0;
 
 
@@ -561,10 +529,8 @@ int DButils::getTestResult(string testid,string callid,vector<TestResult>& resul
         cout<<"ERROR GET DB LOCK in dbutils getCRMUsers\n";
         return 0;
     }
-    cout<<"LOCK ACCEPTED getTestResult v.1\n";
     string querystr = "select time,nodetype from CallRun where uniqueid = '"+callid+"'";
     mysqlpp::Query query = conn->query(querystr);
-    cout <<querystr<<"\n"<< query<<"\n";
      
     try{ 
         if (mysqlpp::StoreQueryResult res = query.store()) 
@@ -574,7 +540,6 @@ int DButils::getTestResult(string testid,string callid,vector<TestResult>& resul
     		mysqlpp::Row row = *it;
     		TestResult tr;
     	    
-    		std::cout<<"getTestResult "<<row[0].data()<<"  "<<row[1].data()<<std::endl;
     	    
     		tr.time = row[0];
     		tr.nodetype = row[1];
@@ -598,7 +563,6 @@ int DButils::getTestResult(string testid,string callid,vector<TestResult>& resul
      
      querystr = "select time,nodetype,timediffallow,checkaction from testcheck where testid = "+testid;
      mysqlpp::Query queryResult = conn->query(querystr);
-     cout <<querystr<<"\n"<< queryResult<<"\n";
      try
      {
         if (mysqlpp::StoreQueryResult res = queryResult.store()) 
@@ -615,7 +579,6 @@ int DButils::getTestResult(string testid,string callid,vector<TestResult>& resul
     	    
     		etalon.push_back(tt);
     	    
-    		std::cout<<"getTestEtalon "<<row[0].data()<<"  "<<row[1].data()<<std::endl;
     	    }
         }
         else
@@ -641,10 +604,8 @@ int DButils::getTestById(string testid,string& from,string& to)
         cout<<"ERROR GET DB LOCK in dbutils getCRMUsers\n";
         return 0;
     }
-    cout<<"LOCK ACCEPTED getTestById v.1\n";
     string querystr = "select treeA,treeB from testlist where id = "+testid;//+testid;
     mysqlpp::Query query = conn->query(querystr);
-     cout <<querystr<<"\n"<< query<<"\n";
      
      if (mysqlpp::StoreQueryResult res = query.store()) 
      {
@@ -654,7 +615,6 @@ int DButils::getTestById(string testid,string& from,string& to)
     	    from = row[0].data();
     	    to = row[0].data();
     	    
-    	    std::cout<<"getTestById "<<row[0].data()<<"  "<<row[1].data()<<std::endl;
         }
          return 1;
      }
@@ -672,8 +632,6 @@ int DButils::getCrmUsers(map<string,int>& users)
         cout<<"ERROR GET DB LOCK in dbutils getCRMUsers\n";
         return 0;
     }
-    cout<<"LOCK ACCEPTED\n";    
-    std::cout<<"getCrmUsers"<<std::endl;
     mysqlpp::Query query = conn->query("select id from UserConfig where usecrm=1");
         
      if (mysqlpp::StoreQueryResult res = query.store()) 
@@ -683,7 +641,6 @@ int DButils::getCrmUsers(map<string,int>& users)
     	    mysqlpp::Row row = *it;
     	    users[row[0].data()]=1;
     	    
-    	    std::cout<<"getCrmUsers "<<row[0].data()<<" = 1"<<std::endl;
         }
          return 1;
      }
@@ -700,7 +657,6 @@ void DButils::PutRegisterEvent(string id,string number,string status,string addr
         cout<<"ERROR GET DB LOCK in dbutils PutRegisterevent\n";
         return;
     }
-    cout<<"LOCK ACCEPTED\n";
      mysqlpp::Query query = conn->query("insert into RegisterEvents(eventtime,number,status,uid,address) values(Now(),'%0','%1',%2,'%3')");
      query.parse();
      mysqlpp::SQLQueryParms parms;
@@ -717,8 +673,6 @@ void DButils::PutRegisterEvent(string id,string number,string status,string addr
 		            //    exit(0);
 	                
     }
-    else
-	cout <<"PUTREGISTER EVENT"<<endl;
 }
 
 void DButils::addUidToMap(map<string,string>& storage,mysqlpp::StoreQueryResult::const_iterator it)
@@ -740,7 +694,6 @@ int DButils::getUid(map<string,string>& uidToUserId,string uid,string& id)
         cout<<"ERROR GET DB LOCK in dbutils getUid\n";
         return 0;
     }
-    cout<<"LOCK ACCEPTED\n";    
     mysqlpp::Query query = conn->query("select id,uid from UserConfig where uid="+uid);
     
      if (mysqlpp::StoreQueryResult res = query.store()) 
@@ -794,7 +747,6 @@ int DButils::parse(string msg,string delimiter,string& param,string& value)
         return 1;	
 		
     }
-//    std::cout<<"in message \'"<<msg<<"\' we did not fine delimiter \'"<<delimiter<<"\'\n";
     return 0;
 }
 
@@ -802,16 +754,13 @@ int DButils::parseParam(string msg,string& param,string& value)
 {
     if(parse(msg,delimiter,param,value))
     {
-        std::cout<<"param = "<<param<<" value "<<value<<"\n";
         string tmpparam;
         if((parse(param,vardelimiter, tmpparam,param))/*&&(value.length()>3)*/)
         {
-    	    std::cout<<"VALUE prepare "<<value<<"\n";
     	    if(value[0] == '\'')
     		value = value.substr(VALUEPREFIXLENGTH,value.length()-VALUEPOSTFIXLENGTH);
     	    else
     		value = value.substr(0,value.length()-INTVALUEPOSTFIXLENGTH);	
-            std::cout<<"VALUE post ["<<value<<"]\n";
             return 1;
         }
     }

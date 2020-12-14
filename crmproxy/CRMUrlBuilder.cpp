@@ -37,7 +37,6 @@ int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
         std::vector<std::string> lines;
         boost::algorithm::split(lines, url, boost::is_any_of("?"));
         
-        //std::cout<<"processURL "<<url<<endl;
         
         if(lines.size()==2)
         {
@@ -50,13 +49,11 @@ int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
                 size_t pos = 0;
                 if((pos = data.find(delimiter))!= std::string::npos)
                 {
-            	    //std::cout<<"processURL split params "<<data<<std::endl;
             	    
                     std::string param = data.substr(0, pos);
                     data.erase(0, pos + delimiter.length());
                     std::string value=data;
                     CDRData[param] = value;
-                    //std::cout<<"processURL split params complete"<<param<<" = "<<value<<std::endl;
                 }
                 
             }
@@ -65,7 +62,6 @@ int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
         }
     } catch (exception& e) {
         string errmsg = "ICM parse URL error "+url;
-        //lm.makeLog(boost::log::trivial::severity_level::error,errmsg+e.what());
 	std::cout<<errmsg<<" "<<e.what()<<"\n";
     }
     
@@ -95,17 +91,12 @@ int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
     		    if(db!=NULL)
     			db->addSendEventReportEntry(data["call_id"],data["requestId"],data["serverId"],data["userId"],"2",request);
     		    
-    		    std::cout<<"sendRequestAndStore\n";
     		    sendRequestAndStore(request,data["requestId"],data["call_id"]);
-    		    std::cout<<"END sendRequestAndstore\n";
 		}
-		std::cout<<"check icm and run\n";
 		if(icm!=NULL)
 		    icm->putCDREvent(data);
-		std::cout<<"check cdr and run\n";
         	if(cdr!=NULL)
         	    cdr->processCDR(data);
-        	std::cout<<"complete makeAction "<<data["requestId"]<<"\n";
             }
             return 1;
         }
@@ -138,11 +129,10 @@ void CRMUrlBuilder::sendRequestAndStore(string url,string requestId,string calli
                 data. */
     string curlBaseUrl = "http://"+server+":"+port+url;
     
-    std::cout<<"curlBaseUrl "<<curlBaseUrl<<"\n";
     
     curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
 
-
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 3);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
     callbackParam* sendParam =new callbackParam(db,requestId,callid,lm);
@@ -152,13 +142,16 @@ void CRMUrlBuilder::sendRequestAndStore(string url,string requestId,string calli
 
      /* Perform the request, res will get the return code */
       res = curl_easy_perform(curl);
+      
      /* Check for errors */
       if(res != CURLE_OK)
-         fprintf(stderr, "curl_easy_perform() failed: %s\n",
-      curl_easy_strerror(res));
+      {
+    	    std::string errorStr = curl_easy_strerror(res);
+           lm->makeLog(info,"ERROR send  "+errorStr);
+      }
+
       curl_easy_cleanup(curl);
     }
-    std::cout<<"send url complete\n";
 }
 
 

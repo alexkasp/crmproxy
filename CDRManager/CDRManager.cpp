@@ -69,9 +69,6 @@ CDRManager::CDRManager(LoggerModule& _lm,string webserver,string port,string _ba
     
     ep = *iter;
     
-    std::cout << ep.address().to_string() << std::endl;
-    
-    
 //    boost::thread t(boost::bind(&CDRManager::keepAlive,this));
 //    t.detach();
 }
@@ -107,7 +104,6 @@ void CDRManager::addInvolvedNums(map<string,string>& data)
     string callid = data["call_id"];
     string answeredNum = data["dst_num"];
     
-    std::cout<<"Add involved num for "<<callid<<" "<<answeredNum<<"\n";
 
     auto x = involvedNums.find(callid);
     if(x!=involvedNums.end())
@@ -200,20 +196,10 @@ void CDRManager::putCDR(map<string,string> data)
     string recordName = data["call_record_link"];
     int numRecords = !(recordName.empty());
 
-/*
-    for(auto x=involvedNums.begin();x!=involvedNums.end();++x)
-    {
-    	std::cout<<(x->first)<<"\n";
-    	
-    	for(auto nums=(x->second).begin();nums!=(x->second).end();++nums)
-    	    std::cout<<(*nums)<<"\n";
-    }
-    */
     string answeredNums = "";
     auto x = involvedNums.find(callid);
     if(x!=involvedNums.end())
     {
-	//std::cout<<"start calculate answerednums\n";
 	vector<string>& nums = x->second;
 	string tmpanswernum = "";
 	for(auto num=nums.begin();num!=nums.end();++num)
@@ -221,7 +207,6 @@ void CDRManager::putCDR(map<string,string> data)
 	    answeredNums+=(*num);
 	    answeredNums+=",";
 	    lm.makeLog(info,"PREPARE ANSWERED NUMS"+answeredNums);
-	    std::cout<<answeredNums<<"\n";
 	//    if(tmpanswernum.empty())
 		tmpanswernum = (*num);
 	}
@@ -232,7 +217,6 @@ void CDRManager::putCDR(map<string,string> data)
 	involvedNums.erase(x);
     }
 	
-//	std::cout<<"Stop process involvedNums\n";
     
     string status = data["status"];
     
@@ -371,7 +355,7 @@ void CDRManager::sendJsonRequest(string url,string requestId,string callid)
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 3);    
     
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, curlUrl.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cdr_write_callback);
@@ -383,10 +367,13 @@ void CDRManager::sendJsonRequest(string url,string requestId,string callid)
     lm.makeLog(info,"SEND COMPLETE!");                             
      /* Perform the request, res will get the return code */ 
       res = curl_easy_perform(curl);
-     /* Check for errors */ 
+     /* Check for errors */
       if(res != CURLE_OK)
-         fprintf(stderr, "curl_easy_perform() failed: %s\n",
-      curl_easy_strerror(res));
+      {
+      std::string errorStr = curl_easy_strerror(res);
+      lm.makeLog(info,"ERROR send  "+errorStr);
+                       }
+                       
       curl_easy_cleanup(curl);
     }
     lm.makeLog(info,"send url complete");
@@ -444,11 +431,9 @@ void CDRManager::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf,
     
 	    buf.consume(size);
     	    lm.makeLog(info,"[CDRManager]:\n"+str);
-	    std::cout<<str<<"\n";
 	}
 	else
 	{
-	    std::cout<<ec.category().name() << ':' << ec.value();
     	    string errmsg = ec.category().name() + ec.value();
     	    lm.makeLog(boost::log::trivial::severity_level::error,"NetWork ERROR: "+errmsg);
 	    

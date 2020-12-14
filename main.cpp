@@ -31,11 +31,8 @@ int main()
 {
 
 
-    //string webservaddr = "212.193.100.104";
-    string webservaddr = "wss.sipuni.com";
-//  string webservaddr = "212.193.100.122";
-//    string webservaddr = "178.124.128.205";
-//    string webservaddr = "wss2test.sipuni.com";
+//    string webservaddr = "wss.sipuni.com";
+    string webservaddr = "crmstat.sipuni.com";
     cout<<"CDR by NET version 4.4(DB lock withou exit)\n";
     
     LoggerModule lm;
@@ -52,19 +49,19 @@ int main()
     
     std::cout<<"Server ID = "<<std::stoi(DBWorker.getPBXServerId())<<"\n";
     int serverInInt = std::stoi(DBWorker.getPBXServerId());
-//    if( serverInInt >= 122 || serverInInt < 30)
+/*    if( serverInInt >= 122)
     {
 	std::cout<<"We set test WSS\n";
 	webservaddr = "wss3.sipuni.com";
     }
-    
-    if(DBWorker.getPBXServerId() == "29")    
+*/    
+/*    if(DBWorker.getPBXServerId() == "29")    
     {
 	std::cout<<"We set test WSS\n";
 	webservaddr = "wss2test.sipuni.com";
     
     }
-    
+*/    
     int asterVersion = 13;
     if(DBWorker.getPBXServerId() == "81")
 	asterVersion = 11;
@@ -83,14 +80,14 @@ int main()
     
     std::cout<<"webservaddr="<<webservaddr<<"\n";
     
-    CDRManager cdr(lm,webservaddr,"80","http://"+webservaddr+":9104","/ext/keepalive",DBWorker);
-//    CDRManager cdr(lm,"127.0.0.1","80","/IaEQvJmntW/autocall.php","/ext/keepalive");
+//    CDRManager cdr(lm,webservaddr,"80","http://"+webservaddr+":9104","/ext/keepalive",DBWorker);
+CDRManager cdr(lm,webservaddr,"80","http://"+webservaddr+":80","/ext/keepalive",DBWorker);
     
     
     EventReader reader("127.0.0.1",5038,lm);
     
-    CRMUrlBuilder sender(webservaddr,"9102",&DBWorker,&icm,&cdr/*NULL*/);
-    //Parser newParser("/ext/crm_api/pbxCrmGatewayHandler?userId=",lm);
+//    CRMUrlBuilder sender(webservaddr,"9102",&DBWorker,&icm,&cdr/*NULL*/);
+CRMUrlBuilder sender(webservaddr,"80",&DBWorker,&icm,&cdr,&lm);
     Parser newParser("/?userId=",lm);
     newParser.addDBWorker(&DBWorker);
     newParser.setAsterVer(asterVersion);

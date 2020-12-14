@@ -33,7 +33,7 @@ EventReader::~EventReader(void)
 
 int EventReader::startProcessing(std::string str)
 {
-    lm.makeLog(info,"GET BUFFER, START PARSE\n["+str+"]\n");
+//    lm.makeLog(info,"GET BUFFER, START PARSE\n["+str+"]\n");
     try
         {
 	    lm.makeLog(info,"AMI:\n ["+(str)+"]");
@@ -70,7 +70,6 @@ void EventReader::read_handler(boost::shared_ptr<boost::asio::streambuf> databuf
 	else
 	{
 	    
-	    //std::cout<<ec.category().name() << ':' << ec.value();
 	    
 	    string errmsg = ec.category().name() + ec.value();
 	    lm.makeLog(boost::log::trivial::severity_level::error,"NetWork ERROR: "+errmsg);
@@ -94,7 +93,10 @@ void EventReader::readRequest()
     while(1)
     {
 	std::string data;
-	size_t n = boost::asio::read_until(_sock,boost::asio::dynamic_buffer(data), "\r\n\r\n");
+	boost::system::error_code ec;
+	size_t n = boost::asio::read_until(_sock,boost::asio::dynamic_buffer(data), "\r\n\r\n",ec);
+	if(n > 0)
+	{
 	std::string line = data.substr(0, n-DELIMITER_LENGTH);
 	line = prev+line;
 	
@@ -103,6 +105,11 @@ void EventReader::readRequest()
 	tgroup.add_thread(&t);
 	t.detach();
 	data.erase(0, n);
+	}
+	else
+	{
+	    sleep(1);
+	}
     }
 }
 
@@ -115,8 +122,9 @@ int EventReader::start(void)
 	
 	
 	while(1)
-	{
+	{	
 		readRequest();
+		lm.makeLog(info,"Start reconnect");
 		service.run();
 		lm.makeLog(boost::log::trivial::severity_level::error,"Disconnect from ATS");
 		//tgroup.join_all();
@@ -235,7 +243,6 @@ int EventReader::AddParam(std::string data, ParamMap& eventdata)
 	}
 	
 	eventdata[key]=value;
-//	cout << "receive:"<<key<<value<<endl;
 	return 0;
 }
 

@@ -21,14 +21,10 @@ int RecallManager::makeAction(ParamMap data,IParser* iparser)
     
     if(parser->parsedata(data,from,to,announce))
     {
-	std::cout<<"START CALLING "<<from<<" "<<to<<" "<<announce<<std::endl;
-	
         boost::thread(boost::bind(&RecallManager::callWithPause,this,from,to,announce));
     }
     else if(parser->parsedatacheckanswer(data,from,to,channel,callernum,callid,dialtime,dialargs))
     {
-	std::cout<<"START CHECKASNWER "<<from<<" "<<to<<" "<<announce<<std::endl;
-	
         boost::thread t(boost::thread(boost::bind(&RecallManager::callCheckAnswer,this,from,to,channel,callernum,callid,dialtime,dialargs)));
         tgroup.add_thread(&t);
         t.detach();
