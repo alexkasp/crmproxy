@@ -310,6 +310,7 @@ void CDRManager::sendCurlRequest(string url,string requestId)
     lm.makeLog(info,"curlBaseUrl "+curlBaseUrl);
     
     curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
     /* Now specify the POST data */ 
     string curlUrl = "params="+url;
     
@@ -355,8 +356,8 @@ void CDRManager::sendJsonRequest(string url,string requestId,string callid)
     headers = curl_slist_append(headers, "Accept: application/json");
     headers = curl_slist_append(headers, "Content-Type: application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 3);    
-    
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 5000);    
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, curlUrl.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cdr_write_callback);
     

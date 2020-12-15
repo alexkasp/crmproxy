@@ -10,7 +10,6 @@ size_t CurlCallback::callback(char *ptr, size_t size, size_t nmemb, void *userda
     string callid = (cbp)->callid;
     string requestId = (cbp)->requestId;
     delete cbp;
-std::cout<<"Callback start\n";
     if(db==NULL)
         return answerSize;
 

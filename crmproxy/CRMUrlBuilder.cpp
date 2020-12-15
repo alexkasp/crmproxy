@@ -17,7 +17,7 @@ CRMUrlBuilder::CRMUrlBuilder(string webserver,string _port,DButils* _db,ICMServe
     std::cout << ep.address().to_string() << std::endl;
     db = _db;
     
-    
+    curl_global_init(CURL_GLOBAL_ALL);    
     
 };
 
@@ -129,12 +129,12 @@ void CRMUrlBuilder::sendRequestAndStore(string url,string requestId,string calli
                 data. */
     string curlBaseUrl = "http://"+server+":"+port+url;
     
-    
+    lm->makeLog(info,"Ready to send  ["+url+"]");
     curl_easy_setopt(curl, CURLOPT_URL,curlBaseUrl.c_str());
 
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 3);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 5000);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-
+    curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
     callbackParam* sendParam =new callbackParam(db,requestId,callid,lm);
 
 
