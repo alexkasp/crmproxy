@@ -108,7 +108,7 @@ void EventReader::readRequest()
 	}
 	else
 	{
-	    sleep(1);
+	    return;
 	}
     }
 }
@@ -117,27 +117,23 @@ int EventReader::start(void)
 {
 
 	
-	
 	connect(_sock,ep);
 	
-	
 	while(1)
-	{	
+	{	
 		readRequest();
 		lm.makeLog(info,"Start reconnect");
 		service.run();
 		lm.makeLog(boost::log::trivial::severity_level::error,"Disconnect from ATS");
-		//tgroup.join_all();
 		lm.makeLog(info,"Start reconnect");
-			
 		while(!connect(_sock,ep))
 		{
 			boost::this_thread::sleep_for(boost::chrono::milliseconds(10000));
 		}
+		
 		lm.makeLog(info,"Reconnect SUCCESS");
 		service.reset();
 	}
-		
 	_sock.write_some(buffer("Action: Events\nEventmask: off\n"));
 	_sock.write_some(buffer("Action: logoff\n"));
 	_sock.close();

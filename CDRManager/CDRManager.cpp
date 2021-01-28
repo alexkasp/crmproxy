@@ -132,6 +132,7 @@ void CDRManager::putCDR(map<string,string> data)
 	    treeId="0";
     }
     string src = data["src_num"];
+    
     //if(data["calltype"]=="out")
 //	src = data["dst_num"];
     
@@ -183,7 +184,7 @@ void CDRManager::putCDR(map<string,string> data)
 	else if((src.length()>11) && (src.substr(0,3)=="100"))
 	{
 	    src = src.substr(3, string::npos);
-	    src = "8"+dst;
+	    src = "8"+src;
 	}
     if((dst.length()>11)&&(dst.substr(0,3)=="100") && dst.find("_id") == std::string::npos)
 	{
