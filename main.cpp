@@ -55,13 +55,13 @@ int main()
 	webservaddr = "wss3.sipuni.com";
     }
 */    
-/*    if(DBWorker.getPBXServerId() == "29")    
+    if(DBWorker.getPBXServerId() == "29")    
     {
 	std::cout<<"We set test WSS\n";
 	webservaddr = "wss2test.sipuni.com";
     
     }
-*/    
+    
     int asterVersion = 13;
     if(DBWorker.getPBXServerId() == "81")
 	asterVersion = 11;

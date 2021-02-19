@@ -147,7 +147,7 @@ void CRMUrlBuilder::sendRequestAndStore(string url,string requestId,string calli
       if(res != CURLE_OK)
       {
     	    std::string errorStr = curl_easy_strerror(res);
-           lm->makeLog(info,"ERROR send  "+errorStr);
+           lm->makeLog(info,"ERROR send  "+callid+"\n"+errorStr);
       }
 
       curl_easy_cleanup(curl);

@@ -95,7 +95,7 @@ void EventReader::readRequest()
 	std::string data;
 	boost::system::error_code ec;
 	size_t n = boost::asio::read_until(_sock,boost::asio::dynamic_buffer(data), "\r\n\r\n",ec);
-	if(n > 0)
+	if(n > 0 && !ec)
 	{
 	std::string line = data.substr(0, n-DELIMITER_LENGTH);
 	line = prev+line;
