@@ -599,11 +599,11 @@ string callbackId,string treeid, string channel,string serverId,string recordfil
 	    src_type = call.getsrctype();
 	    dst_type = call.getdsttype();
 	}
-	else
+/*	else
 	{
 	    return "";
 	}
-	
+*/	
 	if(!forcedRecord.empty())
 	    recordfile = forcedRecord;
 	    
