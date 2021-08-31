@@ -63,8 +63,8 @@ int main()
     }
     
     int asterVersion = 13;
-    if(DBWorker.getPBXServerId() == "81")
-	asterVersion = 11;
+//    if(DBWorker.getPBXServerId() == "81")
+//	asterVersion = 11;
     
     
     std::cout<<"We set ASTER version = "<<asterVersion<<"\n";

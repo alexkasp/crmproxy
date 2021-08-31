@@ -32,6 +32,10 @@ class IParser
 		//boost::this_thread::sleep( boost::posix_time::milliseconds(60000));
 	    }
 	}
+	int getAsterVersion()
+	{
+	    return asterVersion;
+	}
 	
 	string fieldNameConverter(std::string fieldname)
 	{

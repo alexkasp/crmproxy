@@ -439,7 +439,7 @@ string Parser::parse_webphoneUUID(string src,string dst,string uid,string timest
 
 }
 
-string Parser::parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype,string uidcode)
+string Parser::parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype,string uidcode, string dstchannel)
 {
 
 	string request = request_str;
@@ -449,6 +449,8 @@ string Parser::parse_incomecall(string src,string dst,string uid,string timestam
 	request+=format_srcdstnum(src,dst,uidcode);
 	request+="&timestamp=";
 	request+=timestamp;
+	request+="&dstchannel=";
+	request+=dstchannel;
 	return request;
 }
 
@@ -562,7 +564,7 @@ string Parser::parse_agentcalled(string src,string dst,string callid)
 	CallRecord call;
 	if(currentCalls.getCall(callid,call))
 	{
-		return parse_incomecall(src,dst,call.getuserid(),"1111",callid,call.getsrctype(),call.getuid());
+		return parse_incomecall(src,dst,call.getuserid(),"1111",callid,call.getsrctype(),call.getuid(),"dstchannel");
 	}
 	
 }
@@ -690,18 +692,20 @@ string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree
 	boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
 	auto report = reportedCall.find(callid);
 	    
-	if((cdrdata!=event2CDRstorage.end())&&(!(report!=reportedCall.end())))
+	if(this->getAsterVersion() == 11 || ((cdrdata!=event2CDRstorage.end())&&(!(report!=reportedCall.end()))))
 	{
-	    
 	    
 	    int involvedNums = call.removeNumber(dst);
 	    if(involvedNums==0)
 	    {
-	        event2store+=cdrdata->second;
 	    
 		
 	        //clearCallEnviroment(callid);
-	        event2CDRstorage.erase(cdrdata);
+	        if(cdrdata!=event2CDRstorage.end())
+	        {
+	            event2store+=cdrdata->second;
+	    	    event2CDRstorage.erase(cdrdata);
+	        }
 	        event2store+="&parsertask=finish";
 	        reportedCall[callid]=request;
 	        
@@ -1019,9 +1023,9 @@ string Parser::parsedata(ParserData& data)
 		if(data["UserEvent:"]=="incomecall")
 		{
 			if(data[fieldNameConverter("callbacktype")].compare("CallBackReverse")==0)
-			    str = parse_incomecall(data[fieldNameConverter("dst")],data[fieldNameConverter("src")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("srctype")],data[fieldNameConverter("uidcode")]);
+			    str = parse_incomecall(data[fieldNameConverter("dst")],data[fieldNameConverter("src")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("srctype")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("dstchannel")]);
 			else
-			    str = parse_incomecall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("srctype")],data[fieldNameConverter("uidcode")]);
+			    str = parse_incomecall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("srctype")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("dstchannel")]);
 			
 		}
 		if(data["UserEvent:"]=="queuecall")
@@ -1170,7 +1174,7 @@ string Parser::parsedata(ParserData& data)
 			    str = parse_finishcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
 			    data[fieldNameConverter("callid")],data[fieldNameConverter("callstart")],data[fieldNameConverter("callanswer")],data[fieldNameConverter("status")],data[fieldNameConverter("calltype")],data[fieldNameConverter("callbackId")],data[fieldNameConverter("TreeId")],
 			    data[fieldNameConverter("ChannelName")],data[fieldNameConverter("serverId")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("label")],data[fieldNameConverter("rating")],data[fieldNameConverter("newstatus")],data[fieldNameConverter("crmcall")],
-			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcedrecord")],data[fieldNameConverter("firstTree")],data[fieldNameConverter("lastCalled")],,data[fieldNameConverter("hangupinit")]);
+			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcedrecord")],data[fieldNameConverter("firstTree")],data[fieldNameConverter("lastCalled")],data[fieldNameConverter("hangupinit")]);
 			else
 			    str = "";
 			
@@ -1343,9 +1347,9 @@ string Parser::parsedata(ParserData& data)
 		    else
 			dstnum="AgentName:";
 		    if(call.getCallType().compare("CallBackTreeReverse")==0)
-			str =  parse_incomecall(data[dstnum],data[fieldNameConverter("CallerIDNum:")],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid());
+			str =  parse_incomecall(data[dstnum],data[fieldNameConverter("CallerIDNum:")],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid(), data[fieldNameConverter("DestChannel")]);
 		    else	
-			str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid());
+			str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid(), data[fieldNameConverter("DestChannel")]);
 		
 		}
 	}
