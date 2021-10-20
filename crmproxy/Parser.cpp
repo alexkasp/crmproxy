@@ -584,7 +584,7 @@ string Parser::parse_hangup(string callid, string peername, string uidcode)
 
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, 
 string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,
-string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree,string lastCalled, string hangupinit)
+string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree,string lastCalled, string hangupinit, string dtmfUserAnswer)
 {
 	string event2store;
 	
@@ -656,6 +656,7 @@ string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree
 	request+="&firsttree="+firstTree;
 	request+="&lastCalled="+lastCalled;
 	request+="&hangupinit="+hangupinit;
+	request+="&dtmfUserAnswer="+dtmfUserAnswer;
 	
 	int DurationInt = boost::lexical_cast<int>(timestamp) - boost::lexical_cast<int>(callstart);
 	int billsec = 0;
@@ -1115,13 +1116,15 @@ string Parser::parsedata(ParserData& data)
 			else if(data[fieldNameConverter("callbacktype")].compare("CallBackReverse")==0)
 			{
 			}
-			else if(data[fieldNameConverter("callbacktype")].compare("standart")==0)
+			else if(data[fieldNameConverter("callbacktype")].compare("standart") == 0)
 			{
+			lm.makeLog(boost::log::trivial::severity_level::info,"CALLBACK STANDART");
 			    std::string duration = "0";
 			    std::string billsec = "0";
-
-			    if(data[fieldNameConverter("dialstatus")].compare("ANSWER")!=0)
+lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialstatus")+"="+data[fieldNameConverter("dialstatus")]+" "+fieldNameConverter("status")+" = ["+data[fieldNameConverter("status")]+"]");
+			    if(data[fieldNameConverter("dialstatus")].compare("ANSWER")!=0 && data[fieldNameConverter("status")].compare("ANSWERED")!=0)
 			    {
+			    
 				string formdst = data[fieldNameConverter("uidcode")]+"001";
 				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")]);
 				data[fieldNameConverter("dst")]=formdst;
@@ -1174,7 +1177,8 @@ string Parser::parsedata(ParserData& data)
 			    str = parse_finishcall(data[fieldNameConverter("src")],data[fieldNameConverter("dst")],data[fieldNameConverter("userid")],data[fieldNameConverter("time")],
 			    data[fieldNameConverter("callid")],data[fieldNameConverter("callstart")],data[fieldNameConverter("callanswer")],data[fieldNameConverter("status")],data[fieldNameConverter("calltype")],data[fieldNameConverter("callbackId")],data[fieldNameConverter("TreeId")],
 			    data[fieldNameConverter("ChannelName")],data[fieldNameConverter("serverId")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("label")],data[fieldNameConverter("rating")],data[fieldNameConverter("newstatus")],data[fieldNameConverter("crmcall")],
-			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcedrecord")],data[fieldNameConverter("firstTree")],data[fieldNameConverter("lastCalled")],data[fieldNameConverter("hangupinit")]);
+			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcedrecord")],data[fieldNameConverter("firstTree")],data[fieldNameConverter("lastCalled")],
+			    data[fieldNameConverter("hangupinit")],data[fieldNameConverter("dtmfUserAnswer")]);
 			else
 			    str = "";
 			

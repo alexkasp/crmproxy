@@ -221,9 +221,13 @@ void CDRManager::putCDR(map<string,string> data)
     
     string status = data["status"];
     
-    if(answeredNums!="")
+    if(answeredNums != "")
     {
-	status = "ANSWERED";
+	if(status == "CALLBACKCANCEL")
+	 status = "NOANSWER";
+	else
+	 status = "ANSWERED";
+	
     }
     else
     {
@@ -266,6 +270,7 @@ void CDRManager::putCDR(map<string,string> data)
     CDRData["hashtag"] = data["hashtag"];
     CDRData["serverId"] = data["serverId"];
     CDRData["hangupinitor"] = data["hangupinit"];
+    CDRData["dtmfUserAnswer"] = data["dtmfUserAnswer"];
     
     auto it = data.find("transfercallid");
     if(it!=data.end())
