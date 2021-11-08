@@ -343,7 +343,7 @@ string Parser::format_srcdstnum(string src,string dst,string uidcode,string src_
 	return result;
 }
 string Parser::parse_initcall(string src,string dst,string uid,string timestamp,string callid,string recordfile,string usecrm,string uidcode,string treeid,
-string channel,string roistat,string roistatphone,string roistatmarket,string roistatsource,string xcallerid,string calltype,string transferstart="",string from_number = "")
+string channel,string roistat,string roistatphone,string roistatmarket,string roistatsource,string xcallerid,string calltype,string transferstart="",string from_number = "", string outLine = "")
 {
 
 	string request = request_str;
@@ -365,6 +365,8 @@ string channel,string roistat,string roistatphone,string roistatmarket,string ro
 	request+=xcallerid;
 	request+="&from_number=";
 	request+=from_number;
+	request+="&outLine=";
+	request+=outLine;
 	
 	if(!transferstart.empty())
 	{
@@ -1055,7 +1057,8 @@ string Parser::parsedata(ParserData& data)
 			 data[fieldNameConverter("time")],data[fieldNameConverter("callid")],data[fieldNameConverter("recordfile")],
 			 data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("TreeId")],
 			 data[fieldNameConverter("ChannelName")],data[fieldNameConverter("roistat")],data[fieldNameConverter("x-roistat-phone")],
-			 data[fieldNameConverter("x-roistat-marker")],data[fieldNameConverter("x-roistat-source")],data[fieldNameConverter("x-callerid")],data[fieldNameConverter("callbacktype")],"",data[fieldNameConverter("from_number")]);
+			 data[fieldNameConverter("x-roistat-marker")],data[fieldNameConverter("x-roistat-source")],data[fieldNameConverter("x-callerid")],data[fieldNameConverter("callbacktype")],"",
+			 data[fieldNameConverter("from_number")], data[fieldNameConverter("outLine")]);
 			
 		}
 		if(data["UserEvent:"]=="transfercall")
