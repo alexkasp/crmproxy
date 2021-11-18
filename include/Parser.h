@@ -97,6 +97,7 @@ class Parser: public IParser
 	string parse_gatewaycall(string src,string dst,string uid);
 	string parse_peerstatus(string peer,string status,string address);
 	string parse_agentcalled(string callid,string agent,string queueid);
+	string parse_agentstopcalled(string callid, string agent, string queueid, string uid);
 	string parse_incomecall(string src,string dst,string uid,string timestamp,string callid,string srctype,string uidcode, string dstchannel);
 	string parse_attendedTransfer(string callid,string num,string uid);
 	string parse_answercall(string src,string dst,string uid,string timestamp,string callid,string calltype,string usecrm,string uidcode,string channel,string curnode);

@@ -560,6 +560,8 @@ string Parser::parse_attendedTransfer(string callid,string num,string uid)
     return request;
 }
 
+
+
 string Parser::parse_agentcalled(string src,string dst,string callid)
 {
 	string request = request_str;
@@ -569,6 +571,20 @@ string Parser::parse_agentcalled(string src,string dst,string callid)
 		return parse_incomecall(src,dst,call.getuserid(),"1111",callid,call.getsrctype(),call.getuid(),"dstchannel");
 	}
 	
+}
+
+string Parser::parse_agentstopcalled(string callid, string agent, string queueid, string uid)
+{
+     string request = request_str;
+     request+=uid;
+     request+="&event=11&call_id=";
+     request+=callid;
+     request+="&login=";
+     request+=agent;
+     request+="queue=";
+     request+=queueid;
+
+    return request;
 }
 
 string Parser::parse_hangup(string callid, string peername, string uidcode)
@@ -1359,6 +1375,20 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 			str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid(), data[fieldNameConverter("DestChannel")]);
 		
 		}
+	}
+	else if(data["Event:"] == "AgentRingNoAnswer")
+	{
+	    CallRecord call;
+	    string callid = data[fieldNameConverter("Linkedid:")];
+	    if(currentCalls.getCall(callid,call))
+	    {
+	        string treeid = call.getCurrentTreeId();
+	        if(treeid.empty())
+	        {
+	           treeid=call.getTreeId();
+	        }
+	       str =  parse_agentstopcalled(callid, data[fieldNameConverter("MemberName:")], data[fieldNameConverter("Queue:")] , call.getuserid());
+	    }
 	}
 	else if(data["Event:"] == "Cdr")
 	{
