@@ -581,7 +581,7 @@ string Parser::parse_agentstopcalled(string callid, string agent, string queueid
      request+=callid;
      request+="&login=";
      request+=agent;
-     request+="queue=";
+     request+="&queue=";
      request+=queueid;
 
     return request;
@@ -602,7 +602,7 @@ string Parser::parse_hangup(string callid, string peername, string uidcode)
 
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, 
 string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,
-string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree,string lastCalled, string hangupinit, string dtmfUserAnswer)
+string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree,string lastCalled, string hangupinit, string dtmfUserAnswer, string outline="")
 {
 	string event2store;
 	
@@ -675,6 +675,7 @@ string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree
 	request+="&lastCalled="+lastCalled;
 	request+="&hangupinit="+hangupinit;
 	request+="&dtmfUserAnswer="+dtmfUserAnswer;
+	request+="&outLine="+outline;
 	
 	int DurationInt = boost::lexical_cast<int>(timestamp) - boost::lexical_cast<int>(callstart);
 	int billsec = 0;
@@ -1197,7 +1198,7 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 			    data[fieldNameConverter("callid")],data[fieldNameConverter("callstart")],data[fieldNameConverter("callanswer")],data[fieldNameConverter("status")],data[fieldNameConverter("calltype")],data[fieldNameConverter("callbackId")],data[fieldNameConverter("TreeId")],
 			    data[fieldNameConverter("ChannelName")],data[fieldNameConverter("serverId")],data[fieldNameConverter("recordfile")],data[fieldNameConverter("label")],data[fieldNameConverter("rating")],data[fieldNameConverter("newstatus")],data[fieldNameConverter("crmcall")],
 			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcedrecord")],data[fieldNameConverter("firstTree")],data[fieldNameConverter("lastCalled")],
-			    data[fieldNameConverter("hangupinit")],data[fieldNameConverter("dtmfUserAnswer")]);
+			    data[fieldNameConverter("hangupinit")],data[fieldNameConverter("dtmfUserAnswer")], data[fieldNameConverter("outLine")]);
 			else
 			    str = "";
 			

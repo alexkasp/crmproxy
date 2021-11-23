@@ -104,7 +104,7 @@ class Parser: public IParser
 
 	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype,string callbackId,string TreeID,
 	                        string ChannelName,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forceRecord,string firstTree,
-	                        string lastCalled, string hangupinit,string dtmfUserAnswer);
+	                        string lastCalled, string hangupinit,string dtmfUserAnswer, string outline);
 	                        
 	string parse_transfercall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 

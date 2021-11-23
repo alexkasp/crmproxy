@@ -271,6 +271,7 @@ void CDRManager::putCDR(map<string,string> data)
     CDRData["serverId"] = data["serverId"];
     CDRData["hangupinitor"] = data["hangupinit"];
     CDRData["dtmfUserAnswer"] = data["dtmfUserAnswer"];
+    CDRData["outLine"] = data["outLine"];
     
     auto it = data.find("transfercallid");
     if(it!=data.end())
