@@ -1416,7 +1416,10 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 		str += "&TreeId=";
 		str += data[fieldNameConverter("TreeId")];
 		str += "&Channel=";
-		str += data[fieldNameConverter("ChannelName")];
+		if(data["Event:"] == "AgentCalled")
+		   str += data[fieldNameConverter("DestChannel")];
+		else
+		   str += data[fieldNameConverter("ChannelName")];
 		
 
 	}
