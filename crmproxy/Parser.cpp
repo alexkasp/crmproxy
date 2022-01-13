@@ -579,7 +579,7 @@ string Parser::parse_agentstopcalled(string callid, string agent, string queueid
      request+=uid;
      request+="&event=11&call_id=";
      request+=callid;
-     request+="&login=";
+     request+="&dst_num=";
      request+=agent;
      request+="&queue=";
      request+=queueid;
@@ -1384,10 +1384,13 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 	    if(currentCalls.getCall(callid,call))
 	    {
 	        string treeid = call.getCurrentTreeId();
-	        if(treeid.empty())
-	        {
-	           treeid=call.getTreeId();
-	        }
+		if(treeid.empty())
+		{
+		   lm.makeLog(boost::log::trivial::severity_level::info,"new tree empty");
+		   treeid=call.getTreeId();
+		}
+		data[fieldNameConverter("TreeId")] = treeid;
+		data[fieldNameConverter("ChannelName")] = call.getChannel();
 	       str =  parse_agentstopcalled(callid, data[fieldNameConverter("MemberName:")], data[fieldNameConverter("Queue:")] , call.getuserid());
 	    }
 	}
