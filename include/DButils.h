@@ -72,7 +72,8 @@ class DButils
 	~DButils();
 	string getServerId();
 	string getPBXServerId();
-	
+
+	void setRedisVariable(setname setname, string varname, string value);
 	int getTestResult(string testid,string callid,vector<TestResult>& result,vector<TestTemplate>& etalon);
 	int getTestById(string testid,string& from,string& to);
 	void addSendEventReportEntry(string callid,string request,string ats,string userid,string type,string sendData);

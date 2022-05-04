@@ -1370,10 +1370,20 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 		    }
 		    else
 			dstnum="AgentName:";
+
 		    if(call.getCallType().compare("CallBackTreeReverse")==0)
 			str =  parse_incomecall(data[dstnum],data[fieldNameConverter("CallerIDNum:")],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid(), data[fieldNameConverter("DestChannel")]);
-		    else	
-			str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid(), data[fieldNameConverter("DestChannel")]);
+		    else
+		    {
+			    str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid(), data[fieldNameConverter("DestChannel")]);
+			    auto a = std::chrono::system_clock::now();
+                auto value = std::chrono::duration_cast<std::chrono::seconds>(a.time_since_epoch());
+
+
+			    DBWorker->setRedisVariable("NUMPICKUP",data[dstnum],data[fieldNameConverter("DestChannel")]);
+			    DBWorker->setRedisVariable("NUMPICKUPTIME",data[dstnum],to_string(value.count()));
+			    DBWorker->setRedisVariable(NUMPICKUPCALLID,data[dstnum],callid);
+			}
 		
 		}
 	}

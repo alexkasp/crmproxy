@@ -245,6 +245,13 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
     return;
 }
 
+void DButils::setRedisVariable(string setname, string varname, string value)
+{
+        redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"HSET %s %s %s",  setname.c_str(),varname.c_str() ,value.c_str()));
+        printf("SET: %s\n", reply->str);
+        freeReplyObject(reply);
+}
+
 void DButils::completeEventReportEntry(string callid,string responce,string answerData)
 {
     return;
