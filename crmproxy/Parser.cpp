@@ -1382,7 +1382,8 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 
 			    DBWorker->setRedisVariable("NUMPICKUP",data[dstnum],data[fieldNameConverter("DestChannel")]);
 			    DBWorker->setRedisVariable("NUMPICKUPTIME",data[dstnum],to_string(value.count()));
-			    DBWorker->setRedisVariable(NUMPICKUPCALLID,data[dstnum],callid);
+			    DBWorker->setRedisVariable("NUMPICKUPCALLID",data[dstnum],callid);
+			    DBWorker->redisCommit();
 			}
 		
 		}

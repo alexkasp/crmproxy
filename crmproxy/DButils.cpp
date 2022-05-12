@@ -141,30 +141,16 @@ DButils::DButils()
     conn = shared_ptr<mysqlpp::Connection>(new mysqlpp::Connection(false));
     cout<<"it is OK"<<endl;
     cout<<"try to create redis connection object"<<endl;
-    unsigned int j;
-    serverid= "0";
-    
-    redisReply *reply;
-    struct timeval timeout = { 1, 500000 }; // 1.5 seconds
-    redis = redisConnectWithTimeout("127.0.0.1", 6379, timeout);
-    if (redis == NULL || redis->err)
-    {
-	if (redis)
-	{
-    	    printf("Connection error: %s\n", redis->errstr);
-	    redisFree(redis);
-	}
-        else 
-	{
-	    printf("Connection error: can't allocate redis context\n");
-	}
-    }
+    redis.connect("127.0.0.1", 6379, [](const std::string& host, std::size_t port, cpp_redis::connect_state status) {
+        if (status == cpp_redis::connect_state::dropped) {
+              std::cout << "client disconnected from " << host << ":" << port << std::endl;
+                  }
+                    });
 }
 
 DButils::~DButils()
 {
     
-    redisFree(redis);
 }
 
 int DButils::getUidList(map<string,string>& uidToUserId)
@@ -215,25 +201,6 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
     try
     {	
     
-     redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"sadd calls %s", callid.c_str()));
-     printf("SET: %s\n", reply->str);
-     freeReplyObject(reply);
-	 
-     reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "request",request.c_str()));
-     printf("SET: %s\n", reply->str);
-     freeReplyObject(reply);
-        
-     reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "userid",userid.c_str()));
-     printf("SET: %s\n", reply->str);
-     freeReplyObject(reply);
-    
-     reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "type",type.c_str()));
-     printf("SET: %s\n", reply->str);
-     freeReplyObject(reply);
-    
-     reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "sendData",sendData.c_str()));
-     printf("SET: %s\n", reply->str);
-     freeReplyObject(reply);         
     
     }
      catch (std::exception& e)
@@ -245,11 +212,19 @@ void DButils::addSendEventReportEntry(string callid,string request,string ats,st
     return;
 }
 
+void DButils::redisCommit()
+{
+   redis.sync_commit();
+}
+
 void DButils::setRedisVariable(string setname, string varname, string value)
 {
-        redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"HSET %s %s %s",  setname.c_str(),varname.c_str() ,value.c_str()));
-        printf("SET: %s\n", reply->str);
-        freeReplyObject(reply);
+std::cout<<"TRY SET REDIS "<<setname<<" "<<varname<<" "<<value<<"\n";
+redis.send({"HSET", setname, varname, value}, [](cpp_redis::reply& reply) {
+    std::cout << "hset: " << reply << std::endl;
+        // if (reply.is_string())
+            //   do_something_with_string(reply.as_string())
+              });
 }
 
 void DButils::completeEventReportEntry(string callid,string responce,string answerData)
@@ -269,13 +244,6 @@ void DButils::completeEventReportEntry(string callid,string responce,string answ
      
     try
     { 
-        redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "responce",responce.c_str()));
-        printf("SET: %s\n", reply->str);
-        freeReplyObject(reply);
-        
-	reply = static_cast<redisReply*>(redisCommand(redis,"HSET crmreport:%s %s %s", callid.c_str(), "answerData",answerData.c_str()));
-	printf("SET: %s\n", reply->str);
-        freeReplyObject(reply);
     
     }
     catch (std::exception& e)
@@ -299,44 +267,6 @@ void DButils::getCDRReports(vector<CDRReport>& reports,string period)
 	         
 	    CDRReport report;
 	    
-	    redisReply* Callsreply = static_cast<redisReply*>(redisCommand(redis,"smembers calls"));
-	    
-	    for (int j = 0; j < Callsreply->elements; j++)
-	    {
-	        printf("%u) %s\n", j, Callsreply->element[j]->str);
-	     
-		redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s callid",Callsreply->element[j]->str));
-		printf(": %s\n", reply->str);
-		report.origcallid=reply->str;
-		report.callid = reply->str;
-	    
-		reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s responce",Callsreply->element[j]->str));
-		printf(": %s\n", reply->str);
-		report.responce = reply->str;;
-	    
-		reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s request",Callsreply->element[j]->str));
-		printf(": %s\n", reply->str);
-		report.request = reply->str;;
-	    
-	//    redisReply *reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s request",Callsreply->element[j]->str));
-	//    printf(": %s\n", reply->string);
-	//    report.uniqueid=row[4].data();
-	    
-		reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s sendData",Callsreply->element[j]->str));
-		printf(": %s\n", reply->str);
-		report.sendData=reply->str;;
-	    
-		reply = static_cast<redisReply*>(redisCommand(redis,"HGET crmreport:%s type",Callsreply->element[j]->str));
-		printf(": %s\n", reply->str);
-		report.type = reply->str;;
-    
-		reports.push_back(report);
-	     
-	     
-	        freeReplyObject(reply);
-	    }
-	     
-	    freeReplyObject(Callsreply);
 	                                                                                      
 	    
     
