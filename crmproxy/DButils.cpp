@@ -219,7 +219,6 @@ void DButils::redisCommit()
 
 void DButils::setRedisVariable(string setname, string varname, string value)
 {
-std::cout<<"TRY SET REDIS "<<setname<<" "<<varname<<" "<<value<<"\n";
 redis.send({"HSET", setname, varname, value}, [](cpp_redis::reply& reply) {
     std::cout << "hset: " << reply << std::endl;
         // if (reply.is_string())
