@@ -1357,9 +1357,11 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 		    data[fieldNameConverter("ChannelName")] = call.getChannel();
 		    auto millis = std::time(0);
 		    std::string dstnum="";
+		    std::string dstnumForPickUp = "DestAccountCode:";
 		    if(ASTER_VER==13)
 		    {
 			dstnum="MemberName:";
+
 			lm.makeLog(boost::log::trivial::severity_level::info,data["Interface:"].substr(0,5));
 			if(data["Interface:"].substr(0,5)=="PJSIP")
 			{
@@ -1380,9 +1382,9 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
                 auto value = std::chrono::duration_cast<std::chrono::seconds>(a.time_since_epoch());
 
 
-			    DBWorker->setRedisVariable("NUMPICKUP",data[dstnum],data[fieldNameConverter("DestChannel")]);
-			    DBWorker->setRedisVariable("NUMPICKUPTIME",data[dstnum],to_string(value.count()));
-			    DBWorker->setRedisVariable("NUMPICKUPCALLID",data[dstnum],callid);
+			    DBWorker->setRedisVariable("NUMPICKUP",data[dstnumForPickUp],data[fieldNameConverter("Channel")]);
+			    DBWorker->setRedisVariable("NUMPICKUPTIME",data[dstnumForPickUp],to_string(value.count()));
+			    DBWorker->setRedisVariable("NUMPICKUPCALLID",data[dstnumForPickUp],callid);
 			    DBWorker->redisCommit();
 			}
 		
