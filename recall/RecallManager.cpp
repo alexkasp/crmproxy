@@ -21,7 +21,10 @@ int RecallManager::makeAction(ParamMap data,IParser* iparser)
     
     if(parser->parsedata(data,from,to,announce))
     {
-        boost::thread(boost::bind(&RecallManager::callWithPause,this,from,to,announce));
+        boost::thread t(boost::bind(&RecallManager::callWithPause,this,from,to,announce));
+        tgroup.add_thread(&t);
+        t.detach();
+
     }
     else if(parser->parsedatacheckanswer(data,from,to,channel,callernum,callid,dialtime,dialargs))
     {
@@ -36,6 +39,7 @@ int RecallManager::makeAction(ParamMap data,IParser* iparser)
 void RecallManager::callWithPause(string from,string to,string announce)
 {
     boost::this_thread::sleep(boost::posix_time::seconds(WaitForSeconds));
+AsteriskManager ast;
     ast.callWithAnnounce(from,to,announce);
 }
 
