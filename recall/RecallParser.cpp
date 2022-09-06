@@ -11,7 +11,7 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& annou
     	    from = data[fieldNameConverter("operator")];
     	    to = data[fieldNameConverter("recallnum")];
     	    announce = data[fieldNameConverter("announce")];
-    	    std::cout<<"Start recall "<<from<<" ->"<<to<<" with "<<announce<<endl;
+    	    lm.makeLog(boost::log::trivial::severity_level::info,"Start recall "+from+" ->"+to+" with "+announce);
     	    return 1;
 	}
     }
