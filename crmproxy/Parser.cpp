@@ -431,6 +431,9 @@ string Parser::parse_webphoneUUID(string src,string dst,string uid,string timest
     request+=dst;
     request+="&callid=";
     request+=callid;
+    request+="&call_id=";
+    request+=callid;
+
     request+="&webphoneid=";
     request+=webphoneid;
     request+="&timestamp=";
