@@ -1,7 +1,7 @@
 #include <RecallParser.h>
 #include <iostream>
 
-int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& announce, string& simgateway)
+int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& announce, string& simgateway, string& callername)
 {
     if(data["Event:"] == "UserEvent")
     {
@@ -12,7 +12,8 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& annou
     	    to = data[fieldNameConverter("recallnum")];
     	    announce = data[fieldNameConverter("announce")];
             simgateway = data[fieldNameConverter("simgateway")];
-    	    lm.makeLog(boost::log::trivial::severity_level::info,"Start recall "+from+" ->"+to+" with "+announce+" simgateway "+simgateway);
+	    callername = data[fieldNameConverter("callername")];
+    	    lm.makeLog(boost::log::trivial::severity_level::info,"Start recall "+from+" ->"+to+" with "+announce+" simgateway "+simgateway+" callername "+callername);
     	    return 1;
 	}
     }
@@ -53,7 +54,6 @@ string RecallParser::parsedata(ParamMap& data)
 	}
     }
     
-    std::cout<<"prepare URL "<<request<<endl;
     return request;
 }
 

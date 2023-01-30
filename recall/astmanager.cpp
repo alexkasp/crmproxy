@@ -176,12 +176,12 @@ int AsteriskManager::call(std::string from,std::string to)
 		  }
 }
 
-int AsteriskManager::callWithAnnounce(std::string from,std::string to,std::string announce,std::string simgateway)
+int AsteriskManager::callWithAnnounce(std::string from,std::string to,std::string announce,std::string simgateway, std::string callernum)
 {
 	try
 	{
 	    softinit();
-	    std::string command = "Action: Originate\r\nChannel: Local/"+from+"@vatsrecall\r\nExten: announce:"+announce+":"+to+"\r\nContext: vatsoutrecall\r\nPriority: 1\r\nCallerID: "+from+"\r\nVariable: CALLERID(dnid)="+to+",client="+to+",SimGateWay="+simgateway+",RecallAnnounce="+announce+"\r\nActionID: 2\r\n\r\n";
+	    std::string command = "Action: Originate\r\nChannel: Local/"+from+"@vatsrecall\r\nExten: announce:"+announce+":"+to+"\r\nContext: vatsoutrecall\r\nPriority: 1\r\nCallerID: "+from+"\r\nVariable: callernum="+callernum+",CALLERID(dnid)="+to+",client="+to+",SimGateWay="+simgateway+",RecallAnnounce="+announce+"\r\nActionID: 2\r\n\r\n";
     	    std::cout<<command<<"\n";
 	    boost::system::error_code ec;
 	    
