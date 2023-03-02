@@ -104,7 +104,7 @@ class Parser: public IParser
 
 	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype,string callbackId,string TreeID,
 	                        string ChannelName,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forceRecord,string firstTree,
-	                        string lastCalled, string hangupinit,string dtmfUserAnswer, string outline);
+	                        string lastCalled, string hangupinit,string dtmfUserAnswer, string outline, string answerOperator);
 	                        
 	string parse_transfercall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 
@@ -113,7 +113,7 @@ class Parser: public IParser
 	    
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 	string parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid,string uidcode);
-	string parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string DestinationContext);
+	string parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string DestinationContext, string answerOperator);
 	string parse_numtype(string num,string uidcode);
 	void parse_mergecall(string newcallid,string callid);
 	void parse_setcallbackId(string callid,string callbackId);
