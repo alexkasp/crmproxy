@@ -716,7 +716,7 @@ string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree
 	boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
 	auto report = reportedCall.find(callid);
 	    
-	if(this->getAsterVersion() == 11 || ((cdrdata!=event2CDRstorage.end())&&(!(report!=reportedCall.end()))))
+	if(this->getAsterVersion() == 11 || this->getAsterVersion() == 13 || this->getAsterVersion() == 18 || ((cdrdata!=event2CDRstorage.end())&&(!(report!=reportedCall.end()))))
 	{
 	    
 	    int involvedNums = call.removeNumber(dst);
