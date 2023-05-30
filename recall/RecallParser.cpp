@@ -1,7 +1,7 @@
 #include <RecallParser.h>
 #include <iostream>
 
-int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& announce, string& simgateway, string& callername)
+int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& announce, string& simgateway, string& callername, string& userid)
 {
     if(data["Event:"] == "UserEvent")
     {
@@ -13,7 +13,9 @@ int RecallParser::parsedata(ParamMap& data,string& from,string& to,string& annou
     	    announce = data[fieldNameConverter("announce")];
             simgateway = data[fieldNameConverter("simgateway")];
 	    callername = data[fieldNameConverter("callername")];
-    	    lm.makeLog(boost::log::trivial::severity_level::info,"Start recall "+from+" ->"+to+" with "+announce+" simgateway "+simgateway+" callername "+callername);
+	    userid = data[fieldNameConverter("user")];
+
+    	    lm.makeLog(boost::log::trivial::severity_level::info,"Start recall "+from+" ->"+to+" with "+announce+" simgateway "+simgateway+" callername "+callername+" user "+userid);
     	    return 1;
 	}
     }
