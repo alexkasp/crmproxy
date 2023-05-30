@@ -17,12 +17,13 @@ int RecallManager::makeAction(ParamMap data,IParser* iparser)
     string dialargs;
     string callernum;
     string simgateway;
+    string user;
 
     RecallParser* parser = dynamic_cast<RecallParser*>(iparser);
     
-    if(parser->parsedata(data, from, to, announce, simgateway, callernum))
+    if(parser->parsedata(data, from, to, announce, simgateway, callernum,user))
     {
-        boost::thread t(boost::bind(&RecallManager::callWithPause,this,from,to,announce,simgateway,callernum));
+        boost::thread t(boost::bind(&RecallManager::callWithPause,this,from,to,announce,simgateway,callernum,user));
         tgroup.add_thread(&t);
         t.detach();
 
@@ -37,11 +38,11 @@ int RecallManager::makeAction(ParamMap data,IParser* iparser)
     
 }
 
-void RecallManager::callWithPause(string from,string to,string announce, string simgateway, string callernum)
+void RecallManager::callWithPause(string from,string to,string announce, string simgateway, string callernum, string user)
 {
     boost::this_thread::sleep(boost::posix_time::seconds(WaitForSeconds));
 AsteriskManager ast;
-    ast.callWithAnnounce(from,to,announce,simgateway,callernum);
+    ast.callWithAnnounce(from, to, announce, simgateway, callernum, user);
 }
 
 void RecallManager::callCheckAnswer(string from,string to,string channel,string callernum,string callid,string dialtime,string dialargs)
