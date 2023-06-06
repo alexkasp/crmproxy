@@ -628,6 +628,12 @@ string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree
 	    return "";
 	}
 */	
+	boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
+	auto report = reportedCall.find(callid);
+	if(report!=reportedCall.end())
+	    return "";
+
+
 	if(!forcedRecord.empty())
 	    recordfile = forcedRecord;
 	    
@@ -713,8 +719,7 @@ string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree
 	
 	auto cdrdata = event2CDRstorage.find(callid);
 	
-	boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
-	auto report = reportedCall.find(callid);
+	
 	    
 	if(this->getAsterVersion() == 11 || this->getAsterVersion() == 13 || this->getAsterVersion() == 18 || ((cdrdata!=event2CDRstorage.end())&&(!(report!=reportedCall.end()))))
 	{
@@ -893,6 +898,13 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	string transferedCallId = "";
 	string callid = mergedCalls.getMergedCall(origcallid);
 	
+
+	boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
+	auto report = reportedCall.find(callid);
+	if(report!=reportedCall.end())
+	    return "";
+
+
 	boost::mutex::scoped_lock lockTransferStorage(transferstorageLock);
 	auto transfercall = transferstorage.find(callid);
 	if(transfercall!=transferstorage.end())
@@ -936,11 +948,7 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 	lm.makeLog(boost::log::trivial::severity_level::info,"REQUEST prepared = "+request);
 	if(it!=event2storage.end())
 	{
-	    boost::mutex::scoped_lock lockReportedCallsStorage(reportedCallstorageLock);
-	    auto report = reportedCall.find(callid);
-	    if(report!=reportedCall.end())
-		return "";
-		
+			
 	    request = it->second+request;;
 	    
 	    event2storage.erase(it);
