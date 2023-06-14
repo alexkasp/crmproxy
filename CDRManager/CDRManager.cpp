@@ -170,8 +170,13 @@ void CDRManager::putCDR(map<string,string> data)
 	    if(data["calltype"] == "LOCAL")
 		destinationcontext = "vatsl";
 	    else if(data["calltype"] == "INCOME")
-		destinationcontext = "vats";
-	    else
+	    {
+		if(data["DestinationContext"] == "vatscallbacktree")
+		    destinationcontext = "vatscallbacktree";
+		else
+		    destinationcontext = "vats";
+	    }
+    	    else
 		destinationcontext = "vatsout";
 	}
 // 	dst = data["destination"];
