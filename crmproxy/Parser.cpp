@@ -552,6 +552,21 @@ string Parser::parse_queuecall(string src,string dst,string uid,string timestamp
     return "";
 }
 
+
+string Parser::parse_transferAnswer(string callid, string uid, string src, string dst)
+{
+    string request = request_str;
+    request+=uid;
+    request+="&event=12&call_id=";
+    request+=callid;
+    request+="&scr=";
+    request+=src;
+    request+="&dst=";
+    request+=dst;
+
+    return request;
+}
+
 string Parser::parse_attendedTransfer(string callid,string num,string uid)
 {
     string request = request_str;
@@ -1243,6 +1258,10 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 		if(data["UserEvent:"] == "mergecall")
 		{
 		    parse_mergecall(data[fieldNameConverter("newcallid")],data[fieldNameConverter("callid")]);
+		}
+		if(data["UserEvent:"] == "transferanswer")
+		{
+		    str = parse_transferAnswer(data[fieldNameConverter("callid")],data[fieldNameConverter("userid")],data[fieldNameConverter("src")],data[fieldNameConverter("dst")]);
 		}
 		if(data["UserEvent:"] == "onlinepbx")
 		{
