@@ -907,7 +907,8 @@ int Parser::processTransfer(string callid,string linkedid,string record,string d
     lm.makeLog(boost::log::trivial::severity_level::info,"Make Transfer Entry for "+linkedid+" for "+callid);
 }
 
-string Parser::parse_cdrevent(string origcallid,string destination,string duration,string billableseconds,string starttime,string endtime,string Destinationcontext,string answerOperator)
+string Parser::parse_cdrevent(string origcallid,string destination,string duration,
+string billableseconds,string starttime,string endtime,string Destinationcontext,string answerOperator,string callHistory)
 {
 	string request="";
 	string transferedCallId = "";
@@ -959,6 +960,7 @@ string Parser::parse_cdrevent(string origcallid,string destination,string durati
 //	request+="&endtime="+endtime;
 	request+="&DestinationContext="+Destinationcontext;
 	request+="&answerOperator="+answerOperator;
+	request+="&callHistory="+callHistory;
 	
 	lm.makeLog(boost::log::trivial::severity_level::info,"REQUEST prepared = "+request);
 	if(it!=event2storage.end())
@@ -1138,7 +1140,8 @@ string Parser::parsedata(ParserData& data)
 				    data[fieldNameConverter("callanswer")]="0";
 				    data[fieldNameConverter("status")]="NOANSWER";
 				    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("newexten")],"0","0",data[fieldNameConverter("callstart")],
-					data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")]);
+					data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],
+					data[fieldNameConverter("answerOperator")],data[fieldNameConverter("callHistory")]);
 				    
 				}
 				else
@@ -1147,7 +1150,8 @@ string Parser::parsedata(ParserData& data)
 				    if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callstart")]).empty()))
 					duration =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callstart")]));
 				    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("newexten")],duration,duration,data[fieldNameConverter("callstart")],
-					data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")]);
+					data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")],
+					data[fieldNameConverter("callHistory")]);
 				}
 				data[fieldNameConverter("dst")] = data[fieldNameConverter("newexten")];
 			    }
@@ -1157,7 +1161,8 @@ string Parser::parsedata(ParserData& data)
 				data[fieldNameConverter("status")]="NOANSWER";
 				string formdst = data[fieldNameConverter("uidcode")]+"001";
 				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],"0","0",data[fieldNameConverter("callstart")],
-					data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")]);
+					data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")],
+					data[fieldNameConverter("callHistory")]);
 				data[fieldNameConverter("src")]=formdst;
 			    }
 			    else
@@ -1178,7 +1183,8 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 			    
 				string formdst = data[fieldNameConverter("uidcode")]+"001";
 				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],
-				data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")]);
+				data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")],
+				data[fieldNameConverter("callHistory")]);
 				data[fieldNameConverter("dst")]=formdst;
 			    }
 			    else
@@ -1192,7 +1198,8 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 				    data[fieldNameConverter("dst")] = data[fieldNameConverter("src")];
 				
 				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],
-					duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")]);
+					duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],data[fieldNameConverter("callbacktype")],
+					data[fieldNameConverter("answerOperator")], data[fieldNameConverter("callHistory")]);
 			    }
 			    
 			    
@@ -1202,7 +1209,7 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 			    if(data[fieldNameConverter("status")]=="CHANUNAVAIL")
 			    {
 				parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],"0","0",data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],
-					data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")]);
+					data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")], data[fieldNameConverter("callHistory")]);
 			    }
 			}
 			else if(data[fieldNameConverter("callbacktype")].compare("crmredirect")==0)
@@ -1214,7 +1221,7 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 			    if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callanswer")]).empty())&&(data[fieldNameConverter("callanswer")].compare("0")!=0))
 				billsec =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callanswer")]));
 			    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],
-				    data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")]);
+				    data[fieldNameConverter("callbacktype")],data[fieldNameConverter("answerOperator")], data[fieldNameConverter("callHistory")]);
 			}
 			else if((data[fieldNameConverter("callbacktype")].compare("CRMCallback")==0)&&(ASTER_VER==11))
 			{
@@ -1226,7 +1233,7 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 				if((!(data[fieldNameConverter("time")]).empty())&&(!(data[fieldNameConverter("callanswer")]).empty())&&(data[fieldNameConverter("callanswer")].compare("0")!=0))
 				    billsec =  std::to_string(std::stoi(data[fieldNameConverter("time")]) - std::stoi(data[fieldNameConverter("callanswer")]));
 			    parse_cdrevent(data[fieldNameConverter("callid")],data[fieldNameConverter("dst")],duration,billsec,data[fieldNameConverter("callstart")],data[fieldNameConverter("time")],"crmcallback",
-				data[fieldNameConverter("answerOperator")]);
+				data[fieldNameConverter("answerOperator")], data[fieldNameConverter("callHistory")]);
 			}
 			
 			if(!skipfinish)    
@@ -1237,7 +1244,8 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 			    data[fieldNameConverter("newstatus")],data[fieldNameConverter("crmcall")],
 			    data[fieldNameConverter("hashtag")],data[fieldNameConverter("usecrm")],data[fieldNameConverter("uidcode")],data[fieldNameConverter("forcedrecord")],
 			    data[fieldNameConverter("firstTree")],data[fieldNameConverter("lastCalled")],
-			    data[fieldNameConverter("hangupinit")],data[fieldNameConverter("dtmfUserAnswer")], data[fieldNameConverter("outLine")],data[fieldNameConverter("answerOperator")]);
+			    data[fieldNameConverter("hangupinit")],data[fieldNameConverter("dtmfUserAnswer")], data[fieldNameConverter("outLine")],
+			    data[fieldNameConverter("answerOperator")], data[fieldNameConverter("callHistory")]);
 			else
 			    str = "";
 			
@@ -1457,7 +1465,9 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 	    if(data[fieldNameConverter("DestinationContext:")]=="vatscallbackreverse")
 	    data[fieldNameConverter("UniqueID:")] = mergedCalls.getMergedCall(data[fieldNameConverter("UniqueID:")]);
 		str = parse_cdrevent(data[fieldNameConverter("UniqueID:")],data[fieldNameConverter("Destination:")],data[fieldNameConverter("Duration:")],
-		    data[fieldNameConverter("BillableSeconds:")],data[fieldNameConverter("StartTime:")],data[fieldNameConverter("EndTime:")],data[fieldNameConverter("DestinationContext:")],data[fieldNameConverter("answerOperator")]);
+		    data[fieldNameConverter("BillableSeconds:")],data[fieldNameConverter("StartTime:")],
+		    data[fieldNameConverter("EndTime:")],data[fieldNameConverter("DestinationContext:")],
+		    data[fieldNameConverter("answerOperator")],data[fieldNameConverter("callHistory")]);
 	}
 	else
 	    return str;

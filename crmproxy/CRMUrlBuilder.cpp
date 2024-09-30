@@ -72,37 +72,35 @@ int CRMUrlBuilder::processURL(string url,map<string,string>& CDRData)
 int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
 {
     map<string,string> data;
-    try{
+    try
+    {
+        string httpsign = "nocrm";
     
-	
-    
-    string httpsign = "nocrm";
-    
-	string request = currentParser->parsedata(rawdata);
-	if (!request.empty())
+	    string request = currentParser->parsedata(rawdata);
+        if (!request.empty())
         {
-	    if(processURL(request,data))
-	    {
-		
-		int UtillEvent = ((data["event"]).compare("s1")==0);
-		
-		if((request.compare(0,httpsign.length(),httpsign)!=0) && !UtillEvent)
-    		{
-    		    if(db!=NULL)
-    			db->addSendEventReportEntry(data["call_id"],data["requestId"],data["serverId"],data["userId"],"2",request);
-    		    
-    		    sendRequestAndStore(request,data["requestId"],data["call_id"]);
-		}
-		if(icm!=NULL)
-		    icm->putCDREvent(data);
-        	if(cdr!=NULL)
-        	    cdr->processCDR(data);
+            if(processURL(request,data))
+            {
+		        int UtillEvent = ((data["event"]).compare("s1")==0);
+
+                if((request.compare(0,httpsign.length(),httpsign)!=0) && !UtillEvent)
+                {
+                    if(db!=NULL)
+                    db->addSendEventReportEntry(data["call_id"],data["requestId"],data["serverId"],data["userId"],"2",request);
+
+                    sendRequestAndStore(request,data["requestId"],data["call_id"]);
+                }
+
+                if(icm!=NULL)
+                    icm->putCDREvent(data);
+                if(cdr!=NULL)
+                    cdr->processCDR(data);
             }
             return 1;
         }
     }
-     catch(exception &ec)
-         {
+    catch(exception &ec)
+    {
         	string errmsg = "Error in makeAction"+ data["requestId"];
 //        	lm.makeLog(boost::log::trivial::severity_level::error,errmsg+ec.what());
 		std::cout<<errmsg<<"Error in makeAction  "<<ec.what()<<"\n";
@@ -111,7 +109,7 @@ int CRMUrlBuilder::makeAction(ParamMap rawdata,IParser* currentParser)
 		{
 		    std::cout<<"DATA WITH ERROR"<<((*x).first)<<"    "<<((*x).second)<<"\n";
 		}
-             }
+    }
              
     return 0;
 }
