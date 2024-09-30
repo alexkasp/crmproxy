@@ -559,9 +559,9 @@ string Parser::parse_transferAnswer(string callid, string uid, string src, strin
     request+=uid;
     request+="&event=12&call_id=";
     request+=callid;
-    request+="&scr=";
+    request+="&src_num=";
     request+=src;
-    request+="&dst=";
+    request+="&dst_num=";
     request+=dst;
 
     return request;
@@ -1385,6 +1385,7 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 	}
 	else if(data["Event:"] == "AgentCalled")
 	{
+		lm.makeLog(boost::log::trivial::severity_level::info,"PROCESS AGENTCALLED  "+data[fieldNameConverter("Linkedid:")]);
 	    	string request = request_str;
 		CallRecord call;
 		string callid = data[fieldNameConverter("Linkedid:")];
@@ -1405,7 +1406,7 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 		    {
 			dstnum="MemberName:";
 
-			lm.makeLog(boost::log::trivial::severity_level::info,data["Interface:"].substr(0,5));
+			lm.makeLog(boost::log::trivial::severity_level::info,"data[interface] = "+data["Interface:"].substr(0,5));
 			if(data["Interface:"].substr(0,5)=="PJSIP")
 			{
 			    lm.makeLog(boost::log::trivial::severity_level::info,"MODIFY dstnum");
@@ -1421,17 +1422,22 @@ lm.makeLog(boost::log::trivial::severity_level::info,fieldNameConverter("dialsta
 		    else
 		    {
 			    str =  parse_incomecall(data[fieldNameConverter("CallerIDNum:")],data[dstnum],call.getuserid(),std::to_string(millis),callid,call.getsrctype(),call.getuid(), data[fieldNameConverter("DestChannel")]);
+			lm.makeLog(boost::log::trivial::severity_level::info,"prepare str "+str);
 			    auto a = std::chrono::system_clock::now();
                 auto value = std::chrono::duration_cast<std::chrono::seconds>(a.time_since_epoch());
 
-
+lm.makeLog(boost::log::trivial::severity_level::info,"little pause");
 			    DBWorker->setRedisVariable("NUMPICKUP",data[dstnumForPickUp],data[fieldNameConverter("Channel")]);
 			    DBWorker->setRedisVariable("NUMPICKUPTIME",data[dstnumForPickUp],to_string(value.count()));
 			    DBWorker->setRedisVariable("NUMPICKUPCALLID",data[dstnumForPickUp],callid);
+			    lm.makeLog(boost::log::trivial::severity_level::info,"REDIS BEFORE COMMIT");
 			    DBWorker->redisCommit();
+			    lm.makeLog(boost::log::trivial::severity_level::info,"REDIS AFTER COMMIT");
 			}
-		
+		lm.makeLog(boost::log::trivial::severity_level::info,"FINISH PROCESS AGENTCALLED  "+data[fieldNameConverter("Linkedid:")]);
 		}
+		else
+		    lm.makeLog(boost::log::trivial::severity_level::info,"NO FIND CALL "+callid);
 	}
 	else if(data["Event:"] == "AgentRingNoAnswer")
 	{
