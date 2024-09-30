@@ -39,7 +39,8 @@ class CallRecord
 	
 public:
 	CallRecord();
-	CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string userid,string uid,string srctype,string dsttype,string treeid,string channel,string calltype);
+	CallRecord(string _src,string _dst,string _timestamp,string _recordfile,string userid,string uid,
+	string srctype,string dsttype,string treeid,string channel,string calltype);
 	~CallRecord();
 	int addNumber(string);
 	int removeNumber(string);
@@ -104,7 +105,7 @@ class Parser: public IParser
 	string parse_transferAnswer(string callid, string uid, string src, string dst);
 	string parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype,string callbackId,string TreeID,
 	                        string ChannelName,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,string hashtag,string usecrm,string uidcode,string forceRecord,string firstTree,
-	                        string lastCalled, string hangupinit,string dtmfUserAnswer, string outline, string answerOperator);
+	                        string lastCalled, string hangupinit,string dtmfUserAnswer, string outline, string answerOperator ,string callHistory);
 	                        
 	string parse_transfercall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 
