@@ -621,7 +621,7 @@ string Parser::parse_hangup(string callid, string peername, string uidcode)
 string Parser::parse_finishcall(string src,string dst,string uid,string timestamp,string callid,string callstart,string callanswer,string status,string calltype, 
 string callbackId,string treeid, string channel,string serverId,string recordfile,string label,string rating,string newstatus,string crmcall,
 string hashtag,string usecrm,string uidcode,string forcedRecord,string firstTree,string lastCalled, string hangupinit, string dtmfUserAnswer, string outline="",
-string answerOperator="",string callHistory)
+string answerOperator="",string callHistory = "")
 {
 	string event2store;
 	
