@@ -114,7 +114,8 @@ class Parser: public IParser
 	    
 	string parse_outcall(string src,string dst,string uid,string timestamp,string callid,string uidcode);
 	string parse_finishtransfer(string src, string dst, string uid, string timestamp, string callid,string uidcode);
-	string parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string DestinationContext, string answerOperator);
+	string parse_cdrevent(string callid,string destination,string duration,string billableseconds,string starttime,string endtime,string DestinationContext,
+	 string answerOperator,string callHistory);
 	string parse_numtype(string num,string uidcode);
 	void parse_mergecall(string newcallid,string callid);
 	void parse_setcallbackId(string callid,string callbackId);
